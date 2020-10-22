@@ -1,0 +1,24 @@
+{
+  "name": "slider",
+  "version": "1.0.0",
+  "description": "JQuery slider",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avatarsik6699/slider.git"
+  },
+  "keywords": [
+    "slider",
+    "typescript",
+    "JQuery"
+  ],
+  "author": "Vladislav Godlevskii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/avatarsik6699/slider/issues"
+  },
+  "homepage": "https://github.com/avatarsik6699/slider#readme"
+}
