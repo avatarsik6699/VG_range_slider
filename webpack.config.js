@@ -4,6 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
 
 // variables---------------------------------------------------
 const isProd = process.env.NODE_ENV === 'production';
@@ -57,10 +58,10 @@ const sass = {
           reloadAll: true,
       },
     },
-    { loader: 'css-loader', options: {sourceMap: true} },
-    { loader: 'postcss-loader', options: { sourceMap: true } },
+    { loader: 'css-loader', options: {sourceMap: isDev} },
+    { loader: 'postcss-loader', options: { sourceMap: isDev } },
     { loader: 'resolve-url-loader' },
-    { loader: 'sass-loader', options: {sourceMap: true} },
+    { loader: 'sass-loader', options: {sourceMap: isDev} },
   ]
 };
 const images = {
@@ -72,7 +73,7 @@ const images = {
       loader: 'image-webpack-loader',
       options: {
         bypassOnDebug: true,
-        disable: true,
+        disable: false,
         optipng: {
           enabled: true,
         },
@@ -120,6 +121,11 @@ module.exports = {
     rules: [ts, sass, images, fonts, pug],
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery'
+    }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: isProd ? '[name]/style.[contenthash].css' : '[name]/style.css',
@@ -136,7 +142,7 @@ module.exports = {
       }
     })
   ],
-  devtool: isProd ? 'source-map' : 'eval-cheap-module-source-map',
+  devtool: isProd ? false : 'eval-cheap-module-source-map',
   devServer: {
     contentBase: './dist',
     compress: true,
@@ -148,6 +154,9 @@ module.exports = {
     alias: {
       root: path.resolve(__dirname, 'src/'),
     }
+  },
+  externals: {
+    jquery: '$',
   },
   optimization: optimization(), 
 }
