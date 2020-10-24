@@ -2,19 +2,14 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["es2015", "es2017", "dom"],
-    "declaration": true,     
-    "sourceMap": true,
-    "outDir": "./dist",    
+    "lib": ["es2015", "es2017", "dom"],   
+    "sourceMap": true,   
     "strict": true,
-    "moduleResolution": "node",
-    "typeRoots": [
-      "node_modules/@types",
-      "src/typings.d.ts"
-    ],
+    // "typeRoots": [
+    //   "node_modules/@types",
+    //   "src/typings.d.ts"
+    // ],
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
   },
   "exclude": ["node_modules", "webpack.config.js"]
 }

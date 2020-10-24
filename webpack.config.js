@@ -99,12 +99,12 @@ const fonts = {
   ],
 };
 const ts = {
-  test: /\.tsx?$/,
+  test: /\.ts?$/,
   loader: 'ts-loader',
   exclude: /node_modules/,
   options: {
     configFile: isProd ? 'tsconfig.prod.json' : 'tsconfig.json',
-    transpileOnly: true,
+    // transpileOnly: true,
   },
 }
 // config------------------------------------------------------
@@ -150,13 +150,10 @@ module.exports = {
     port: 8000,
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+    extensions: ['.ts', '.js'],
     alias: {
       root: path.resolve(__dirname, 'src/'),
     }
-  },
-  externals: {
-    jquery: '$',
   },
   optimization: optimization(), 
 }
