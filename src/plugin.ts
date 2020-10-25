@@ -8,7 +8,7 @@ interface JQuery {
       name: 'Fedor',
       age: 25
     }, options)
-    const anchor = this[0];
+    const anchor: HTMLElement = this[0];
     return this;
   }
 })(jQuery)
