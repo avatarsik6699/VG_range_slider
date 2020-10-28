@@ -13,6 +13,6 @@ export class Handle implements component {
 
   setTemplate(type: string): void {
     const className = `slider__handle slider__handle_${type}`;
-    this.template = `<div class=${className}></div>`;
+    this.template = `<div class=${className} data-component="handle"></div>`;
   }
 }

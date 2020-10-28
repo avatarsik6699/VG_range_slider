@@ -18,12 +18,6 @@
   height: 10px;
   margin-left: 50px;
   position: relative;
-  
-  &__basis {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
 
   &__bar {
     position: absolute;
@@ -37,7 +31,7 @@
 
   &__handle {
     position: absolute;
-    width: 4%;
+    width: 8px;
     height: 79%;
     background: black;
     top: 1px;
