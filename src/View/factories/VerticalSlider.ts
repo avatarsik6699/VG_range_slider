@@ -1,5 +1,4 @@
 import { Bar } from '../components/Bar/Bar';
-import { Basis } from '../components/Basis/Basis';
 import { component } from '../components/component_interface';
 import { Handle } from '../components/Handle/Handle';
 import { factory } from './factory_interface'

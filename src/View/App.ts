@@ -17,6 +17,7 @@ class App {
 			this.setFactory(this.options.position)
 			this.setSliderComponents();
 			this.renderUI();
+			this.bindEvents();
 		}
 
 		renderUI(): void {
@@ -26,7 +27,6 @@ class App {
 		
 		private setSliderComponents(): void {
 			this.sliderComponents = this.factory?.createComponents();
-			console.log(this.sliderComponents)
 		}
 
 		private setFactory(position: string): void {
@@ -39,6 +39,12 @@ class App {
 
 			this.sliderComponents?.forEach( component => {
 				component.paint(slider);
+			})
+		}
+
+		bindEvents(): void {
+			this.anchor?.addEventListener('mousedown', e => {
+				console.log((<HTMLElement>e.target).dataset.component);
 			})
 		}
 

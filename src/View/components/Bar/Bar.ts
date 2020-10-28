@@ -12,6 +12,6 @@ export class Bar implements component {
 
   setTemplate(type: string): void {
     const className = `slider__bar slider__bar_${type}`;
-    this.template = `<div class=${className}></div>`;
+    this.template = `<div class=${className} data-component="bar"></div>`;
   }
 }
