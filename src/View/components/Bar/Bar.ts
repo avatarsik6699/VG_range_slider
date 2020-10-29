@@ -14,4 +14,8 @@ export class Bar implements component {
     const className = `slider__bar slider__bar_${type}`;
     this.template = `<div class=${className} data-component="bar"></div>`;
   }
+
+  getDomElement(anchor: Element): Element | null {
+    return anchor.querySelector('div[data-component="bar"]');
+  }
 }

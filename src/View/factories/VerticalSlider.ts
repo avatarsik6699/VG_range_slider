@@ -1,10 +1,10 @@
 import { Bar } from '../components/Bar/Bar';
 import { component } from '../components/component_interface';
-import { Handle } from '../components/Handle/Handle';
+import { Handler } from '../components/Handler/Handler';
 import { factory } from './factory_interface'
 
 export class VerticalSlider implements factory {
-  private sliderComponents: any[] = [Bar, Handle];
+  private sliderComponents: any[] = [Bar, Handler];
   private type: string = 'vertical';
   constructor() {}
 
