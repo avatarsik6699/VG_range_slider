@@ -1,16 +1,26 @@
-interface JQuery {
-  slider(options: object): JQuery;
-}
+import { Controller } from "./Controller/Controller";
+declare global {
+    interface JQuery {
+    slider(options: object): JQuery;
+  }
+} 
 
 (function($){
-  $.fn.slider = function(options) {
-    let settings = $.extend( {
-      name: 'Fedor',
-      age: 25
-    }, options)
+  $.fn.slider = function(setting) {
+    const options = $.extend({}, setting)
     const anchor: HTMLElement = this[0];
+    const controller = new Controller(anchor, options);
     return this;
   }
 })(jQuery)
 
-$('.target').slider({})
+const $slider = $('.anchor').slider({
+  min: 25,
+  max: 100,
+  value: 50,
+  step: 2,
+  position: 'horizontal',
+  type: 'single',
+  scale: false,
+  tooltip: false,
+})

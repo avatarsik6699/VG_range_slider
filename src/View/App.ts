@@ -1,3 +1,4 @@
+import { modelState } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { component } from "./components/component_interface";
 import { factory } from "./factories/factory_interface";
@@ -6,17 +7,20 @@ import { VerticalSlider } from "./factories/VerticalSlider";
 import { Selector } from "./Selector";
 import { sliderTemplate } from './templates/sliderTemplate';
 
-class App extends Observer {
+export class App extends Observer {
 	public sliderComponents: component[] | undefined = [];
 	public domComponents: any = {};
-	public selector: Selector = new Selector();
+	public sliderWrapper: HTMLElement | null | undefined;
 	private factory: HorizontalSlider | VerticalSlider | undefined = undefined;
 	private sliderTemplate: any = sliderTemplate;
   constructor(
 		public anchor: Element | null, 
-		public options: {position: string}) 
+		public options: modelState,
+		public selector: Selector
+		) 
 		{
 			super();
+			this.sliderWrapper = anchor?.querySelector('.slider-wrapper');
 			this.setFactory(this.options.position)
 			this.setSliderComponents();
 			this.renderUI();
@@ -115,10 +119,3 @@ class App extends Observer {
 			return el.getBoundingClientRect()[coord];
 		}
 }
-
-// anchor comes from controller ?
-// params comes from model in the from 'state' -> there must be an interface
-const anchor: Element | null = document.querySelector('.slider-wrapper');
-const app = new App(anchor, {
-	position: 'horizontal'
-})
