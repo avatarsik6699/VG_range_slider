@@ -1,19 +1,18 @@
-export class Model {
-  defaultState: any = {
-    min: 1,
-    max: 10,
-    value: 5,
-    step: 1,
-    position: 'horizontal',
-    type: 'single',
-    scale: false,
-    tooltip: false,
-  };
+import { Observer } from "../Helpers/Observer";
+import { defaultCoreState } from "./defaultCoreState";
+
+export class Core extends Observer {
+  private state: any = defaultCoreState;
   constructor(private options: {}) {
-    this.setState(options);
+    super();
+    this.setState()
   }
 
-  setState(options) {
-    this.defaultState = {...this.defaultState, ...options};
+  setState() {
+    this.state = {...defaultCoreState, ...this.options};
+  }
+
+  getState() {
+    return this.state;
   }
 }

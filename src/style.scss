@@ -2,7 +2,6 @@
 :root {
   font: normal normal .875em/1.2 Arial, Helvetica, sans-serif;
   box-sizing: border-box;
-  // background: #E5E5E5;
 }
 
 *,
@@ -11,31 +10,39 @@
   box-sizing: inherit;
 }
 
+.anchor {
+  max-width: 500px;
+  margin: 10px 0px 0px 10px;
+}
+
 .slider {
-  max-width: 200px;
-  background-color: red;
-  border-radius: 10em;
+  max-width: 500px;
   height: 10px;
-  margin-left: 50px;
+  background: #b0ecfa;
+  margin: 0;
   position: relative;
+  border-radius: 10em;
+}
 
-  &__bar {
-    position: absolute;
-    width: 99%;
-    height: 79%;
-    background: wheat;
-    top: 1px;
-    left: 1px;
-    border-radius: 10em;
-  }
+.slider__handle {
+  width: 20px;
+  height: 20px;
+  background: #42aafe;
+  position: absolute;
+  border-radius: 10em;
+  bottom: -6px;
+  left: 0;
+  cursor: pointer;
+}
 
-  &__handler {
-    position: absolute;
-    width: 8px;
-    height: 79%;
-    background: black;
-    top: 1px;
-    left: 1px;
-    border-radius: 10em;
-  }
+.slider__handle:hover {
+  background: #77bdf7;
+}
+
+.slider__bar {
+  background: #68d5ff;
+  height: 10px;
+  border-radius: 10em;
+  position: absolute;
+  cursor: pointer;
 }

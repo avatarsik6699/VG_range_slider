@@ -1,7 +1,7 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
-class Bar implements Component {
-  template: string = `<div class="slider__bar"></div>`;
+class Handle implements Component {
+  template: string = `<div class="slider__handle"></div>`;
   constructor(params: State) {
     this.setTemplate(params.type);
   }
@@ -12,8 +12,8 @@ class Bar implements Component {
   }
 
   setTemplate(type: string): void {
-    const className = `slider__bar slider__bar_${type}`;
-    this.template = `<div class=${className} data-component="bar"></div>`;
+    const className = `slider__handle slider__handle_${type}`;
+    this.template = `<div class=${className} data-component="handle"></div>`;
   }
 
   private getRootElement(anchor: Element): Element {
@@ -23,4 +23,4 @@ class Bar implements Component {
   }
 }
 
-export { Bar };
+export { Handle }

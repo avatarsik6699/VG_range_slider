@@ -1,121 +1,62 @@
-import { modelState } from "../Helpers/Interfaces";
+import { Component, State, Template } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
-import { component } from "./components/component_interface";
-import { factory } from "./factories/factory_interface";
 import { HorizontalSlider } from "./factories/horizontalSlider";
-import { VerticalSlider } from "./factories/VerticalSlider";
+// import { VerticalSlider } from "./factories/VerticalSlider";
 import { Selector } from "./Selector";
-import { sliderTemplate } from './templates/sliderTemplate';
+import {sliderTemplate } from './templates/sliderTemplate';
 
 export class App extends Observer {
-	public sliderComponents: component[] | undefined = [];
+	private factory: HorizontalSlider;
+	private sliderTemplate: Template = sliderTemplate;
+	public componentsDomList: any = {};
 	public domComponents: any = {};
-	public sliderWrapper: HTMLElement | null | undefined;
-	private factory: HorizontalSlider | VerticalSlider | undefined = undefined;
-	private sliderTemplate: any = sliderTemplate;
-  constructor(
-		public anchor: Element | null, 
-		public options: modelState,
-		public selector: Selector
-		) 
+  constructor(public anchor: HTMLElement, public params: State, public selector: Selector) 
 		{
 			super();
-			this.sliderWrapper = anchor?.querySelector('.slider-wrapper');
-			this.setFactory(this.options.position)
-			this.setSliderComponents();
-			this.renderUI();
-			this.bindEvents();
-			this.setDomComponents();	
+			this.factory = selector.getFactory(params)!;
 		}
 
-		renderUI(): void {
-			this.renderSlider();
-			// this.renderSettings();
-		}
-		
-		private setSliderComponents(): void {
-			this.sliderComponents = this.factory?.createComponents();
-		}
-
-		private setDomComponents(): void {
-			this.sliderComponents?.forEach( el => {
-				let domEl = el.getDomElement(this.anchor);
-				let domElName = (<HTMLElement>domEl).dataset.component;
-				this.domComponents[domElName!] = domEl;
+		init(params: State): void {
+			this.sliderTemplate.render(this.anchor);
+			let components: Component[] = this.factory?.createComponents(params);
+			components.forEach( component => {
+				component.render(this.anchor, {});
 			});
 		}
 
-		private setFactory(position: string): void {
-			this.factory = this.selector.getFactory(position)
+		setFactory(params: State): void {
+			this.factory = this.selector.getFactory(params)!;
 		}
 
-		private renderSlider(): void {
-			this.sliderTemplate.render(this.anchor);
-			const slider: Element = this.sliderTemplate.getDomElement(this.anchor);
-			this.setDomComponents();
+		// bindEvents(): void {
+		// 	this.anchor?.addEventListener('mousedown', (e: MouseEvent) => {
+		// 		let component = (<HTMLElement>e.target).dataset.component;
+				
+		// 		if (!component) return;
 
-			this.sliderComponents?.forEach( component => {
-				component.paint(slider);
-			})
-		}
+		// 		let eventName: 'Slider' | 'Settings' = this.makeEventName(component);
+		// 		this[eventName](e);
+		// 	})
+		// }
 
-		bindEvents(): void {
-			this.anchor?.addEventListener('mousedown', e => {
-				let targetName = (<HTMLElement>e.target).dataset.component;
-				if (targetName === undefined) return;
+		// private makeEventName(name: string): 'Slider' | 'Settings' {
+		// 	let upperName = name.toUpperCase().slice(0,1) + name.slice(1);
+		// 	return `event${upperName}`;
+		// }
 
-				let eventName = this.makeEventName(targetName);
-				this[eventName](e);
-			})
-		}
+		// private eventBar(e: Event) {
+		// 	console.log('bar');
+		// }
 
-		private makeEventName(name: string): string {
-			let upperName = name.toUpperCase().slice(0,1) + name.slice(1);
-			return `event${upperName}`;
-		}
+		// private eventHandler(e: any) {
+		// 	const handler = (<HTMLElement>e.target);
+		// 	const slider = handler.closest('.slider');
 
-		private eventBar(e: Event) {
-			console.log('bar');
-			// this.notify('bar', {});
-		}
+		// 	document.addEventListener('mousemove', handlerMove);
+		// 	document.onmouseup = () => {
+		// 		document.removeEventListener('mousemove', handlerMove);
+		// 	};
 
-		private eventHandler(e: any) {
-			const handler = (<HTMLElement>e.target);
-			const slider = handler.closest('.slider');
-
-			const sliderBorderLeft = Math.round(this.getElementCoords(slider, 'left'));
-			const sliderBorderRight = Math.round(this.getElementCoords(slider, 'right'));
-			const shiftX = Math.round(e.pageX - this.getElementCoords(handler, 'left'));
-			
-			const handlerMove = (event) => {
-				// this.notify('handler', {
-				// 	pageX: event.pageX,
-				// 	sliderBorderLeft,
-				// 	shiftX,
-				// });
-				handler.style.left = (event.pageX - sliderBorderLeft) - shiftX + 'px';
-			}
-
-			document.addEventListener('mousemove', handlerMove);
-			document.onmouseup = () => {
-				document.removeEventListener('mousemove', handlerMove);
-			};
-
-			(<HTMLElement>e.target).ondragstart = () => false;
-			// this.notify('handler', {});
-		}
-
-		public getHandlerValue(value: string): string {
-			return value;
-		}
-
-		private renderSettings(): void {
-
-		}
-
-		private getElementCoords(el: HTMLElement | Element| null, coord: string): any {
-			if (!el) return;
-			
-			return el.getBoundingClientRect()[coord];
-		}
+		// 	(<HTMLElement>e.target).ondragstart = () => false;
+		// }
 }
