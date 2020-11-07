@@ -1,7 +1,5 @@
-import { modelState } from "../Helpers/Interfaces";
-
 export class Model {
-  defaultState: modelState = {
+  defaultState: any = {
     min: 1,
     max: 10,
     value: 5,

@@ -1,6 +1,6 @@
-import { Model } from "../Model/Model";
-import { App } from "../View/App";
-import { Selector } from "../View/Selector";
+import { Model } from "../Core/Model";
+import { App } from "../App/App";
+import { Selector } from "../App/Selector";
 export class Controller {
   model: Model;
   app: App;
