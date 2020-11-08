@@ -9,7 +9,7 @@ const sliderTemplate: Template = {
     anchor.insertAdjacentHTML('afterbegin', this.template);
   },
 
-  getSlider(anchor: Element): Element {
+  getNode(anchor: Element): Element {
     const slider = anchor.querySelector('.slider');
     if (!slider) { throw new Error(`Item not found. Maybe you didn't call the 'render' method`) };
     return slider;

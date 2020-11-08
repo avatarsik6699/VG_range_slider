@@ -8,6 +8,13 @@ export class Controller {
   {
     this.core = new Core(options);
     this.app = new App(anchor, this.core.getState(), new Selector())
+    this.bindEvents();
     this.app.init(this.core.getState());
+  }
+
+  bindEvents() {
+    this.app.subscribe('finishInit', (appData) => {
+      let renderData = this.core.getRenderData(appData);
+    })
   }
 }

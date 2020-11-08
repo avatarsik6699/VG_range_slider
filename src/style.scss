@@ -46,3 +46,14 @@
   position: absolute;
   cursor: pointer;
 }
+
+.slider__tooltip {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background: #42aafe;
+  top: -24px;
+  border-radius: 0.2em;
+  color: white;
+  white-space: nowrap;
+}

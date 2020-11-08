@@ -1,3 +1,4 @@
+import { Expression } from "typescript";
 import { Component, State, Template } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { HorizontalSlider } from "./factories/horizontalSlider";
@@ -8,8 +9,9 @@ import {sliderTemplate } from './templates/sliderTemplate';
 export class App extends Observer {
 	private factory: HorizontalSlider;
 	private sliderTemplate: Template = sliderTemplate;
-	public componentsDomList: any = {};
-	public domComponents: any = {};
+	public componentInstancesList: Component[] = [];
+	public componentNodeList: {[name: string]: HTMLElement | Element} = {};
+	public appData: { [name: string]: {[key: string]: number} | number} = {};
   constructor(public anchor: HTMLElement, public params: State, public selector: Selector) 
 		{
 			super();
@@ -18,14 +20,55 @@ export class App extends Observer {
 
 		init(params: State): void {
 			this.sliderTemplate.render(this.anchor);
-			let components: Component[] = this.factory?.createComponents(params);
-			components.forEach( component => {
+			this.componentInstancesList = this.factory?.createComponents(params);
+			this.componentNodeList['Slider'] = this.sliderTemplate.getNode(this.anchor);
+
+			
+
+			this.componentInstancesList.forEach( component => {
 				component.render(this.anchor, {});
+
+				let componentName = component.getName();
+				let componentNode = component.getNode(this.anchor);
+				this.componentNodeList[componentName] = componentNode;
 			});
+			this.setAppData(this.componentNodeList);
+			this.notify('finishInit', this.appData);
+		}
+
+		renderUI() {
+			
 		}
 
 		setFactory(params: State): void {
 			this.factory = this.selector.getFactory(params)!;
+		}
+
+		setAppData(componentNodeList: {[name: string]: HTMLElement | Element} = {} ): any {
+			const exclude = ['Bar', 'Tooltip']; // не нуждаются в вычислениях ?
+			const properties = ['left', 'right', 'width'];
+			const specialProperties = [
+				['shiftX', () => Math.round( (this.appData.Handle['right'] - this.appData.Handle['left']) / 2)],
+			];
+
+			Object.entries(componentNodeList).forEach( el => {
+				let nodeName = el[0];
+				let nodeDom = el[1];
+				this.appData[nodeName] = {};
+				
+				// calculation default properties
+				properties.forEach( prop => {
+					let propValue = nodeDom.getBoundingClientRect()[prop];
+					this.appData[nodeName][prop] = propValue;
+				});
+			});
+
+			// calculation special properties
+			specialProperties.forEach( prop => {
+				let name = <string>prop[0];
+				let func = <(() => number)>prop[1];
+				this.appData[name] = func();
+			})
 		}
 
 		// bindEvents(): void {

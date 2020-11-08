@@ -12,7 +12,7 @@ interface State {
 interface Template {
   template: string;
   render(anchor: Element): void;
-  getSlider?(anchor: Element): Element
+  getNode(anchor: Element): Element
 }
 
 interface Factory {
@@ -23,6 +23,8 @@ interface Component {
   template: string;
   render(anchor: Element | HTMLElement, renderParams?: any): void
   setTemplate(type: string): void;
+  getNode(anchor: HTMLElement | Element): Element;
+  getName(): string;
 }
 
 export { State, Template, Factory, Component };
