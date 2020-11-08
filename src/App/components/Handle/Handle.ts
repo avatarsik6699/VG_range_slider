@@ -20,6 +20,12 @@ class Handle implements Component {
     return Object.getPrototypeOf(this).constructor.name;
   }
 
+  update(anchor: Element | HTMLElement, renderParams: {pxValue: number}): void {
+    if (this.getNode(anchor)) {
+      (<HTMLElement>this.getNode(anchor)).style.left = renderParams.pxValue + 'px';
+    }
+  }
+
   getNode(anchor: HTMLElement | Element): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
     const node = anchor.querySelector('.slider__handle');

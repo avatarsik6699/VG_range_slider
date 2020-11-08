@@ -10,11 +10,24 @@ export class Controller {
     this.app = new App(anchor, this.core.getState(), new Selector())
     this.bindEvents();
     this.app.init(this.core.getState());
+    this.app.bindEvents();
   }
 
   bindEvents() {
     this.app.subscribe('finishInit', (appData) => {
-      let renderData = this.core.getRenderData(appData);
+      this.core.getRenderData(appData);
     })
+    
+    this.app.subscribe('touchEvent', (appData) => {
+      this.core.getRenderData(appData);
+    })
+
+    this.core.subscribe('getRenderData', (renderData) => {
+      this.app.renderUI(renderData);
+    })
+
+    this.app.subscribe('moveEvent', (appData) => {
+      this.core.getRenderData(appData);
+    })    
   }
 }

@@ -28,6 +28,12 @@ class Tooltip implements Component {
     return node;
   }
 
+  update(anchor: Element | HTMLElement, renderParams: {tipValue}): void {
+    if (this.getNode(anchor)) {
+      (<HTMLElement>this.getNode(anchor)).textContent = renderParams.tipValue;
+    }
+  }
+
   private getRootElement(anchor: Element): Element {
     const root = anchor.querySelector('.slider__handle');
     if (!root) throw new Error (`Root 'Handle' was not found`);

@@ -6,14 +6,15 @@ class Bar implements Component {
     this.setTemplate(params.type);
   }
 
-  render(anchor: Element | HTMLElement, renderParams?: any): void {
+  render(anchor: Element | HTMLElement): void { 
     let el = this.getRootElement(anchor);
     el.insertAdjacentHTML('beforeend', this.template);
+    
   }
 
-  setTemplate(type: string): void {
+  setTemplate(type: string, template?: string): void {
     const className = `slider__bar slider__bar_${type}`;
-    this.template = `<div class=${className} data-component="bar"></div>`;
+    this.template = !template ? `<div class=${className} data-component="bar"></div>` : template;
   }
 
   getName(): string {
@@ -25,6 +26,12 @@ class Bar implements Component {
     let node = anchor.querySelector('.slider__bar');
     if (!node) throw new Error(`bar wasn't found. Also, for this to work, you must call the 'render' method`);
     return node;
+  }
+
+  update(anchor: Element | HTMLElement, renderParams: {pxValue: number}): void {
+    if (this.getNode(anchor)) {
+      (<HTMLElement>this.getNode(anchor)).style.width = renderParams.pxValue + 10 + 'px';
+    }
   }
 
   private getRootElement(anchor: Element): Element {

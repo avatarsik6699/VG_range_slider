@@ -25,6 +25,7 @@ interface Component {
   setTemplate(type: string): void;
   getNode(anchor: HTMLElement | Element): Element;
   getName(): string;
+  update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number}): void
 }
 
 export { State, Template, Factory, Component };
