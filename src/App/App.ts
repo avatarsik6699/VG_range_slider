@@ -9,9 +9,9 @@ import {sliderTemplate } from './templates/sliderTemplate';
 export class App extends Observer {
 	private factory: HorizontalSlider;
 	private sliderTemplate: Template = sliderTemplate;
-	public componentInstanceList: Component[] = [];
-	public componentNodeList: {[name: string]: HTMLElement | Element} = {};
-	public appData: { [name: string]: {[key: string]: number} | number} = {};
+	public componentInstanceList: {} = {};
+	public componentNodeList: {[name: string]: HTMLElement | Element | any[]} = {};
+	public appData: { [name: string]: any[] | {[key: string]: number} | number} = {};
   constructor(public anchor: HTMLElement, public params: State, public selector: Selector) 
 		{
 			super();
@@ -21,23 +21,29 @@ export class App extends Observer {
 		init(params: State): void {
 			this.sliderTemplate.render(this.anchor);
 			this.componentInstanceList = this.factory?.createComponents(params);
-			this.componentNodeList['Slider'] = this.sliderTemplate.getNode(this.anchor);
-
-			this.componentInstanceList.forEach( component => {
-				component.render(this.anchor, {});
-
-				let componentName = component.getName();
-				let componentNode = component.getNode(this.anchor);
-				this.componentNodeList[componentName] = componentNode;
+			this.componentNodeList['slider'] = this.sliderTemplate.getNode(this.anchor);
+			
+			Object.entries(this.componentInstanceList).forEach( instance => {
+				let instanceName = instance[0];
+				let instanceElement = Array.isArray(instance[1]) 
+				? instance[1].map( (el, index) => el.create(this.anchor).getNode(this.anchor, index))
+				: (<Component>instance[1]).create(this.anchor).getNode(this.anchor)
+				this.componentNodeList[instanceName] = instanceElement;
 			});
+
 			this.setAppData(this.componentNodeList);
 			this.notify('finishInit', this.appData);
 		}
 
 		renderUI(renderData) {
-			this.componentInstanceList.forEach( el => {
-				if (!el.update) return;
-				el.update(this.anchor, renderData);
+			Object.values(this.componentInstanceList).forEach( (instance: any) => {
+				if (Array.isArray(instance)) {
+					instance.forEach( (handle, index) => {
+						handle.update(this.anchor, renderData, index);
+					} )
+				} else {
+					instance.update(this.anchor, renderData);
+				}
 			});
 		}
 
@@ -45,22 +51,25 @@ export class App extends Observer {
 			this.factory = this.selector.getFactory(params)!;
 		}
 
-		setAppData(componentNodeList: {[name: string]: HTMLElement | Element} = {} ): any {
-			const exclude = ['Bar', 'Tooltip']; // не нуждаются в вычислениях ?
+		setAppData(componentNodeList: {[name: string]: HTMLElement | Element | any[]} = {} ): any {
 			const properties = ['left', 'right', 'width'];
 			const specialProperties = [
-				['shiftX', () => Math.round( (this.appData.Handle['right'] - this.appData.Handle['left']) / 2)],
+				['halfHandle', () => Math.round( componentNodeList.handles[0].getBoundingClientRect().width / 2)],
 			];
 
 			Object.entries(componentNodeList).forEach( el => {
 				let nodeName = el[0];
-				let nodeDom = el[1];
+				let nodeElem = el[1];
 				this.appData[nodeName] = {};
 				
 				// calculation default properties-----------------
 				properties.forEach( prop => {
-					let propValue = nodeDom.getBoundingClientRect()[prop];
-					this.appData[nodeName][prop] = propValue;
+					if (Array.isArray(nodeElem)) {
+						this.appData[nodeName][prop] = 
+						[nodeElem[0].getBoundingClientRect()[prop], nodeElem[1].getBoundingClientRect()[prop]];
+					} else {
+						this.appData[nodeName][prop] = nodeElem.getBoundingClientRect()[prop];
+					}
 				});
 			});
 
@@ -76,13 +85,21 @@ export class App extends Observer {
 			this.anchor?.addEventListener('mousedown', (e: MouseEvent) => {
 				if ((<Element>e.target)?.closest('.slider')) {
 					e.preventDefault();
-					const halfHandle = this.appData.Handle['width'] / 2;
-					let left = e.clientX - this.appData.Slider['left'] - halfHandle;
-					this.notify('touchEvent', {left, ...this.appData})
+				
+					const halfHandle = 10;
+					let left = e.clientX - this.appData.slider['left'] - halfHandle;
+					let targetId = 0;
+					if ((this.componentNodeList.handles as Element[]).length > 1) {
+					
+						targetId = this.defineCloseHandle(left);
+						this.notify('touchEvent', {left, targetId, ...this.appData})
+					} else {
+						this.notify('touchEvent', {left, ...this.appData})
+					}
 
 					const handleMove = (e: MouseEvent) => {
-						left = e.clientX - this.appData.Slider['left'] - halfHandle;
-						this.notify('moveEvent', {left, ...this.appData})
+						left = e.clientX - this.appData.slider['left'] - halfHandle;
+						this.notify('moveEvent', {left, targetId, ...this.appData})
 					}
 
 					const finishMove = () => {
@@ -92,29 +109,25 @@ export class App extends Observer {
 
 					document.addEventListener('mousemove', handleMove);
 					document.addEventListener('mouseup', finishMove);
-					(<any>this.componentNodeList.Handle).ondragstart = () => false;
+					(this.componentNodeList.handles as HTMLElement[]).forEach( handle => {
+						handle.ondragstart = () => false;
+					});
 				};
 			})
 		}
 
-		// private makeEventName(name: string): 'Slider' | 'Settings' {
-		// 	let upperName = name.toUpperCase().slice(0,1) + name.slice(1);
-		// 	return `event${upperName}`;
-		// }
+		private defineCloseHandle(left: any): any {
+			let firstHandleLeft = this.componentNodeList.handles[0].getBoundingClientRect().left;
+			let secondHandleLeft = this.componentNodeList.handles[1].getBoundingClientRect().left;
 
-		// private eventBar(e: Event) {
-		// 	console.log('bar');
-		// }
+			
+			let firstResult = Math.abs(left - firstHandleLeft);
+			let secondResult = Math.abs(left - secondHandleLeft);
+			
+			let targetId = firstResult < secondResult 
+			? this.componentNodeList.handles[0].dataset.id 
+			: this.componentNodeList.handles[1].dataset.id 
 
-		// private eventHandler(e: any) {
-		// 	const handler = (<HTMLElement>e.target);
-		// 	const slider = handler.closest('.slider');
-
-		// 	document.addEventListener('mousemove', handlerMove);
-		// 	document.onmouseup = () => {
-		// 		document.removeEventListener('mousemove', handlerMove);
-		// 	};
-
-		// 	(<HTMLElement>e.target).ondragstart = () => false;
-		// }
+			return targetId;
+		}
 }

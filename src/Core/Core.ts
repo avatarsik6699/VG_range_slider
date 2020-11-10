@@ -19,20 +19,35 @@ export class Core extends Observer {
     return this.state;
   }
 
-  getRenderData(viewData): void {
-    let distance = this.state.max - this.state.min; // дистанция
-    let ratio = viewData.Slider['width'] / distance; // соотношеие px к единцие value
-    // если left (позиция курсора) не передана -> вычисляем её из value
-    let cursorPosition = !viewData.left  
-    ? (this.state.value / this.state.max) * viewData.Slider['width']
-    : viewData.left
-    // приравнивание 1px к 1value и уменьшение пути на step 
-    let correctValue = Math.round(cursorPosition / ratio / this.state.step) * this.state.step;
-    let partOfDistance = correctValue / distance; // часть дистанции от 0 до 1
-    let pxValue = partOfDistance * viewData.Slider['width']; // часть дистанции в px
-    let tipValue = partOfDistance * distance + this.state.min;
-    this.notify('getRenderData', {pxValue, tipValue});
+  getRenderData(appData): void {
+    const distance = this.state.max - this.state.min; // дистанция
+    const ratio = appData.slider['width'] / distance; // соотношеие px к единцие value
+    const value: number[] = Array.isArray(this.state.value) ? this.state.value : [this.state.value];
+    
+    if (this.state.type === 'range' && !appData.targetId) {
+      let renderData = value.map( (num, index) => {
+        let handlePxValue = appData.hasOwnProperty('left')
+        ? appData.left[index]
+        : (num / this.state.max) * appData.slider['width']; 
+        
+        let correctPxValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
+        let tipValue = correctPxValue / ratio + this.state.min;
+        return [index, {correctPxValue, tipValue}];
+      })
+      console.log( {...Object.fromEntries(renderData), ...this.state})
+      this.notify('getRenderData', {...Object.fromEntries(renderData), ...this.state})
+    } else {
+      
+      let handlePxValue = appData.left;
+      let correctPxValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
+      let tipValue = correctPxValue / ratio + this.state.min;
+      let renderData =  {[appData.targetId] : {correctPxValue, tipValue}};
+      console.log(renderData)
+      this.notify('getRenderData', {...renderData, ...this.state});
+    }
   }
+
+
 
   calcCorrectValue() {
     const remainder = this.state.value % this.state.step;

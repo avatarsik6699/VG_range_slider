@@ -1,20 +1,21 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
 class Bar implements Component {
-  template: string = `<div class="slider__bar"></div>`;
+  template: string = '';
+  static componentName: string = Object.getPrototypeOf(Bar).constructor.name.toLowerCase();
   constructor(params: State) {
-    this.setTemplate(params.type);
+    this.setTemplate(params.position);
   }
 
-  render(anchor: Element | HTMLElement): void { 
+  create(anchor: Element | HTMLElement): this { 
     let el = this.getRootElement(anchor);
     el.insertAdjacentHTML('beforeend', this.template);
-    
+    return this;
   }
 
-  setTemplate(type: string, template?: string): void {
-    const className = `slider__bar slider__bar_${type}`;
-    this.template = !template ? `<div class=${className} data-component="bar"></div>` : template;
+  setTemplate(position: string): void {
+    const className = `slider__bar slider__bar_${position}`;
+    this.template = `<div class="${className}" data-component="bar"></div>`;
   }
 
   getName(): string {
@@ -28,9 +29,14 @@ class Bar implements Component {
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number}): void {
+  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
     if (this.getNode(anchor)) {
-      (<HTMLElement>this.getNode(anchor)).style.width = renderParams.pxValue + 10 + 'px';
+      let bar = (<HTMLElement>this.getNode(anchor));
+      // if (renderParams.type === 'range') {
+      //   let correctWidth = renderParams[1].correctPxValue - renderParams[0].correctPxValue;
+      //   bar.style.width = correctWidth + 20 + 'px';
+      //   bar.style.left = renderParams[0].correctPxValue + 'px'
+      // }
     }
   }
 

@@ -2,35 +2,44 @@ import { Component, State } from "../../../Helpers/Interfaces";
 
 class Handle implements Component {
   template: string = `<div class="slider__handle"></div>`;
-  constructor(params: State) {
-    this.setTemplate(params.type);
+  
+  constructor(params: State, index?: number) {
+    this.setTemplate(params.type, index);
   }
 
-  render(anchor: Element | HTMLElement, renderParams?: any): void {
+  create(anchor: Element | HTMLElement): this {
     let el = this.getRootElement(anchor);
     el.insertAdjacentHTML('beforeend', this.template);
+    return this;
   }
 
-  setTemplate(type: string): void {
+  setTemplate(type: string, id: number = 0): void {
     const className = `slider__handle slider__handle_${type}`;
-    this.template = `<div class=${className} data-component="handle"></div>`;
+    this.template = `<div class="${className}" data-component="handle" data-id=${id}></div>`;
+  }
+
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    if (renderParams[id] === undefined) return;
+    console.log(renderParams)
+    if (this.getNode(anchor, id)) {
+      let handle = (<HTMLElement>this.getNode(anchor, id));
+      if (renderParams.position === 'horizontal') {
+        handle.style.left = renderParams[id].correctPxValue + 'px';
+      } else {
+        handle.style.top = renderParams[id].correctPxValue + 'px';
+      }
+    }
+  }
+
+  getNode(anchor: HTMLElement | Element, id: number): Element {
+    if (!anchor) throw new Error(`didn't get anchor`);
+    let node = anchor.querySelector(`.slider__handle[data-id="${id}"`);
+    if (!node) throw new Error(`handle wasn't found`);
+    return node;
   }
 
   getName(): string {
     return Object.getPrototypeOf(this).constructor.name;
-  }
-
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number}): void {
-    if (this.getNode(anchor)) {
-      (<HTMLElement>this.getNode(anchor)).style.left = renderParams.pxValue + 'px';
-    }
-  }
-
-  getNode(anchor: HTMLElement | Element): Element {
-    if (!anchor) throw new Error(`didn't get anchor`);
-    const node = anchor.querySelector('.slider__handle');
-    if (!node) throw new Error(`handle wasn't found`);
-    return node;
   }
 
   private getRootElement(anchor: Element): Element {

@@ -50,11 +50,32 @@
 
 .slider__tooltip {
   position: relative;
-  width: 20px;
-  height: 20px;
+  display: inline-block;
+  font: normal normal 16px/1.2 Helvetica;
+  padding: 2px 5px;
   background: #42aafe;
-  top: -24px;
+  top: -29px;
+  left: -7px;
   border-radius: 0.2em;
   color: white;
   white-space: nowrap;
+}
+
+.slider_vertical {
+  max-width: 10px;
+  height: 200px;
+}
+
+.slider__bar_vertical {
+  height: 0;
+}
+
+.slider__handle_vertical {
+  bottom: 0;
+  left: -5px;
+}
+
+.slider__tooltip_vertical {
+  top: 0;
+  left: 26px;
 }

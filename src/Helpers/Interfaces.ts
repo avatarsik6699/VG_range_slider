@@ -16,16 +16,15 @@ interface Template {
 }
 
 interface Factory {
-  createComponents(params: {type: string, scale: boolean, tooltip: boolean}): Component[];
+  createComponents(params: {type: string, scale: boolean, tooltip: boolean}): {};
 }
 
 interface Component {
   template: string;
-  render(anchor: Element | HTMLElement, renderParams?: any): void
-  setTemplate(type: string): void;
-  getNode(anchor: HTMLElement | Element): Element;
-  getName(): string;
-  update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number}): void
+  create(anchor: Element | HTMLElement, renderParams?: any): this
+  setTemplate(type: string, handleId: number): void;
+  getNode(anchor: HTMLElement | Element, handleId?: number): Element;
+  update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number | string} | any, handleId?: any): void
 }
 
 export { State, Template, Factory, Component };

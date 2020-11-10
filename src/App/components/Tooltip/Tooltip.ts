@@ -7,9 +7,10 @@ class Tooltip implements Component {
     this.setTemplate(params.type);
   }
 
-  render(anchor: Element | HTMLElement, renderParams?: any): void {
+  create(anchor: Element | HTMLElement, renderParams?: any): this {
     let root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
+    return this;
   }
 
   setTemplate(type: string): void {
