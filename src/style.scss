@@ -23,6 +23,16 @@
   position: relative;
   border-radius: 10em;
   cursor: pointer;
+
+  &_position-horizontal {
+    max-width: 300px;
+    height: 10px;
+  }
+
+  &_position-vertical {
+    max-width: 10px;
+    height: 300px;
+  }
 }
 
 .slider__handle {
@@ -34,18 +44,38 @@
   bottom: -6px;
   left: 0;
   cursor: pointer;
-}
 
-.slider__handle:hover {
-  background: #77bdf7;
+  &:hover {
+    background: #77bdf7;
+  }
+
+  &_position-horizontal {
+    bottom: -6px;
+    left: 0;
+  }
+
+  &_position-vertical {
+    bottom: 0;
+    left: -5px;
+    top: 0;
+  }
 }
 
 .slider__bar {
   background: #68d5ff;
-  height: 10px;
   border-radius: 10em;
   position: absolute;
   cursor: pointer;
+
+  &_position-horizontal {
+    height: 10px;
+    width: 0px;
+  }
+
+  &_position-vertical {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 .slider__tooltip {
@@ -57,35 +87,23 @@
   border-radius: 0.2em;
   color: white;
   white-space: nowrap;
+  
   &_position-horizontal {
     top: -29px;
     left: 0px;
   }
-}
 
-.slider_vertical {
-  max-width: 10px;
-  height: 200px;
-}
-
-.slider__bar_vertical {
-  height: 0;
-}
-
-.slider__handle_vertical {
-  bottom: 0;
-  left: -5px;
-}
-
-.slider__tooltip_vertical {
-  top: 0;
-  left: 26px;
+  &_position-vertical {
+    top: 0;
+    left: 29px;
+  }
 }
 
 .slider__scale {
   position: relative;
   top: 21px;
   display: flex;
+  
 }
 
 .slider__scale-item {
@@ -97,6 +115,11 @@
   flex-flow: column;
   margin-top: 15px;
   max-width: 140px;
+  
+  &__item {
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
 
   &__name {
     font-family: cursive;
