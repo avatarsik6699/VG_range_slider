@@ -23,7 +23,8 @@ export class Core extends Observer {
     const distance = this.state.max - this.state.min; // дистанция
     const ratio = appData.slider['width'] / distance; // соотношеие px к единцие value
     const value: number[] = Array.isArray(this.state.value) ? this.state.value : [this.state.value];
-    
+    const scaleValues = this.calcScaleValues(appData); 
+
     if (this.state.type === 'range' && !appData.targetId) {
       let renderData = value.map( (num, index) => {
         let handlePxValue = appData.hasOwnProperty('left')
@@ -34,22 +35,33 @@ export class Core extends Observer {
         let tipValue = correctPxValue / ratio + this.state.min;
         return [index, {correctPxValue, tipValue}];
       })
-      console.log( {...Object.fromEntries(renderData), ...this.state})
-      this.notify('getRenderData', {...Object.fromEntries(renderData), ...this.state})
+      this.notify('getRenderData', {scaleValues, ...Object.fromEntries(renderData), ...this.state})
     } else {
-      
       let handlePxValue = appData.left;
-      let correctPxValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
-      let tipValue = correctPxValue / ratio + this.state.min;
-      let renderData =  {[appData.targetId] : {correctPxValue, tipValue}};
-      console.log(renderData)
-      this.notify('getRenderData', {...renderData, ...this.state});
+      let correctValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
+      let partOfDistance = correctValue / distance;
+      let correctPxValue = partOfDistance * appData.slider['width'];
+      let renderData =  {0 : {correctPxValue, correctValue}};
+      console.log({scaleValues, ...renderData, ...this.state})
+      this.notify('getRenderData', {scaleValues, ...renderData, ...this.state});
     }
   }
 
+  calcScaleValues(appData) {
+    let min = this.state.min;
+    let max = this.state.max;
+    let step = this.state.step;
+    let ratio = appData.slider['width'] / max;
+    let steps: number[] = [];
+    steps.push(0);
+    for (let i = min; i <= max; i += step + (0.2 * max)) {
+      steps.push(Math.round(i * ratio));
+    }
+    steps.push(appData.slider['width'])
+    return steps;
+  }
 
-
-  calcCorrectValue() {
+  calcCorrectValue(): number {
     const remainder = this.state.value % this.state.step;
     if (remainder !== 0) { return this.state.value - remainder }
     else { return this.state.value };

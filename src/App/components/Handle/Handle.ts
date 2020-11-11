@@ -20,7 +20,7 @@ class Handle implements Component {
 
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
     if (renderParams[id] === undefined) return;
-    console.log(renderParams)
+
     if (this.getNode(anchor, id)) {
       let handle = (<HTMLElement>this.getNode(anchor, id));
       if (renderParams.position === 'horizontal') {

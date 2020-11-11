@@ -3,7 +3,8 @@ import { Template } from "../../Helpers/Interfaces";
 const sliderTemplate: Template = {
   template: `
   <div class="slider-wrapper">
-    <div class="slider"></div>
+    <div class="slider">
+    </div>
   </div>`,
   render(anchor: Element): void {
     anchor.insertAdjacentHTML('afterbegin', this.template);

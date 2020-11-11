@@ -5,7 +5,7 @@ import { Tooltip } from '../components/Tooltip/Tooltip';
 import { Scale } from '../components/Scale/Scale';
 
 class HorizontalSlider implements Factory {
-  private componentList: any = [Bar, [Handle]];
+  private componentList: any = [Bar, [Handle], Scale];
 
   createComponents(params: State): {} {
     this.setComponentList(params);
@@ -27,9 +27,9 @@ class HorizontalSlider implements Factory {
   }
 
   setComponentList( params: State, customCheckList?: string[] ): void {
-    let checkList: any[] = customCheckList ? customCheckList : [['scale', Scale], ['tooltip', Tooltip]];
-    if (params.type === 'range') this.componentList = [Bar, [Handle, Handle]];
-    if (params.type === 'single') this.componentList = [Bar, [Handle]];
+    // let checkList: any[] = customCheckList ? customCheckList : [['scale', Scale], ['tooltip', Tooltip]];
+    if (params.type === 'range') this.componentList = [Bar, [Handle, Handle], Scale];
+    if (params.type === 'single') this.componentList = [Bar, [Handle], Scale];
 
     // let newComponents = checkList.map( el => {
     //   console.log(params[el[0]])

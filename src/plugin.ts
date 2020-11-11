@@ -17,10 +17,10 @@ declare global {
 const $slider = $('.anchor').slider({
 	max: 500,
 	min: 0,
-  value: [50,100],
-  step: 10,
+  value: [1],
+  step: 5,
   position: 'horizontal',
-  type: 'range',
+  type: 'single',
   scale: false,
   tooltip: false,
 })

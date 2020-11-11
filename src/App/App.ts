@@ -22,7 +22,6 @@ export class App extends Observer {
 			this.sliderTemplate.render(this.anchor);
 			this.componentInstanceList = this.factory?.createComponents(params);
 			this.componentNodeList['slider'] = this.sliderTemplate.getNode(this.anchor);
-			
 			Object.entries(this.componentInstanceList).forEach( instance => {
 				let instanceName = instance[0];
 				let instanceElement = Array.isArray(instance[1]) 
@@ -64,9 +63,11 @@ export class App extends Observer {
 				
 				// calculation default properties-----------------
 				properties.forEach( prop => {
-					if (Array.isArray(nodeElem)) {
+					if (Array.isArray(nodeElem) && nodeElem.length > 1) {
 						this.appData[nodeName][prop] = 
 						[nodeElem[0].getBoundingClientRect()[prop], nodeElem[1].getBoundingClientRect()[prop]];
+					} else if (Array.isArray(nodeElem)) {
+						this.appData[nodeName][prop] = nodeElem[0].getBoundingClientRect()[prop];
 					} else {
 						this.appData[nodeName][prop] = nodeElem.getBoundingClientRect()[prop];
 					}
@@ -90,7 +91,6 @@ export class App extends Observer {
 					let left = e.clientX - this.appData.slider['left'] - halfHandle;
 					let targetId = 0;
 					if ((this.componentNodeList.handles as Element[]).length > 1) {
-					
 						targetId = this.defineCloseHandle(left);
 						this.notify('touchEvent', {left, targetId, ...this.appData})
 					} else {
@@ -117,16 +117,22 @@ export class App extends Observer {
 		}
 
 		private defineCloseHandle(left: any): any {
-			let firstHandleLeft = this.componentNodeList.handles[0].getBoundingClientRect().left;
-			let secondHandleLeft = this.componentNodeList.handles[1].getBoundingClientRect().left;
+			let targetId;
+			if ((this.componentNodeList.handles as any[]).length > 1)	{
+				let targetId = 0;
+			} else {
+				let firstHandleLeft = this.componentNodeList.handles[0].getBoundingClientRect().left;
+				let secondHandleLeft = this.componentNodeList.handles[1].getBoundingClientRect().left;
 
-			
-			let firstResult = Math.abs(left - firstHandleLeft);
-			let secondResult = Math.abs(left - secondHandleLeft);
-			
-			let targetId = firstResult < secondResult 
-			? this.componentNodeList.handles[0].dataset.id 
-			: this.componentNodeList.handles[1].dataset.id 
+				
+				let firstResult = Math.abs(left - firstHandleLeft);
+				let secondResult = Math.abs(left - secondHandleLeft);
+				
+				let targetId = firstResult < secondResult 
+				? this.componentNodeList.handles[0].dataset.id 
+				: this.componentNodeList.handles[1].dataset.id 
+			}
+				
 
 			return targetId;
 		}
