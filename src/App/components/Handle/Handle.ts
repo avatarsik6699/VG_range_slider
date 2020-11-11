@@ -1,34 +1,17 @@
+import { param } from "jquery";
 import { Component, State } from "../../../Helpers/Interfaces";
 
-class Handle implements Component {
-  template: string = `<div class="slider__handle"></div>`;
-  
-  constructor(params: State, index?: number) {
-    this.setTemplate(params.type, index);
+abstract class Handle {
+  protected template: string = '';
+  constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
+    this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement): this {
-    let el = this.getRootElement(anchor);
-    el.insertAdjacentHTML('beforeend', this.template);
+  create(anchor: Element | HTMLElement, params: State): this { 
+    this.setTemplate(params);
+    const root = this.getRootElement(anchor);
+    root.insertAdjacentHTML('beforeend', this.template);
     return this;
-  }
-
-  setTemplate(type: string, id: number = 0): void {
-    const className = `slider__handle slider__handle_${type}`;
-    this.template = `<div class="${className}" data-component="handle" data-id=${id}></div>`;
-  }
-
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
-    if (renderParams[id] === undefined) return;
-
-    if (this.getNode(anchor, id)) {
-      let handle = (<HTMLElement>this.getNode(anchor, id));
-      if (renderParams.position === 'horizontal') {
-        handle.style.left = renderParams[id].correctPxValue + 'px';
-      } else {
-        handle.style.top = renderParams[id].correctPxValue + 'px';
-      }
-    }
   }
 
   getNode(anchor: HTMLElement | Element, id: number): Element {
@@ -39,14 +22,33 @@ class Handle implements Component {
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name;
+    return Object.getPrototypeOf(this).constructor.name.slice(1);
   }
 
-  private getRootElement(anchor: Element): Element {
-    const el = anchor.querySelector('.slider');
-    if (!el) throw new Error ('Hanlde was not found');
-    return el;
+  abstract update(anchor: Element | HTMLElement, renderParams: any, id: number): void;
+
+  protected setTemplate(params: State): void {
+    const modifer = `slider__handle slider__handle_position-${params.position}`;
+    this.template = `<div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id}></div>`;
+  }
+
+  getRootElement(anchor: Element | HTMLElement): Element {
+    const root = anchor.querySelector('.slider');
+    if (!root) throw new Error ('Hanlde was not found');
+    return root;
   }
 }
 
-export { Handle }
+class hHandle extends Handle {
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+  }
+
+}
+
+class vHandle extends Handle {
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+
+  }
+}
+
+export { hHandle, vHandle }

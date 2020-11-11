@@ -1,43 +1,41 @@
-import { Bar } from '../components/Bar/Bar';
+import { hBar } from '../components/Bar/Bar';
 import { Component, Factory, State } from '../../Helpers/Interfaces';
-import { Handle } from '../components/Handle/Handle';
-import { Tooltip } from '../components/Tooltip/Tooltip';
-import { Scale } from '../components/Scale/Scale';
+import { hSlider } from '../components/Slider/Slider';
+import { Settings } from '../components/Settings/Settings';
+import { hHandle } from '../components/Handle/Handle';
+import { hScale } from '../components/Scale/Scale';
+import { hTooltip } from '../components/Tooltip/Tooltip';
 
-class HorizontalSlider implements Factory {
-  private componentList: any = [Bar, [Handle], Scale];
+class HorizontalSlider {
+  private componentList: any = [hSlider, hBar, [hHandle], [hTooltip], hScale, Settings];
 
-  createComponents(params: State): {} {
+  createComponents(anchor: HTMLElement | Element, params: State): {} {
     this.setComponentList(params);
     
     let componentInstanceList = {};
     
-    this.componentList.forEach( el => {
-      if (Array.isArray(el)) {
-        componentInstanceList['handles'] = el.map( (subElement, index) => {
-          return new subElement(params, index);
+    this.componentList.forEach( component => {
+      if (Array.isArray(component)) {
+        let name = component[0].prototype.constructor.name.slice(1).toLowerCase() + 's';
+        componentInstanceList[name] = component.map( (subComponent, index) => {
+          return new subComponent(anchor, params, index);
         });
       } else {
-        let name = el.prototype.constructor.name.toLowerCase();
-        componentInstanceList[name] = new el(params);
+        let name = component.prototype.constructor.name === 'Settings'
+        ? component.prototype.constructor.name.toLowerCase()
+        : component.prototype.constructor.name.slice(1).toLowerCase();
+        componentInstanceList[name] = new component(anchor, params);
       }
     });
 
     return componentInstanceList;
   }
 
-  setComponentList( params: State, customCheckList?: string[] ): void {
-    // let checkList: any[] = customCheckList ? customCheckList : [['scale', Scale], ['tooltip', Tooltip]];
-    if (params.type === 'range') this.componentList = [Bar, [Handle, Handle], Scale];
-    if (params.type === 'single') this.componentList = [Bar, [Handle], Scale];
-
-    // let newComponents = checkList.map( el => {
-    //   console.log(params[el[0]])
-    //   if (params[el[0]]) return el[1];
-    // });
-
-    // console.log(newComponents)
-    // this.componentList.concat(newComponents);
+  private setComponentList(params: State): void {
+    if (params.type === 'range') this.componentList = 
+    [hSlider, hBar, [hHandle, hHandle], [hTooltip, hTooltip], hScale, Settings];
+    if (params.type === 'single') this.componentList = 
+    [hSlider, hBar, [hHandle], [hTooltip], hScale, Settings];
   }
 }
 

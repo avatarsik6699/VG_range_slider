@@ -7,31 +7,29 @@ import { Selector } from "./Selector";
 import {sliderTemplate } from './templates/sliderTemplate';
 
 export class App extends Observer {
-	private factory: HorizontalSlider;
-	private sliderTemplate: Template = sliderTemplate;
 	public componentInstanceList: {} = {};
 	public componentNodeList: {[name: string]: HTMLElement | Element | any[]} = {};
 	public appData: { [name: string]: any[] | {[key: string]: number} | number} = {};
   constructor(public anchor: HTMLElement, public params: State, public selector: Selector) 
 		{
 			super();
-			this.factory = selector.getFactory(params)!;
 		}
 
 		init(params: State): void {
-			this.sliderTemplate.render(this.anchor);
-			this.componentInstanceList = this.factory?.createComponents(params);
-			this.componentNodeList['slider'] = this.sliderTemplate.getNode(this.anchor);
-			Object.entries(this.componentInstanceList).forEach( instance => {
-				let instanceName = instance[0];
-				let instanceElement = Array.isArray(instance[1]) 
-				? instance[1].map( (el, index) => el.create(this.anchor).getNode(this.anchor, index))
-				: (<Component>instance[1]).create(this.anchor).getNode(this.anchor)
-				this.componentNodeList[instanceName] = instanceElement;
-			});
+			// сразу создались и добавились в разметку
+			this.componentInstanceList = this.selector.getFactory(params)!.createComponents(this.anchor, params);
+			console.log(this.componentInstanceList);
+			// this.componentNodeList['slider'] = this.sliderTemplate.getNode(this.anchor);
+			// Object.entries(this.componentInstanceList).forEach( instance => {
+			// 	let instanceName = instance[0];
+			// 	let instanceElement = Array.isArray(instance[1]) 
+			// 	? instance[1].map( (el, index) => el.create(this.anchor).getNode(this.anchor, index))
+			// 	: (<Component>instance[1]).create(this.anchor).getNode(this.anchor)
+			// 	this.componentNodeList[instanceName] = instanceElement;
+			// });
 
-			this.setAppData(this.componentNodeList);
-			this.notify('finishInit', this.appData);
+			// this.setAppData(this.componentNodeList);
+			// this.notify('finishInit', this.appData);
 		}
 
 		renderUI(renderData) {
@@ -44,10 +42,6 @@ export class App extends Observer {
 					instance.update(this.anchor, renderData);
 				}
 			});
-		}
-
-		setFactory(params: State): void {
-			this.factory = this.selector.getFactory(params)!;
 		}
 
 		setAppData(componentNodeList: {[name: string]: HTMLElement | Element | any[]} = {} ): any {
@@ -132,7 +126,6 @@ export class App extends Observer {
 				? this.componentNodeList.handles[0].dataset.id 
 				: this.componentNodeList.handles[1].dataset.id 
 			}
-				
 
 			return targetId;
 		}

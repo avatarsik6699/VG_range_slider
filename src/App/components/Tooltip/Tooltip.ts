@@ -1,45 +1,48 @@
 import { Component, State } from "../../../Helpers/Interfaces";
-import { Handle } from "../Handle/Handle";
-
-class Tooltip implements Component {
-  template: string = `<div class="slider__tooltip"></div>`;
-  constructor(params: State) {
-    this.setTemplate(params.type);
+abstract class Tooltip {
+  protected template: string = '';
+  constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
+    this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, renderParams?: any): this {
-    let root = this.getRootElement(anchor);
+  create(anchor: Element | HTMLElement, params: State): this { 
+    this.setTemplate(params);
+    const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
     return this;
   }
 
-  setTemplate(type: string): void {
-    const className = `slider__tooltip slider__tooltip_${type}`;
-    this.template = `<div class=${className} data-component="tooltip"></div>`;
-  }
-
-  getName(): string {
-    return Object.getPrototypeOf(this).constructor.name;
-  }
-
-  getNode(anchor: HTMLElement | Element): Element {
+  getNode(anchor: HTMLElement | Element, id: number): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
-    const node = anchor.querySelector('.slider__tooltip');
-    if (!node) throw new Error(`tooltip wasn't found. Also, for this to work, you must call the 'render' method`);
+    let node = anchor.querySelector(`.slider__tooltip[data-id="${id}"`);
+    if (!node) throw new Error(`tooltip wasn't found`);
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderParams: {tipValue}): void {
-    if (this.getNode(anchor)) {
-      (<HTMLElement>this.getNode(anchor)).textContent = renderParams.tipValue;
-    }
+  getName(): string {
+    return Object.getPrototypeOf(this).constructor.name.slice(1);
   }
 
-  private getRootElement(anchor: Element): Element {
-    const root = anchor.querySelector('.slider__handle');
-    if (!root) throw new Error (`Root 'Handle' was not found`);
+  abstract update(anchor: Element | HTMLElement, renderParams: any, id: number): void;
+
+  protected setTemplate(params: State): void {
+    const modifer = `slider__tooltip slider__tooltip_position-${params.position}`;
+    this.template = `<div class="slider__tooltip ${modifer}" data-component="tooltip" data-id=${this.id}>0</div>`;
+  }
+
+  getRootElement(anchor: Element): Element {
+    const root = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`);
+    if (!root) throw new Error ('Hanlde was not found');
     return root;
   }
 }
 
-export { Tooltip }
+class hTooltip extends Tooltip {
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {}
+}
+
+class vTooltip extends Tooltip {
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {}
+}
+
+export { hTooltip, vTooltip };

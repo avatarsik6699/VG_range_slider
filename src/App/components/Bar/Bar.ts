@@ -1,25 +1,20 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
-class Bar implements Component {
-  template: string = '';
-  static componentName: string = Object.getPrototypeOf(Bar).constructor.name.toLowerCase();
-  constructor(params: State) {
-    this.setTemplate(params.position);
+abstract class Bar {
+  protected template: string = '';
+  constructor(anchor: Element | HTMLElement, params: State) {
+    this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement): this { 
-    let el = this.getRootElement(anchor);
-    el.insertAdjacentHTML('beforeend', this.template);
+  create(anchor: Element | HTMLElement, params: State): this { 
+    this.setTemplate(params);
+    const root = this.getRootElement(anchor);
+    root.insertAdjacentHTML('beforeend', this.template);
     return this;
   }
 
-  setTemplate(position: string): void {
-    const className = `slider__bar slider__bar_${position}`;
-    this.template = `<div class="${className}" data-component="bar"></div>`;
-  }
-
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name;
+    return Object.getPrototypeOf(this).constructor.name.slice(1);
   }
 
   getNode(anchor: HTMLElement | Element): Element {
@@ -29,22 +24,30 @@ class Bar implements Component {
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
-    if (this.getNode(anchor)) {
-      let bar = (<HTMLElement>this.getNode(anchor));
-      // if (renderParams.type === 'range') {
-      //   let correctWidth = renderParams[1].correctPxValue - renderParams[0].correctPxValue;
-      //   bar.style.width = correctWidth + 20 + 'px';
-      //   bar.style.left = renderParams[0].correctPxValue + 'px'
-      // }
-    }
+  abstract update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void
+  
+  protected setTemplate (params: State): void {
+    const modifer = `slider__bar_position-${params.position}`
+    this.template = `<div class="slider__bar ${modifer}" data-component="bar"></div>`;
   }
 
-  private getRootElement(anchor: Element): Element {
-    const el = anchor.querySelector('.slider');
-    if (!el) throw new Error (`Slider wasn't found`);
-    return el;
+  protected getRootElement(anchor: Element): Element {
+    const root = anchor.querySelector('.slider');
+    if (!root) throw new Error (`root 'Slider' wasn't found`);
+    return root;
   }
 }
 
-export { Bar };
+class hBar extends Bar {
+  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
+    console.log(this.getName());
+  }
+}
+
+class vBar extends Bar {
+  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
+    console.log(this.getName());
+  }
+}
+
+export { hBar, vBar };

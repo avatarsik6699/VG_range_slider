@@ -20,7 +20,9 @@ const $slider = $('.anchor').slider({
   value: [1],
   step: 5,
   position: 'horizontal',
-  type: 'single',
-  scale: false,
+  type: 'single', //range, multiply{3}
+  scale: false, //
   tooltip: false,
+  handle: true,
+  bar: true,
 })
