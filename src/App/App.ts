@@ -66,22 +66,23 @@ export class App extends Observer {
 
 		bindEvents(): void {
 			this.anchor?.addEventListener('mousedown', (e: MouseEvent) => {
-				if ((<Element>e.target)?.closest('.slider')) {
+				let target = <Element>e.target;
+				if (target.closest('.slider')) {
 					e.preventDefault();
+					let halfHandle = <number>this.appData.halfHandle;
+					let pxValue = this.params.position === 'horizontal'
+					? e.clientX - this.appData.slider['left'] - halfHandle
+					: e.clientY - this.appData.slider['top'] - halfHandle
+					let id: number | undefined = this.defineCloseHandle(pxValue);
 				
-					const halfHandle = 10;
-					let left = e.clientX - this.appData.slider['left'] - halfHandle;
-					let targetId = 0;
-					if ((this.componentNodeList.handles as Element[]).length > 1) {
-						targetId = this.defineCloseHandle(left);
-						this.notify('touchEvent', {left, targetId, ...this.appData})
-					} else {
-						this.notify('touchEvent', {left, ...this.appData})
-					}
-
+					this.notify('touchEvent', {pxValue, id, ...this.appData})
+			
 					const handleMove = (e: MouseEvent) => {
-						left = e.clientX - this.appData.slider['left'] - halfHandle;
-						this.notify('moveEvent', {left, targetId, ...this.appData})
+						let pxValue = this.params.position === 'horizontal'
+						? e.clientX - this.appData.slider['left'] - halfHandle
+						: e.clientY - this.appData.slider['top'] - halfHandle
+						
+						this.notify('moveEvent', {pxValue, id, ...this.appData})
 					}
 
 					const finishMove = () => {
@@ -109,22 +110,19 @@ export class App extends Observer {
 			});
 		}
 
-		private defineCloseHandle(left: any): any {
-			let targetId;
-			if ((this.componentNodeList.handles as any[]).length > 1)	{
-				let targetId = 0;
-			} else {
-				let firstHandleLeft = this.componentNodeList.handles[0].getBoundingClientRect().left;
-				let secondHandleLeft = this.componentNodeList.handles[1].getBoundingClientRect().left;
+		private defineCloseHandle(pxValue): number | undefined{
+			const handles = <HTMLElement[]>this.componentNodeList.handles;
+			
+			let diffHandlesLeft: number[] = handles.length >= 2
+			? (handles.map( handle => Math.abs(pxValue - handle.getBoundingClientRect().left) ))
+			: [(Math.abs(pxValue - handles[0].getBoundingClientRect().left))]
 
-				
-				let firstResult = Math.abs(left - firstHandleLeft);
-				let secondResult = Math.abs(left - secondHandleLeft);
-				
-				let targetId = firstResult < secondResult 
-				? this.componentNodeList.handles[0].dataset.id 
-				: this.componentNodeList.handles[1].dataset.id 
+			if (diffHandlesLeft.length === 1) {
+				return Number(handles[0].dataset.id);
+			} else {
+				return +diffHandlesLeft[0] < +diffHandlesLeft[1]
+				? Number(handles[0].dataset.id)
+				: Number(handles[1].dataset.id)
 			}
-			return targetId;
 		}
 }
