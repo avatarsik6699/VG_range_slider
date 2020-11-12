@@ -20,7 +20,7 @@ class Settings {
 
   getNode(anchor: HTMLElement | Element): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector('.slider__Settings');
+    let node = anchor.querySelector('.settings');
     if (!node) throw new Error(`Settings wasn't found. Also, for this to work, you must call the 'render' method`);
     return node;
   }

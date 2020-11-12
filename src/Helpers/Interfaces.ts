@@ -9,12 +9,6 @@ interface State {
   tooltip: boolean,
 }
 
-interface Template {
-  template: string;
-  render(anchor: Element): void;
-  getNode(anchor: Element): Element
-}
-
 interface Factory {
   createComponents(params: {type: string, scale: boolean, tooltip: boolean}): {};
 }
@@ -27,4 +21,4 @@ interface Component {
   update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number | string} | any, handleId?: any): void
 }
 
-export { State, Template, Factory, Component };
+export { State, Factory, Component };

@@ -59,5 +59,4 @@ const settingsContent = `
     <span class="settings__name">bar</span>
 </label>
 `
-
 export {settingsContent};

@@ -3,7 +3,7 @@ import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Handle {
   protected template: string = '';
-  constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
+  constructor(anchor: Element | HTMLElement, params: State, public id?: number) {
     this.create(anchor, params);
   }
 
@@ -41,6 +41,12 @@ abstract class Handle {
 
 class hHandle extends Handle {
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
+    if (renderParams.type === 'single') {
+      handle.style.left = renderParams[id].correctPxValue + 'px';
+    } else {
+      console.log('range')
+    }
   }
 
 }

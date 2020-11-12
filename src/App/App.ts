@@ -1,10 +1,6 @@
-import { Expression } from "typescript";
-import { Component, State, Template } from "../Helpers/Interfaces";
+import { Component, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
-import { HorizontalSlider } from "./factories/horizontalSlider";
-// import { VerticalSlider } from "./factories/VerticalSlider";
 import { Selector } from "./Selector";
-import {sliderTemplate } from './templates/sliderTemplate';
 
 export class App extends Observer {
 	public componentInstanceList: {} = {};
@@ -18,25 +14,17 @@ export class App extends Observer {
 		init(params: State): void {
 			// сразу создались и добавились в разметку
 			this.componentInstanceList = this.selector.getFactory(params)!.createComponents(this.anchor, params);
-			console.log(this.componentInstanceList);
-			// this.componentNodeList['slider'] = this.sliderTemplate.getNode(this.anchor);
-			// Object.entries(this.componentInstanceList).forEach( instance => {
-			// 	let instanceName = instance[0];
-			// 	let instanceElement = Array.isArray(instance[1]) 
-			// 	? instance[1].map( (el, index) => el.create(this.anchor).getNode(this.anchor, index))
-			// 	: (<Component>instance[1]).create(this.anchor).getNode(this.anchor)
-			// 	this.componentNodeList[instanceName] = instanceElement;
-			// });
-
-			// this.setAppData(this.componentNodeList);
-			// this.notify('finishInit', this.appData);
+			this.setComponentNodeList();
+			this.setAppData(this.componentNodeList);
+			this.notify('finishInit', this.appData);
 		}
 
 		renderUI(renderData) {
 			Object.values(this.componentInstanceList).forEach( (instance: any) => {
 				if (Array.isArray(instance)) {
-					instance.forEach( (handle, index) => {
-						handle.update(this.anchor, renderData, index);
+					instance.forEach( (subInstance, id) => {
+						console.log(subInstance);
+						subInstance.update(this.anchor, renderData, id);
 					} )
 				} else {
 					instance.update(this.anchor, renderData);
@@ -110,6 +98,17 @@ export class App extends Observer {
 			})
 		}
 
+		private setComponentNodeList(): void {
+			if (!this.componentInstanceList) throw new Error('First you need to get component instances')
+			Object.entries(this.componentInstanceList).forEach( instance => {
+				let instanceName = instance[0];
+				let instanceElement = Array.isArray(instance[1]) 
+				? instance[1].map( (subInstance, id) => subInstance.getNode(this.anchor, id))
+				: (<Component>instance[1]).getNode(this.anchor)
+				this.componentNodeList[instanceName] = instanceElement;
+			});
+		}
+
 		private defineCloseHandle(left: any): any {
 			let targetId;
 			if ((this.componentNodeList.handles as any[]).length > 1)	{
@@ -126,7 +125,6 @@ export class App extends Observer {
 				? this.componentNodeList.handles[0].dataset.id 
 				: this.componentNodeList.handles[1].dataset.id 
 			}
-
 			return targetId;
 		}
 }

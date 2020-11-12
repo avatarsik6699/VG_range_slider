@@ -39,13 +39,19 @@ abstract class Bar {
 }
 
 class hBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
-    console.log(this.getName());
+  update(anchor: Element | HTMLElement, renderParams: any): void {
+    const bar = (<HTMLElement>this.getNode(anchor));
+    if (renderParams.type === 'single') {
+      bar.style.left = 0 + 'px';
+      bar.style.width = renderParams['0'].correctPxValue + 20 + 'px';
+    } else {
+      console.log('range')
+    }
   }
 }
 
 class vBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
+  update(anchor: Element | HTMLElement, renderParams: any): void {
     console.log(this.getName());
   }
 }

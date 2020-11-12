@@ -38,7 +38,16 @@ abstract class Tooltip {
 }
 
 class hTooltip extends Tooltip {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {}
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    const toolTip = (<HTMLElement>this.getNode(anchor, id));
+    const offset = (String(renderParams[id].toolTipValue).split('').length - 1) * 4;
+    if (renderParams.type === 'single') {
+      toolTip.innerHTML = renderParams[id].toolTipValue;
+      toolTip.style.left = -offset + 'px';
+    } else {
+      console.log('range')
+    }
+  }
 }
 
 class vTooltip extends Tooltip {

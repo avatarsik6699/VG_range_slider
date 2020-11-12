@@ -1,7 +1,7 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Scale {
-  flag: boolean = true;
+  isInit: boolean = false;
   protected template: string = '<div class="slider__scale"></div>';
   constructor(anchor: Element | HTMLElement, params: State) {
     this.create(anchor, params);
@@ -15,9 +15,9 @@ abstract class Scale {
   }
 
   
-  getNode(anchor: HTMLElement | Element, id: number): Element {
+  getNode(anchor: HTMLElement | Element): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector(`.slider__scale"`);
+    let node = anchor.querySelector(`.slider__scale`);
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
@@ -41,12 +41,17 @@ abstract class Scale {
 }
 
 class hScale extends Scale {
-  constructor(anchor: Element | HTMLElement, params: State) {
-    super(anchor, params);
-  }
-
   update(anchor: Element | HTMLElement, renderParams: any): void {
-    console.log(this.getName());
+    if (!this.isInit) {
+      const scale = (<HTMLElement>this.getNode(anchor));
+      let content: string = ``;
+      renderParams.steps.forEach( (num, index) => {
+        content += `
+        <div class="slider__scale-item" style="left: ${renderParams.spacing[index]}px">${num}</div>`
+      });
+      scale.insertAdjacentHTML('afterbegin', content);
+      this.isInit = true;
+    }
   }
 }
 
