@@ -24,37 +24,24 @@ export class Core extends Observer {
 
     const distance = <number>staticData.distance;
     const ratio = <number>staticData.ratio;
-    let calculatedPxValue = (<number[]>staticData.handleValue).map( (num, id) => {
+    let calculatedPxValue = (<number[]>staticData.handleValue).map( (num, index) => {
       let correctValue = Math.round(num / ratio / this.state.step) * this.state.step;
       let partOfDistance = correctValue / distance;
       let correctPxValue = partOfDistance * appData.slider['width'];
       let toolTipValue = correctValue + this.state.min;
+      let id = appData.id ? appData.id : index;
       return [id, {correctPxValue, toolTipValue}]
     })
     
-    let renderData = {...scaleValues, ...Object.fromEntries(calculatedPxValue), ...this.state};
+    let renderData = {
+      ...{rangeBetweenHandles: appData.rangeBetweenHandles},
+      ...{id: appData.id},
+      ...{diffBetweenHandles: appData.diffBetweenHandles},
+      ...scaleValues, 
+      ...Object.fromEntries(calculatedPxValue), 
+      ...{type: this.state.type}}
     this.notify('getRenderData', renderData);
   }
-  //   if (this.state.type === 'range' && !appData.targetId) {
-  //     let renderData = value.map( (num, index) => {
-  //       // let handlePxValue = appData.hasOwnProperty('left')
-  //       // ? appData.left[index]
-  //       // : (num / this.state.max) * appData.slider['width']; 
-        
-  //       let correctPxValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
-  //       let tipValue = correctPxValue / ratio + this.state.min;
-  //       return [index, {correctPxValue, tipValue}];
-  //     })
-  //     this.notify('getRenderData', {scaleValues, ...Object.fromEntries(renderData), ...this.state})
-  //   } else {
-  //     let handlePxValue = appData.left;
-  //     let correctValue = Math.round(handlePxValue / ratio / this.state.step) * this.state.step;
-  //     let partOfDistance = correctValue / distance;
-  //     let correctPxValue = partOfDistance * appData.slider['width'];
-  //     let renderData =  {0 : {correctPxValue, correctValue}};
-  //     this.notify('getRenderData', {scaleValues, ...renderData, ...this.state});
-  //   }
-  // }
 
   private getStaticData(appData): {[key: string]: number | number[]} {
     const distance: number = this.state.max - this.state.min; // дистанция

@@ -33,9 +33,9 @@ class HorizontalSlider {
 
   private setComponentList(params: State): void {
     if (params.type === 'range') this.componentList = 
-    [hSlider, hBar, [hHandle, hHandle], [hTooltip, hTooltip], hScale, Settings];
+    [hSlider, [hHandle, hHandle], [hTooltip, hTooltip], hScale, hBar, Settings];
     if (params.type === 'single') this.componentList = 
-    [hSlider, hBar, [hHandle], [hTooltip], hScale, Settings];
+    [hSlider, [hHandle], [hTooltip], hScale, hBar, Settings];
   }
 }
 

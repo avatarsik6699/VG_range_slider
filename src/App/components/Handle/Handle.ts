@@ -42,11 +42,9 @@ abstract class Handle {
 class hHandle extends Handle {
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
-    if (renderParams.type === 'single') {
-      handle.style.left = renderParams[id].correctPxValue + 'px';
-    } else {
-      console.log('range')
-    }
+    if (renderParams[id] === undefined) return;
+    handle.style.left = renderParams[id].correctPxValue + 'px';
+    
   }
 
 }

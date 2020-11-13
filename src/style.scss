@@ -38,6 +38,7 @@
 .slider__handle {
   width: 20px;
   height: 20px;
+  z-index: 1;
   background: #42aafe;
   position: absolute;
   border-radius: 10em;

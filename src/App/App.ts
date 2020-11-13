@@ -23,7 +23,6 @@ export class App extends Observer {
 			Object.values(this.componentInstanceList).forEach( (instance: any) => {
 				if (Array.isArray(instance)) {
 					instance.forEach( (subInstance, id) => {
-						console.log(subInstance);
 						subInstance.update(this.anchor, renderData, id);
 					} )
 				} else {
@@ -74,18 +73,21 @@ export class App extends Observer {
 					? e.clientX - this.appData.slider['left'] - halfHandle
 					: e.clientY - this.appData.slider['top'] - halfHandle
 					let id: number | undefined = this.defineCloseHandle(pxValue);
-				
-					this.notify('touchEvent', {pxValue, id, ...this.appData})
-			
-					const handleMove = (e: MouseEvent) => {
-						let pxValue = this.params.position === 'horizontal'
+					let diffBetweenHandles = this.getDiffBetweenHandles();
+					let rangeBetweenHandles = this.getRangeBetweenHandles();
+					this.notify('touchEvent', {pxValue, diffBetweenHandles, rangeBetweenHandles, id, ...this.appData})
+
+					const handleMove = (e: MouseEvent): void => {
+						diffBetweenHandles = this.getDiffBetweenHandles();
+						rangeBetweenHandles = this.getRangeBetweenHandles();
+						pxValue = this.params.position === 'horizontal'
 						? e.clientX - this.appData.slider['left'] - halfHandle
 						: e.clientY - this.appData.slider['top'] - halfHandle
 						
-						this.notify('moveEvent', {pxValue, id, ...this.appData})
+						this.notify('moveEvent', {pxValue, diffBetweenHandles, rangeBetweenHandles, id, ...this.appData})
 					}
 
-					const finishMove = () => {
+					const finishMove = (): void => {
 						document.removeEventListener('mousemove', handleMove);
 						document.removeEventListener('mouseup', finishMove);
 					}
@@ -111,7 +113,7 @@ export class App extends Observer {
 		}
 
 		private defineCloseHandle(pxValue): number | undefined{
-			const handles = <HTMLElement[]>this.componentNodeList.handles;
+			const handles = (<HTMLElement[]>this.componentNodeList.handles);
 			
 			let diffHandlesLeft: number[] = handles.length >= 2
 			? (handles.map( handle => Math.abs(pxValue - handle.getBoundingClientRect().left) ))
@@ -124,5 +126,24 @@ export class App extends Observer {
 				? Number(handles[0].dataset.id)
 				: Number(handles[1].dataset.id)
 			}
+		}
+
+		private getDiffBetweenHandles(): number[] {
+			let handles = (<HTMLElement[]>this.componentNodeList.handles);
+			let diffBetweenHandles = [
+				handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
+				handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
+			]
+			return diffBetweenHandles;
+		}
+
+		private getRangeBetweenHandles(): number {
+			let handles = (<HTMLElement[]>this.componentNodeList.handles);
+			let diffBetweenHandles = this.getDiffBetweenHandles();
+			let result = diffBetweenHandles[0] <= diffBetweenHandles[1] 
+			? handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().right
+			: handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().right
+			
+			return Math.abs(result - 20);	
 		}
 }

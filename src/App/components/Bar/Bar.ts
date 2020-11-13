@@ -2,6 +2,7 @@ import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Bar {
   protected template: string = '';
+  protected isInit = false;
   constructor(anchor: Element | HTMLElement, params: State) {
     this.create(anchor, params);
   }
@@ -41,12 +42,44 @@ abstract class Bar {
 class hBar extends Bar {
   update(anchor: Element | HTMLElement, renderParams: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
+    let handlesPosition = this.getHandlesPosition(anchor);
+    let firstHandle = renderParams['0']?.correctPxValue;
+    let secondHandle = renderParams['1']?.correctPxValue;
+    
     if (renderParams.type === 'single') {
       bar.style.left = 0 + 'px';
-      bar.style.width = renderParams['0'].correctPxValue + 20 + 'px';
-    } else {
-      console.log('range')
+      bar.style.width = firstHandle + 20 + 'px';
+    } 
+    
+    if(renderParams.type === 'range') {
+      if (!this.isInit) {
+        bar.style.left = firstHandle < secondHandle
+        ? firstHandle + 'px'
+        : secondHandle + 'px' 
+        bar.style.width = Math.abs(secondHandle - firstHandle) + 'px';
+
+        this.isInit = true;
+      } else {
+        let id = renderParams.id;
+        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
+       
+        if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
+          bar.style.left = correctPxValue + 'px';
+          bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
+        } else {
+          bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
+          bar.style.left = correctPxValue - Math.abs(handlesPosition[id]) + 'px';;
+        }
+      }
     }
+  }
+  
+  private getHandlesPosition(anchor): number[] {
+    let handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
+    return [
+      handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
+      handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
+    ]
   }
 }
 

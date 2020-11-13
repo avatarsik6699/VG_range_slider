@@ -47,12 +47,11 @@ abstract class Slider {
 }
 
 class vSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams:  any): void {console.log(this.getName())}
+  update(anchor: Element | HTMLElement, renderParams:  any): void {}
 }
 
 class hSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams: any): void {console.log(this.getName());
-  }
+  update(anchor: Element | HTMLElement, renderParams: any): void {}
 }
 
 export { vSlider, hSlider };
