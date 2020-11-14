@@ -42,7 +42,6 @@ abstract class Bar {
 class hBar extends Bar {
   update(anchor: Element | HTMLElement, renderParams: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
-    let handlesPosition = this.getHandlesPosition(anchor);
     let firstHandle = renderParams['0']?.correctPxValue;
     let secondHandle = renderParams['1']?.correctPxValue;
     
@@ -60,6 +59,7 @@ class hBar extends Bar {
 
         this.isInit = true;
       } else {
+        let handlesPosition = this.getHandlesPosition(anchor);
         let id = renderParams.id;
         let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
        

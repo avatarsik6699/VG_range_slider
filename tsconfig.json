@@ -11,7 +11,6 @@
     // "alwaysStrict": true, // for the testing
     // "noUnusedLocals": true, // for the testing
     // "noUnusedParameters": true, // for the testing
-    
     "esModuleInterop": true,
   },
   "exclude": ["node_modules", "webpack.config.js"]

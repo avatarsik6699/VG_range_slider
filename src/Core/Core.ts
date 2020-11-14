@@ -1,4 +1,3 @@
-import { emit } from "process";
 import { Observer } from "../Helpers/Observer";
 import { defaultCoreState } from "./defaultCoreState";
 
@@ -34,9 +33,7 @@ export class Core extends Observer {
     })
     
     let renderData = {
-      ...{rangeBetweenHandles: appData.rangeBetweenHandles},
       ...{id: appData.id},
-      ...{diffBetweenHandles: appData.diffBetweenHandles},
       ...scaleValues, 
       ...Object.fromEntries(calculatedPxValue), 
       ...{type: this.state.type}}
@@ -74,16 +71,19 @@ export class Core extends Observer {
   }
 
   private getScaleValues(appData): {spacing: number[], steps: number[]} {
+
+
     const min = this.state.min;
     const max = this.state.max;
     const step = this.state.step;
     const ratio = appData.slider['width'] / max;
-    const spacing: number[] = [];
-    const steps: number[] = [];
-    for (let i = min; i <= max; i += Math.round(0.2 * max / step) * step) {
-      steps.push(i);
-      spacing.push(Math.round(i * ratio));
-    }
+    const distance = max - min;
+
+    let pieces = distance / step;
+    const result = new Set([min, max])
+    console.log(pieces)
+    let steps = [];
+    let spacing = [];
     return {steps, spacing};
   }
 }

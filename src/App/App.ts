@@ -73,18 +73,14 @@ export class App extends Observer {
 					? e.clientX - this.appData.slider['left'] - halfHandle
 					: e.clientY - this.appData.slider['top'] - halfHandle
 					let id: number | undefined = this.defineCloseHandle(pxValue);
-					let diffBetweenHandles = this.getDiffBetweenHandles();
-					let rangeBetweenHandles = this.getRangeBetweenHandles();
-					this.notify('touchEvent', {pxValue, diffBetweenHandles, rangeBetweenHandles, id, ...this.appData})
+					this.notify('touchEvent', {pxValue, id, ...this.appData})
 
 					const handleMove = (e: MouseEvent): void => {
-						diffBetweenHandles = this.getDiffBetweenHandles();
-						rangeBetweenHandles = this.getRangeBetweenHandles();
 						pxValue = this.params.position === 'horizontal'
 						? e.clientX - this.appData.slider['left'] - halfHandle
 						: e.clientY - this.appData.slider['top'] - halfHandle
 						
-						this.notify('moveEvent', {pxValue, diffBetweenHandles, rangeBetweenHandles, id, ...this.appData})
+						this.notify('moveEvent', {pxValue, id, ...this.appData})
 					}
 
 					const finishMove = (): void => {
@@ -126,24 +122,5 @@ export class App extends Observer {
 				? Number(handles[0].dataset.id)
 				: Number(handles[1].dataset.id)
 			}
-		}
-
-		private getDiffBetweenHandles(): number[] {
-			let handles = (<HTMLElement[]>this.componentNodeList.handles);
-			let diffBetweenHandles = [
-				handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
-				handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
-			]
-			return diffBetweenHandles;
-		}
-
-		private getRangeBetweenHandles(): number {
-			let handles = (<HTMLElement[]>this.componentNodeList.handles);
-			let diffBetweenHandles = this.getDiffBetweenHandles();
-			let result = diffBetweenHandles[0] <= diffBetweenHandles[1] 
-			? handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().right
-			: handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().right
-			
-			return Math.abs(result - 20);	
 		}
 }

@@ -15,12 +15,12 @@ declare global {
 })(jQuery)
 
 const $slider = $('.anchor').slider({
-	max: 300,
-	min: 0,
-  value: [0, 10],
-  step: 1,
+	max: 9000,
+	min: 100,
+  value: [10],
+  step: 50,
   position: 'horizontal',
-  type: 'range', //range, multiply{3}
+  type: 'single', //range, multiply{3}
   scale: false,
   tooltip: false,
   handle: true,
