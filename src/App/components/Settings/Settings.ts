@@ -31,7 +31,7 @@ class Settings {
   
   setTemplate (params: State): void {
     let content = settingsContent;
-    this.template = `<form class="settings" data-component="settings">${content}</form>`;
+    this.template = `<form class="settings" name="settings" data-component="settings">${content}</form>`;
   }
 
   getRootElement(anchor: Element): Element {

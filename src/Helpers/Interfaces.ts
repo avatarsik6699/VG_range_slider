@@ -1,12 +1,14 @@
 interface State {
   min: number,
   max: number,
-  value: number,
+  value: number[],
   step: number,
   position: string,
   type: string,
   scale: boolean,
   tooltip: boolean,
+  bar: boolean,
+  handle: boolean,
 }
 
 interface Factory {
@@ -21,4 +23,9 @@ interface Component {
   update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number | string} | any, handleId?: any): void
 }
 
-export { State, Factory, Component };
+type MinMax = {
+  max: State['max'];
+  min: State['min'];
+}
+
+export { State, Factory, Component, MinMax };

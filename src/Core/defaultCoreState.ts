@@ -1,10 +1,14 @@
-export const defaultCoreState = {
-  min: 0,
-  max: 500,
-  value: 50,
-  step: 1,
+import { State } from "../Helpers/Interfaces";
+
+export const defaultCoreState: State = {
+	max: 500,
+	min: 10,
+  value: [50],
+  step: 5,
   position: 'horizontal',
   type: 'single',
-  scale: false,
-  tooltip: false,
+  scale: true,
+  tooltip: true,
+  handle: true,
+  bar: true,
 }

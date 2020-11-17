@@ -8,8 +8,8 @@ const settingsContent = `
     <span class="settings__name">min</span>
 </label>
 <label class="settings__item">
-    <input name="value" type="number" value="1" class="settings__value"/>
-    <span class="settings__name">value</span>
+    <input name="values" type="number" value="1" class="settings__values"/>
+    <span class="settings__name">values</span>
 </label>
 <label class="settings__item">
     <input name="step" type="number" value="1" class="settings__value"/>

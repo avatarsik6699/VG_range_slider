@@ -44,14 +44,15 @@ class hHandle extends Handle {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
     if (renderParams[id] === undefined) return;
     handle.style.left = renderParams[id].correctPxValue + 'px';
-    
   }
 
 }
 
 class vHandle extends Handle {
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
-
+    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
+    if (renderParams[id] === undefined) return;
+    handle.style.top = renderParams[id].correctPxValue + 'px';
   }
 }
 

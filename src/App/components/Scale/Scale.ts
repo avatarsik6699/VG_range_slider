@@ -45,9 +45,9 @@ class hScale extends Scale {
     if (!this.isInit) {
       const scale = (<HTMLElement>this.getNode(anchor));
       let content: string = ``;
-      renderParams.steps.forEach( (num, index) => {
+      renderParams.result.forEach( (values) => {
         content += `
-        <div class="slider__scale-item" style="left: ${renderParams.spacing[index]}px">${num}</div>`
+        <div class="slider__scale-item" style="left: ${values.pxValue}px">${values.value}</div>`
       });
       scale.insertAdjacentHTML('afterbegin', content);
       this.isInit = true;
@@ -56,12 +56,17 @@ class hScale extends Scale {
 }
 
 class vScale extends Scale {
-  constructor(anchor: Element | HTMLElement, params: State) {
-    super(anchor, params);
-  }
-
   update(anchor: Element | HTMLElement, renderParams: any): void {
-    console.log(this.getName());
+    if (!this.isInit) {
+      const scale = (<HTMLElement>this.getNode(anchor));
+      let content: string = ``;
+      renderParams.result.forEach( (values) => {
+        content += `
+        <div class="slider__scale-item" style="top: ${values.pxValue}px">${values.value}</div>`
+      });
+      scale.insertAdjacentHTML('afterbegin', content);
+      this.isInit = true;
+    }
   }
 }
 

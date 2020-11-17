@@ -37,6 +37,22 @@ abstract class Bar {
     if (!root) throw new Error (`root 'Slider' wasn't found`);
     return root;
   }
+
+  protected getHandlesPosition(anchor, position): number[] {
+    let handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
+    if (position === 'horizontal') {
+        return [
+        handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
+        handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
+      ]
+    } else {
+      return [
+          Math.round(handles[0].getBoundingClientRect().top - handles[1].getBoundingClientRect().top),
+        Math.round(handles[1].getBoundingClientRect().top - handles[0].getBoundingClientRect().top)
+      ]
+    }
+    
+  }
 }
 
 class hBar extends Bar {
@@ -59,7 +75,7 @@ class hBar extends Bar {
 
         this.isInit = true;
       } else {
-        let handlesPosition = this.getHandlesPosition(anchor);
+        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
         let id = renderParams.id;
         let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
        
@@ -73,19 +89,42 @@ class hBar extends Bar {
       }
     }
   }
-  
-  private getHandlesPosition(anchor): number[] {
-    let handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
-    return [
-      handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
-      handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
-    ]
-  }
 }
 
 class vBar extends Bar {
   update(anchor: Element | HTMLElement, renderParams: any): void {
-    console.log(this.getName());
+    const bar = (<HTMLElement>this.getNode(anchor));
+    let firstHandle = renderParams['0']?.correctPxValue;
+    let secondHandle = renderParams['1']?.correctPxValue;
+    
+    if (renderParams.type === 'single') {
+      bar.style.top = 0 + 'px';
+      bar.style.height = firstHandle + 20 + 'px';
+    } 
+    
+    if(renderParams.type === 'range') {
+      if (!this.isInit) {
+        bar.style.top = firstHandle < secondHandle
+        ? firstHandle + 'px'
+        : secondHandle + 'px' 
+        bar.style.height = Math.abs(secondHandle - firstHandle) + 'px';
+
+        this.isInit = true;
+      } else {
+        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
+        console.log(handlesPosition)
+        let id = renderParams.id;
+        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
+       
+        if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
+          bar.style.top = correctPxValue + 'px';
+          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
+        } else {
+          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
+          // bar.style.top = correctPxValue - Math.abs(handlesPosition[id]) + 'px';
+        }
+      }
+    }
   }
 }
 

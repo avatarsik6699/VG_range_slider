@@ -41,15 +41,19 @@ class hTooltip extends Tooltip {
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
     if (renderParams[id] === undefined) return;
     const toolTip = (<HTMLElement>this.getNode(anchor, id));
-    const offset = (String(renderParams[id].toolTipValue).split('').length - 1) * 4;
+    const offset = (String(renderParams[id].value).split('').length - 1) * 4;
   
-    toolTip.innerHTML = renderParams[id].toolTipValue;
+    toolTip.innerHTML = renderParams[id].value;
     toolTip.style.left = -offset + 'px';
   }
 }
 
 class vTooltip extends Tooltip {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {}
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    if (renderParams[id] === undefined) return;
+    const toolTip = (<HTMLElement>this.getNode(anchor, id));
+    toolTip.innerHTML = renderParams[id].value;
+  }
 }
 
 export { hTooltip, vTooltip };

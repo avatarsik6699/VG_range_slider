@@ -7,7 +7,8 @@
     "strict": true,
     "removeComments": true,
     "downlevelIteration": true,
-    "noImplicitAny": false, // for the testing
+    "noImplicitAny": false, // for the testin
+    "noImplicitThis": false,
     // "alwaysStrict": true, // for the testing
     // "noUnusedLocals": true, // for the testing
     // "noUnusedParameters": true, // for the testing
