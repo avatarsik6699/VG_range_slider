@@ -12,28 +12,15 @@ export class Controller {
     this.bindEvents();
     this.app.init(this.core.getState());
     this.app.bindEvents();
-    
   }
 
   bindEvents() {
-    this.app.subscribe('finishInit', (appData) => {
-      this.core.getRenderData(appData);
-    })
-    
-    this.app.subscribe('touchEvent', (appData) => {
-      this.core.getRenderData(appData);
-    })
+    this.app.subscribe('finishInit', (appData) => this.core.getRenderData(appData));
+    this.app.subscribe('touchEvent', (appData) => this.core.getRenderData(appData));
+    this.app.subscribe('settingsEvent', (settings: State) => this.core.setState(settings));
+    this.app.subscribe('moveEvent', (appData) => this.core.getRenderData(appData));
 
-    this.app.subscribe('settingsEvent', (settings: State) => this.core.setState(settings))
-
-    this.core.subscribe('getRenderData', (renderData) => {
-      this.app.renderUI(renderData);
-    })
-
-    this.core.subscribe('updateState', (state: State) => this.app.init(state))
-
-    this.app.subscribe('moveEvent', (appData) => {
-      this.core.getRenderData(appData);
-    })    
+    this.core.subscribe('getRenderData', (renderData) => this.app.renderUI(renderData));
+    this.core.subscribe('updateState', (state: State) => this.app.init(state));
   }
 }

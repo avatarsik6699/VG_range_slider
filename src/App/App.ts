@@ -141,6 +141,11 @@ export class App extends Observer {
 		private setAppData(state: State ): any {
 			const props = ['left', 'right', 'width', 'height', 'top', 'bottom'];
 			const specialProps = [
+				['handleSize', () => {
+					return state.position === 'vertical'
+					? (<HTMLElement>this.componentNodeList.handles[0]).clientHeight
+					: (<HTMLElement>this.componentNodeList.handles[0]).clientWidth
+				}],
 				['limit', () => {
 					return state.position === 'vertical'
 					? (<HTMLElement>this.componentNodeList.slider).clientHeight
