@@ -2,7 +2,6 @@
 :root {
   font: normal normal .875em/1.2 Arial, Helvetica, sans-serif;
   box-sizing: border-box;
-  // background: #E5E5E5;
 }
 
 *,
@@ -11,31 +10,127 @@
   box-sizing: inherit;
 }
 
-.slider {
-  max-width: 200px;
-  background-color: red;
-  border-radius: 10em;
-  height: 10px;
-  margin-left: 50px;
-  position: relative;
+.anchor {
+  max-width: 500px;
+  margin: 10px 0px 0px 10px;
+}
 
-  &__bar {
-    position: absolute;
-    width: 99%;
-    height: 79%;
-    background: wheat;
-    top: 1px;
-    left: 1px;
-    border-radius: 10em;
+.slider {
+  max-width: 500px;
+  height: 10px;
+  background: #b0ecfa;
+  margin: 0;
+  position: relative;
+  border-radius: 10em;
+  cursor: pointer;
+
+  &_position-horizontal {
+    max-width: 300px;
+    height: 10px;
   }
 
-  &__handler {
-    position: absolute;
-    width: 8px;
-    height: 79%;
-    background: black;
-    top: 1px;
-    left: 1px;
-    border-radius: 10em;
+  &_position-vertical {
+    max-width: 10px;
+    height: 300px;
+  }
+}
+
+.slider__handle {
+  width: 20px;
+  height: 20px;
+  z-index: 1;
+  background: #42aafe;
+  position: absolute;
+  border-radius: 10em;
+  bottom: -6px;
+  left: 0;
+  cursor: pointer;
+
+  &:hover {
+    background: #77bdf7;
+  }
+
+  &_position-horizontal {
+    bottom: -6px;
+    left: 0;
+  }
+
+  &_position-vertical {
+    bottom: 0;
+    left: -5px;
+    top: 0;
+  }
+}
+
+.slider__bar {
+  background: #68d5ff;
+  border-radius: 10em;
+  position: absolute;
+  cursor: pointer;
+
+  &_position-horizontal {
+    height: 10px;
+    width: 0px;
+  }
+
+  &_position-vertical {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.slider__tooltip {
+  position: relative;
+  display: inline-block;
+  font: normal normal 16px/1.2 Helvetica;
+  padding: 2px 5px;
+  background: #42aafe;
+  border-radius: 0.2em;
+  color: white;
+  white-space: nowrap;
+  
+  &_position-horizontal {
+    top: -29px;
+    left: 0px;
+  }
+
+  &_position-vertical {
+    top: 0;
+    left: 29px;
+  }
+}
+
+.slider__scale {
+  position: relative;
+  top: 21px;
+  display: flex;
+  &_position-vertical {
+    top: 0;
+    left: 21px;
+  }
+}
+
+
+.slider__scale-item {
+  position: absolute;
+}
+
+.settings {
+  display: flex;
+  flex-flow: column;
+  margin-top: 35px;
+  max-width: 140px;
+  
+  &__item {
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+
+  &__name {
+    font-family: cursive;
+  }
+
+  &__value {
+    max-width: 84px;
   }
 }

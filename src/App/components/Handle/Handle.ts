@@ -1,7 +1,9 @@
+import { param } from "jquery";
 import { Component, State } from "../../../Helpers/Interfaces";
-abstract class Tooltip {
+
+abstract class Handle {
   protected template: string = '';
-  constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
+  constructor(anchor: Element | HTMLElement, params: State, public id?: number) {
     this.create(anchor, params);
   }
 
@@ -14,8 +16,8 @@ abstract class Tooltip {
 
   getNode(anchor: HTMLElement | Element, id: number): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector(`.slider__tooltip[data-id="${id}"`);
-    if (!node) throw new Error(`tooltip wasn't found`);
+    let node = anchor.querySelector(`.slider__handle[data-id="${id}"`);
+    if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
 
@@ -26,34 +28,32 @@ abstract class Tooltip {
   abstract update(anchor: Element | HTMLElement, renderParams: any, id: number): void;
 
   protected setTemplate(params: State): void {
-    const modifer = `slider__tooltip slider__tooltip_position-${params.position}`;
-    this.template = `<div class="slider__tooltip ${modifer}" data-component="tooltip" data-id=${this.id}>0</div>`;
+    const modifer = `slider__handle slider__handle_position-${params.position}`;
+    this.template = `<div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id}></div>`;
   }
 
-  getRootElement(anchor: Element): Element {
-    const root = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`);
+  getRootElement(anchor: Element | HTMLElement): Element {
+    const root = anchor.querySelector('.slider');
     if (!root) throw new Error ('Hanlde was not found');
     return root;
   }
 }
 
-class hTooltip extends Tooltip {
+class hHandle extends Handle {
   update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
     if (renderParams[id] === undefined) return;
-    const toolTip = (<HTMLElement>this.getNode(anchor, id));
-    const offset = (String(renderParams[id].value).split('').length - 1) * 4;
-  
-    toolTip.innerHTML = renderParams[id].value;
-    toolTip.style.left = -offset + 'px';
+    handle.style.left = renderParams[id].correctPxValue + 'px';
+  }
+
+}
+
+class vHandle extends Handle {
+  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
+    if (renderParams[id] === undefined) return;
+    handle.style.top = renderParams[id].correctPxValue + 'px';
   }
 }
 
-class vTooltip extends Tooltip {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
-    if (renderParams[id] === undefined) return;
-    const toolTip = (<HTMLElement>this.getNode(anchor, id));
-    toolTip.innerHTML = renderParams[id].value;
-  }
-}
-
-export { hTooltip, vTooltip };
+export { hHandle, vHandle }

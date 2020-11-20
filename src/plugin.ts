@@ -1,26 +1,62 @@
 import { Controller } from "./Controller/Controller";
+import { defaultCoreState } from "./Core/defaultCoreState";
+import { State } from "./Helpers/Interfaces";
 declare global {
     interface JQuery {
-    slider(options: object): JQuery;
+    slider(settings?: string | State): JQuery;
   }
-} 
+}
 
-(function($){
-  $.fn.slider = function(setting) {
-    const options = $.extend({}, setting)
-    const anchor: HTMLElement = this[0];
-    const controller = new Controller(anchor, options);
-    return this;
+(function($) {
+  const methods = {
+    init(settings)  {
+      let anchor: HTMLElement = this[0];
+      this.data('slider', new Controller(anchor))
+      this.data('slider').core.setState(settings);
+    },
+    hide() {
+      const slider = this.data('slider');
+      if (!slider) throw new Error('Слайдер не инициализирован');
+      slider.app.hide();
+    },
+    show() {
+      const slider = this.data('slider');
+      if (!slider) throw new Error('Слайдер не инициализирован');
+      slider.app.show();
+    },
+    destroy() {
+      const slider = this.data('slider');
+      if (!slider) throw new Error('Слайдер не инициализирован');
+      slider.app.destroy();
+    },
+    reset() {
+      this.data('slider').core.setState(defaultCoreState);
+    }
+  }
+  
+  $.fn.slider = function(settings = defaultCoreState) {
+    if (methods[<string>settings]) {
+      return methods[<string>settings].call(this)
+    } else if (typeof settings === 'object') {
+      return methods.init.call(this, settings);
+    } else {
+      throw new Error(`Метод ${settings} отсутствует у плагина slider`)
+    }
   }
 })(jQuery)
 
-const $slider = $('.anchor').slider({
-  min: 25,
-  max: 100,
-  value: 50,
-  step: 2,
+let settings = {
+	max: 100,
+	min: 10,
+  value: [11],
+  step: 3,
   position: 'horizontal',
   type: 'single',
   scale: false,
   tooltip: false,
-})
+  handle: true,
+  bar: true,
+}
+
+const $slider = $('.anchor').slider(settings)
+

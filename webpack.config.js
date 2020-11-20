@@ -144,10 +144,12 @@ module.exports = {
   ],
   devtool: isProd ? false : 'eval-cheap-module-source-map',
   devServer: {
-    contentBase: './dist',
+    historyApiFallback: true,
+    contentBase: path.resolve(__dirname, './dist'),
     compress: true,
     hot: isDev,
-    port: 8000,
+    port: 8080,
+    open: true,
   },
   resolve: {
     extensions: ['.ts', '.js'],
