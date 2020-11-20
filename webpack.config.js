@@ -149,6 +149,7 @@ module.exports = {
     compress: true,
     hot: isDev,
     port: 8080,
+    open: true,
   },
   resolve: {
     extensions: ['.ts', '.js'],
