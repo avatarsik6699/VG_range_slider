@@ -1,7 +1,7 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Scale {
-  isInit: boolean = false;
+  protected isInit: boolean = false;
   protected template: string = '<div class="slider__scale"></div>';
   constructor(anchor: Element | HTMLElement, params: State) {
     this.create(anchor, params);
@@ -15,7 +15,7 @@ abstract class Scale {
   }
 
   
-  getNode(anchor: HTMLElement | Element): Element {
+  getNode(anchor: HTMLElement | Element): Element | HTMLElement {
     if (!anchor) throw new Error(`didn't get anchor`);
     let node = anchor.querySelector(`.slider__scale`);
     if (!node) throw new Error(`handle wasn't found`);
@@ -26,7 +26,7 @@ abstract class Scale {
     return Object.getPrototypeOf(this).constructor.name.slice(1);
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: any): void;
+  abstract update(anchor: Element | HTMLElement, renderData: any): void;
 
   protected setTemplate(params: State): void {
     const modifer = `slider__scale slider__scale_position-${params.position}`;
@@ -41,14 +41,16 @@ abstract class Scale {
 }
 
 class hScale extends Scale {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
-      const scale = (<HTMLElement>this.getNode(anchor));
+      const scale = this.getNode(anchor);
       let content: string = ``;
-      renderParams.result.forEach( (values) => {
+      
+      renderData.scaleValues.forEach( (values) => {
         content += `
         <div class="slider__scale-item" style="left: ${values.pxValue}px">${values.value}</div>`
-      });
+      })
+
       scale.insertAdjacentHTML('afterbegin', content);
       this.isInit = true;
     }
@@ -56,14 +58,16 @@ class hScale extends Scale {
 }
 
 class vScale extends Scale {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
-      const scale = (<HTMLElement>this.getNode(anchor));
+      const scale = this.getNode(anchor);
       let content: string = ``;
-      renderParams.result.forEach( (values) => {
+      
+      renderData.scaleValues.forEach( (values) => {
         content += `
         <div class="slider__scale-item" style="top: ${values.pxValue}px">${values.value}</div>`
       });
+      
       scale.insertAdjacentHTML('afterbegin', content);
       this.isInit = true;
     }

@@ -1,5 +1,5 @@
 import { State } from "../../../Helpers/Interfaces";
-import { settingsContent } from "../../templates/settingsTemplate";
+import { getSettingsContent } from "../../templates/settingsTemplate";
 
 class Settings {
   private template: string = '';
@@ -11,6 +11,7 @@ class Settings {
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
+    this._updateVisualFields(anchor, params);
     return this;
   }
 
@@ -25,12 +26,17 @@ class Settings {
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void {
-
+  update(anchor: Element | HTMLElement, renderParams: any): void {
+    const inputValue: HTMLInputElement | null = this.getRootElement(anchor).querySelector('.settings input[name="value"]');
+    if (!inputValue) throw new Error('input не найден');
+    
+    inputValue.value = !renderParams[0] 
+    ? renderParams[1].value
+    : renderParams[0].value
   }
   
-  setTemplate (params: State): void {
-    let content = settingsContent;
+  setTemplate (options: State | {} = {}): void {
+    let content = getSettingsContent(options);
     this.template = `<form class="settings" name="settings" data-component="settings">${content}</form>`;
   }
 
@@ -39,6 +45,20 @@ class Settings {
     if (!root) throw new Error (`root 'Slider' wasn't found`);
     return root;
   }
+
+  private _updateVisualFields(anchor: Element | HTMLElement, params: State) {
+    const visualFields = this.getRootElement(anchor).querySelectorAll('.settings select');
+    
+    Array.from(visualFields).forEach( field => {
+      let fieldName = (<HTMLSelectElement>field).name;
+      let options = (<HTMLSelectElement>field).options
+      Array.from(options).forEach( option => {
+        if (params[fieldName] === option.text) {
+          option.selected = true;
+        }
+      });
+    })
+  } 
 }
 
 export { Settings };

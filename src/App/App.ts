@@ -1,3 +1,4 @@
+import { InputType } from "zlib";
 import { Component, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { Selector } from "./Selector";
@@ -6,17 +7,20 @@ export class App extends Observer {
 	public componentInstanceList: {} = {};
 	public componentNodeList: {[name: string]: HTMLElement | Element | any[]} = {};
 	public appData: { [name: string]: any[] | {[key: string]: number} | number} = {};
-  constructor(public anchor: HTMLElement, private state: State, public selector: Selector) 
+  constructor(private anchor: HTMLElement, private params: State, private selector: Selector) 
 		{
 			super();
 		}
 
-		init(state: State): void {
-			// this.state = state;
-			if (!this.isEmpty()) {this.destroy()};
-			this.componentInstanceList = this.selector.getFactory(state)!.createComponents(this.anchor, state);
+		init(params: State): void {
+			this.params = params;
+			if (!this.isEmpty()) {
+				this.destroy();
+			}
+
+			this.componentInstanceList = this.selector.getFactory(params)!.createComponents(this.anchor, params);
 			this.setComponentNodeList();
-			this.setAppData(state);
+			this.setAppData(params);
 			this.notify('finishInit', this.appData);
 		}
 
@@ -33,62 +37,11 @@ export class App extends Observer {
 		}
 
 		bindEvents(): void {
-			this.anchor?.addEventListener('mousedown', (e: MouseEvent): void => {
-				let target = <Element>e.target;
-				if (target.closest('.slider')) {
-					e.preventDefault();
-					const halfHandle = this.appData.handles['width'][0] / 2;
-					let pxValue = this.state.position === 'horizontal'
-					? e.clientX - this.appData.slider['left'] - halfHandle
-					: e.clientY - this.appData.slider['top'] - halfHandle
-					let id: number | undefined = this.defineCloseHandle(pxValue);
-					this.notify('touchEvent', {pxValue, id, ...this.appData})
-
-					const handleMove = (e: MouseEvent): void => {
-						pxValue = this.state.position === 'horizontal'
-						? e.clientX - this.appData.slider['left'] - halfHandle
-						: e.clientY - this.appData.slider['top'] - halfHandle
-						
-						this.notify('moveEvent', {pxValue, id, ...this.appData})
-					}
-
-					const finishMove = (): void => {
-						document.removeEventListener('mousemove', handleMove);
-						document.removeEventListener('mouseup', finishMove);
-					}
-					
-					document.addEventListener('mousemove', handleMove);
-					document.addEventListener('mouseup', finishMove);
-					(this.componentNodeList.handles as HTMLElement[]).forEach( handle => {
-						handle.ondragstart = () => false;
-					});
-				} else if (target.closest('.settings')) {
-					let settings = (document.forms.namedItem('settings'));
-					let labels = Array.from(settings?.elements!)
-					let state = {};
-					let getState = (e: Event) => {
-						e.preventDefault();
-						for (let i = 0; i < settings?.elements.length!; i++) {
-							if (settings?.elements[i].localName === 'input') {
-								let value = (<HTMLInputElement>settings?.elements[i]).value
-								let name = (<HTMLInputElement>settings?.elements[i]).name
-								state[name] = Number(value);
-							}
-
-							if (settings?.elements[i].localName === 'select') {
-								let value = (<HTMLInputElement>settings?.elements[i]).value;
-								let name = (<HTMLInputElement>settings?.elements[i]).name;
-								state[name] = value;
-							}
-						}
-						this.notify('settingsEvent', state);
-						target.removeEventListener('blur', getState);
-					}
-
-					if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
-						target.addEventListener('blur', getState);
-					}
-				}
+			this.anchor.addEventListener('mousedown', (e: MouseEvent): void => {
+				let target = <HTMLElement>e.target;
+				let eventName = this._makeEventName(target);
+				if (!eventName) return;
+				this[eventName](e);
 			})
 		}
 
@@ -106,6 +59,87 @@ export class App extends Observer {
 			});
 		}
 
+		private _settingsEvent(e) {
+			let target = e.target;
+			let settings = (document.forms.namedItem('settings'));
+			if (!settings) throw new Error('Settings not found');
+			const params = {};
+			let getSettings = (e: Event) => {
+				e.preventDefault();
+				Array.from(settings?.elements!).forEach( el => {
+					let value: unknown  = (<HTMLInputElement | HTMLSelectElement>el).value
+					let name: string = (<HTMLInputElement | HTMLSelectElement>el).name
+					params[name] = isNaN(<number>value)
+					? value
+					: Number(value)
+				}) 
+
+				this.notify('settingsEvent', params);
+				target.removeEventListener('blur', getSettings);
+			}
+
+			if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
+				target.addEventListener('blur', getSettings);
+			}
+		}
+
+		private _sliderEvent(e) {
+			// добавить событие со шкалй
+			e.preventDefault();
+			let pxValue = this._getPxValue(e);
+			let id: number | undefined = this.defineCloseHandle(pxValue);
+			this.notify('touchEvent', {pxValue, id, ...this.appData})
+			this.setAppData(this.params);
+
+			const handleMove = (e: MouseEvent): void => {
+				pxValue = this._getPxValue(e);
+				this.notify('moveEvent', {pxValue, id, ...this.appData})
+			}
+
+			const finishMove = (): void => {
+				document.removeEventListener('mousemove', handleMove);
+				document.removeEventListener('mouseup', finishMove);
+			}
+			
+			document.addEventListener('mousemove', handleMove);
+			document.addEventListener('mouseup', finishMove);
+			(this.componentNodeList.handles as HTMLElement[]).forEach( handle => {
+				handle.ondragstart = () => false;
+			});
+		}
+
+		private _scaleEvent(e) {
+
+		}
+
+		private _getPxValue(e: MouseEvent) {
+			const halfHandle = (<number>this.appData.handleSize) / 2;
+			// let top = this.anchor?.querySelector('.slider')!.getBoundingClientRect().top;
+			// let left = this.anchor?.querySelector('.slider')!.getBoundingClientRect().left;
+			let top = this.appData.slider['top']
+			let left = this.appData.slider['left']
+			return this.params.position === 'horizontal'
+			? e.clientX - left - halfHandle	
+			: e.clientY - top - halfHandle
+		}
+
+		private _makeEventName(target: HTMLElement | Element| undefined): string {
+			if (!target) throw new Error("Не передан target");
+			const eventList = ['slider', 'settings'];
+			let eventName: string = '';
+			eventList.forEach( (name) => {
+				if (target.closest(`[data-component="${name}"]`)) {
+					eventName = name;
+				}
+			});
+
+			if (!eventName) {
+				return eventName;
+			} else {
+				return `_${eventName}Event`;
+			}
+		}
+
 		private setComponentNodeList(): void {
 			if (!this.componentInstanceList) throw new Error('First you need to get component instances')
 			Object.entries(this.componentInstanceList).forEach( instance => {
@@ -118,36 +152,36 @@ export class App extends Observer {
 		}
 
 		private defineCloseHandle(pxValue): number | undefined{
+			
 			const handles = (<HTMLElement[]>this.componentNodeList.handles);
-			let diffHandlesLeft: number[] = [];
-			if (this.state.position === 'horizontal') {
-				diffHandlesLeft = handles.length >= 2
-				? (handles.map( handle => Math.abs(pxValue - handle.getBoundingClientRect().left) ))
-				: [(Math.abs(pxValue - handles[0].getBoundingClientRect().left))]
-			} else {
-				diffHandlesLeft = handles.length >= 2
-				? (handles.map( handle => Math.abs(pxValue - handle.getBoundingClientRect().top) ))
-				: [(Math.abs(pxValue - handles[0].getBoundingClientRect().top))]
-			}
+			
+			let diffHandlesLeft: number[] = this._getDiffHandlesLeft(handles, pxValue);
 			if (diffHandlesLeft.length === 1) {
 				return Number(handles[0].dataset.id);
 			} else {
-				return +diffHandlesLeft[0] < +diffHandlesLeft[1]
+				return diffHandlesLeft[0] < diffHandlesLeft[1]
 				? Number(handles[0].dataset.id)
 				: Number(handles[1].dataset.id)
 			}
 		}
 
-		private setAppData(state: State ): any {
+		private _getDiffHandlesLeft(handles, pxValue): number[] {
+			const handlesLeft = this.params.position === 'horizontal'
+			? handles.map( handle => handle.getBoundingClientRect().left + (<number>this.appData.handleSize) / 2)
+			: handles.map( handle => handle.getBoundingClientRect().top + (<number>this.appData.handleSize) / 2)
+			return handlesLeft.map( number => Math.abs(pxValue - number));
+		}
+
+		private setAppData(params: State ): any {
 			const props = ['left', 'right', 'width', 'height', 'top', 'bottom'];
 			const specialProps = [
 				['handleSize', () => {
-					return state.position === 'vertical'
+					return params.position === 'vertical'
 					? (<HTMLElement>this.componentNodeList.handles[0]).clientHeight
 					: (<HTMLElement>this.componentNodeList.handles[0]).clientWidth
 				}],
 				['limit', () => {
-					return state.position === 'vertical'
+					return params.position === 'vertical'
 					? (<HTMLElement>this.componentNodeList.slider).clientHeight
 					: (<HTMLElement>this.componentNodeList.slider).clientWidth
 				}]

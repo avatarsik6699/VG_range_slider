@@ -3,7 +3,7 @@ import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Handle {
   protected template: string = '';
-  constructor(anchor: Element | HTMLElement, params: State, public id?: number) {
+  constructor(anchor: Element | HTMLElement, params: State, protected id: number) {
     this.create(anchor, params);
   }
 
@@ -14,7 +14,7 @@ abstract class Handle {
     return this;
   }
 
-  getNode(anchor: HTMLElement | Element, id: number): Element {
+  getNode(anchor: HTMLElement | Element, id: number): Element | HTMLElement {
     if (!anchor) throw new Error(`didn't get anchor`);
     let node = anchor.querySelector(`.slider__handle[data-id="${id}"`);
     if (!node) throw new Error(`handle wasn't found`);
@@ -40,19 +40,21 @@ abstract class Handle {
 }
 
 class hHandle extends Handle {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
-    if (renderParams[id] === undefined) return;
-    handle.style.left = renderParams[id].correctPxValue + 'px';
+    console.log(renderData)
+    if (!renderData[this.id]) return;
+    handle.style.left = renderData[this.id].pxValue + 'px';
   }
 
 }
 
 class vHandle extends Handle {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
-    if (renderParams[id] === undefined) return;
-    handle.style.top = renderParams[id].correctPxValue + 'px';
+    
+    if (!renderData[this.id]) return;
+    handle.style.top = renderData[this.id].pxValue + 'px';
   }
 }
 
