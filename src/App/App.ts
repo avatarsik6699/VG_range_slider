@@ -60,11 +60,11 @@ export class App extends Observer {
 		}
 
 		private _settingsEvent(e) {
-			let target = e.target;
-			let settings = (document.forms.namedItem('settings'));
+			const target = e.target;
+			const settings = (document.forms.namedItem('settings'));
 			if (!settings) throw new Error('Settings not found');
-			const params = {};
-			let getSettings = (e: Event) => {
+			const params: any = {};
+			const getSettings = (e: Event) => {
 				e.preventDefault();
 				Array.from(settings?.elements!).forEach( el => {
 					let value: unknown  = (<HTMLInputElement | HTMLSelectElement>el).value
@@ -73,7 +73,16 @@ export class App extends Observer {
 					? value
 					: Number(value)
 				}) 
+				
+				if (!params.value) {
+					params.value = ['from', 'to'].map( field => {
+						let valueNum = params[field];
+						delete params[field];
+						return valueNum;
+					}).sort( (a,b) => a - b);
+				}
 
+				console.log(params);
 				this.notify('settingsEvent', params);
 				target.removeEventListener('blur', getSettings);
 			}
@@ -166,9 +175,13 @@ export class App extends Observer {
 		}
 
 		private _getDiffHandlesLeft(handles, pxValue): number[] {
+			
 			const handlesLeft = this.params.position === 'horizontal'
 			? handles.map( handle => handle.getBoundingClientRect().left + (<number>this.appData.handleSize) / 2)
-			: handles.map( handle => handle.getBoundingClientRect().top + (<number>this.appData.handleSize) / 2)
+			: handles.map( handle => {
+				return Math.abs(this.appData.slider['top'] - handle.getBoundingClientRect().top) + (<number>this.appData.handleSize) / 2
+			})
+			
 			return handlesLeft.map( number => Math.abs(pxValue - number));
 		}
 

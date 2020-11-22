@@ -26,13 +26,31 @@ class Settings {
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderParams: any): void {
-    const inputValue: HTMLInputElement | null = this.getRootElement(anchor).querySelector('.settings input[name="value"]');
-    if (!inputValue) throw new Error('input не найден');
+  update(anchor: Element | HTMLElement, renderData?: any): void {
+    ['from', 'to'].forEach( field => {
+      const input: HTMLInputElement | null = anchor.querySelector(`.settings__value[name="${field}"]`);
+      if (!input) throw new Error('input not found');
+      this._setValuesField(anchor, field, input)
+    })
+  }
+
+  private _setValuesField(anchor: Element | HTMLElement, field: string, input: HTMLInputElement): void {
+    const handles: HTMLElement[] = Array.from(anchor.querySelectorAll('.slider__handle'));
+    const values = handles.map( handle => Number(handle.dataset.value));
+    if (values.length < 2) {
+      values.push(0);
+      (<HTMLInputElement>anchor.querySelector('.settings__value[name="to"]')).disabled = true;
+    }
     
-    inputValue.value = !renderParams[0] 
-    ? renderParams[1].value
-    : renderParams[0].value
+    if (field === 'from') {
+      input.value = values[0] < values[1]
+      ? String(values[0])
+      : String(values[1])
+    } else {
+      input.value = values[0] > values[1]
+      ? String(values[0])
+      : String(values[1])
+    }
   }
   
   setTemplate (options: State | {} = {}): void {

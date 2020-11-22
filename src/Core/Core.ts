@@ -11,9 +11,9 @@ export class Core extends Observer {
   setState(settings: State) {
     if (!settings) this._throwException('Не переданы настройки для обновления состояния')
 
-    const {max, min}: MinMax = this.calcCorrectMinMax(settings.max, settings.min);
-    const correctStep: number = this.calcCorrectStep(settings.step, max);
-    const correctValue = this.calcCorrectValue(settings.value, max, min);
+    const {max, min}: MinMax = this._calcCorrectMinMax(settings.max, settings.min);
+    const correctStep: number = this._calcCorrectStep(settings.step, max);
+    const correctValue = this._calcCorrectValue(settings.value, max, min);
 
     this.state = {...defaultCoreState, ...settings, max, min, ...{step: correctStep, value: correctValue}};
     this.notify('updateState', this.state);
@@ -26,13 +26,13 @@ export class Core extends Observer {
   getRenderData(appData): void {
     if (!appData) this._throwException('Не переданы данные об приложении, нужные для проведения рассчетов');
 
-    const values = this.getUnifyValue(appData)
-    const distance = this.getDistance(); 
-    const ratio = this.getRatio(appData.limit, appData.handleSize, distance);
-    const scaleValues = this.calcScaleValues(ratio, distance);
+    const values = this._getUnifyValue(appData)
+    const distance = this._getDistance(); 
+    const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
+    const scaleValues = this._calcScaleValues(ratio, distance);
 
     const renderData = (<number[]>values).map( (value, index) => {
-      let pxValue = this.calcPxValue(value, ratio)
+      let pxValue = this._calcPxValue(value, ratio)
       let id = appData.id ? appData.id : index;
       return [id, {pxValue, value}]
     })
@@ -44,28 +44,28 @@ export class Core extends Observer {
     });
   }
 
-  private getRatio(limit: number, handleSize: number, distance: number): number {
+  private _getRatio(limit: number, handleSize: number, distance: number): number {
     return (limit - handleSize) / (distance / this.state.step);
   }
 
-  private getDistance(): number {
+  private _getDistance(): number {
     return this.state.max - this.state.min;
   }
 
-  private getUnifyValue(appData): number[] {
+  private _getUnifyValue(appData): number[] {
     const distance: number = this.state.max - this.state.min; 
     const ratio: number = (appData.limit - appData.handleSize) / (distance / this.state.step);
 
     // унифицируем данные (переводим px в value, либо берем value из state, если init)
     return !appData.pxValue
     ? this.state.value
-    : this.calcCorrectValue(
+    : this._calcCorrectValue(
       Math.round(appData.pxValue / ratio) * this.state.step + this.state.min, 
       this.state.max,
       this.state.min) 
   }
 
-  private calcCorrectValue(value: State['value'] | number, max: State['max'], min: State['min']): number[] {
+  private _calcCorrectValue(value: State['value'] | number, max: State['max'], min: State['min']): number[] {
     // переводим value -> [value] для правильной работы метода getRenderData
     const preValue: number[] = Array.isArray(value) 
     ? value
@@ -83,7 +83,7 @@ export class Core extends Observer {
     })
   }
 
-  private calcCorrectMinMax(max: State['max'], min: State['min']): MinMax {
+  private _calcCorrectMinMax(max: State['max'], min: State['min']): MinMax {
     let correctMax: number;
     let correctMin: number;
     
@@ -100,7 +100,7 @@ export class Core extends Observer {
     }
   }
 
-  private calcCorrectStep(step: State['step'], max: State['max']): number {
+  private _calcCorrectStep(step: State['step'], max: State['max']): number {
     if (step >= max) {
       return 1;
     } else if (step <= 0) {
@@ -110,11 +110,11 @@ export class Core extends Observer {
     }
   }
 
-  private calcPxValue(value: number, ratio: number): number {
+  private _calcPxValue(value: number, ratio: number): number {
       return (value - this.state.min) / this.state.step * ratio;
   }
 
-  private calcScaleValues(ratio: number, distance: number): any {
+  private _calcScaleValues(ratio: number, distance: number): any {
     const min = this.state.min;
     const max = this.state.max;
     const step = this.state.step;
@@ -135,7 +135,7 @@ export class Core extends Observer {
 
     return Array.from(steps)
     .sort( (a,b) => a-b )
-    .map( value => ({pxValue: this.calcPxValue(value, ratio), value}) )
+    .map( value => ({pxValue: this._calcPxValue(value, ratio), value}) )
   }
 
   private _throwException(message: string): never {

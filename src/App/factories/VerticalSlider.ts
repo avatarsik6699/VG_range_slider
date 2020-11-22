@@ -33,9 +33,9 @@ class VerticalSlider {
 
   private setComponentList(params: State): void {
     if (params.type === 'range') this.componentList = 
-    [vSlider, vBar, [vHandle, vHandle], [vTooltip, vTooltip], vScale, Settings];
+    [vSlider, [vHandle, vHandle], [vTooltip, vTooltip], vBar, vScale, Settings];
     if (params.type === 'single') this.componentList = 
-    [vSlider, vBar, [vHandle], [vTooltip], vScale, Settings];
+    [vSlider, [vHandle], [vTooltip], vBar, vScale, Settings];
   }
 }
 

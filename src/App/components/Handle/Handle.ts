@@ -29,7 +29,10 @@ abstract class Handle {
 
   protected setTemplate(params: State): void {
     const modifer = `slider__handle slider__handle_position-${params.position}`;
-    this.template = `<div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id}></div>`;
+    const value = params.value[this.id] ?? 0;
+    this.template = `
+    <div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id} data-value=${value}></div>
+    `;
   }
 
   getRootElement(anchor: Element | HTMLElement): Element {
@@ -42,7 +45,8 @@ abstract class Handle {
 class hHandle extends Handle {
   update(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
-    console.log(renderData)
+    handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
+
     if (!renderData[this.id]) return;
     handle.style.left = renderData[this.id].pxValue + 'px';
   }
@@ -52,7 +56,8 @@ class hHandle extends Handle {
 class vHandle extends Handle {
   update(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor, this.id!));
-    
+    handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
+
     if (!renderData[this.id]) return;
     handle.style.top = renderData[this.id].pxValue + 'px';
   }

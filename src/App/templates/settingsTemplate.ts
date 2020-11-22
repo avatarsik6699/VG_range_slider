@@ -1,3 +1,7 @@
+// <label class="settings__item">
+// <input name="value" type="number" value="${options.value}" class="settings__value"/>
+// <span class="settings__name">value</span>
+// </label>
 const getSettingsContent = options => `
   <label class="settings__item">
       <input name="max" type="number" value="${options.max}" class="settings__value"/>
@@ -8,12 +12,16 @@ const getSettingsContent = options => `
       <span class="settings__name">min</span>
   </label>
   <label class="settings__item">
-      <input name="value" type="number" value="${options.value}" class="settings__value"/>
-      <span class="settings__name">value</span>
-  </label>
-  <label class="settings__item">
       <input name="step" type="number" value="${options.step}" class="settings__value"/>
       <span class="settings__name">step</span>
+  </label>
+  <label class="settings__item">
+    <input name="from" type="number" value="${options.value[0]}" class="settings__value"/>
+    <span class="settings__name">from</span>
+  </label>
+  <label class="settings__item">
+    <input name="to" type="number" value="${options.value[1] ?? 0}" class="settings__value"/>
+    <span class="settings__name">to</span>
   </label>
 
   <label class="settings__item">

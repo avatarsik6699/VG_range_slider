@@ -9,6 +9,8 @@ interface State {
   tooltip: boolean,
   bar: boolean,
   handle: boolean,
+  from?: number,
+  to?:number,
 }
 
 interface Factory {

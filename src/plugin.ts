@@ -49,7 +49,7 @@ let settings = {
 	max: 100,
 	min: 10,
   value: [10],
-  step: 3,
+  step: 5,
   position: 'horizontal',
   type: 'single',
   scale: false,

@@ -39,7 +39,12 @@ abstract class Bar {
   }
 
   protected getHandlesPosition(anchor, position): number[] {
-    let handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
+    const handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
+    const slider = this.getRootElement(anchor);
+
+    let firstTopCoord = Math.abs(handles[0].getBoundingClientRect().top - slider.getBoundingClientRect().top);
+    let secondTopCoord = Math.abs(handles[1].getBoundingClientRect().top - slider.getBoundingClientRect().top);
+
     if (position === 'horizontal') {
         return [
         handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
@@ -47,44 +52,52 @@ abstract class Bar {
       ]
     } else {
       return [
-          Math.round(handles[0].getBoundingClientRect().top - handles[1].getBoundingClientRect().top),
-        Math.round(handles[1].getBoundingClientRect().top - handles[0].getBoundingClientRect().top)
+        firstTopCoord - secondTopCoord,
+        secondTopCoord - firstTopCoord
       ]
     }
+  }
+
+  protected getPxValue(renderData) {
     
+    if (renderData.type === 'single') {
+      return renderData[0]?.pxValue;
+    } else {
+      return [renderData[0]?.pxValue, renderData[1]?.pxValue]
+    }
   }
 }
 
 class hBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
-    let firstHandle = renderParams['0']?.correctPxValue;
-    let secondHandle = renderParams['1']?.correctPxValue;
-    
-    if (renderParams.type === 'single') {
+    if (renderData.type === 'single') {
+      let pxValue = this.getPxValue(renderData);
       bar.style.left = 0 + 'px';
-      bar.style.width = firstHandle + 20 + 'px';
+      bar.style.width = pxValue + 20 + 'px';
     } 
-    
-    if(renderParams.type === 'range') {
+
+    if(renderData.type === 'range') {
+      let pxValue: number[] = this.getPxValue(renderData);
+      
       if (!this.isInit) {
-        bar.style.left = firstHandle < secondHandle
-        ? firstHandle + 'px'
-        : secondHandle + 'px' 
-        bar.style.width = Math.abs(secondHandle - firstHandle) + 'px';
+        bar.style.width = Math.abs(pxValue[0] - pxValue[1]) + 20 +'px';
+        bar.style.left = pxValue[0] < pxValue[1]
+        ? pxValue[0] + 'px'
+        : pxValue[1] + 'px' 
 
         this.isInit = true;
       } else {
-        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
-        let id = renderParams.id;
-        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
-       
+        const handlesPosition = this.getHandlesPosition(anchor, renderData.position);
+        const id = renderData.id;
+        const pxValue = renderData[id]?.pxValue ?? 0;
+        
         if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
-          bar.style.left = correctPxValue + 'px';
+          bar.style.left = pxValue + 'px';
           bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
         } else {
           bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
-          bar.style.left = correctPxValue - Math.abs(handlesPosition[id]) + 'px';;
+          bar.style.left = pxValue - Math.abs(handlesPosition[id]) + 'px';
         }
       }
     }
@@ -92,36 +105,34 @@ class hBar extends Bar {
 }
 
 class vBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
+  update(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
-    let firstHandle = renderParams['0']?.correctPxValue;
-    let secondHandle = renderParams['1']?.correctPxValue;
-    
-    if (renderParams.type === 'single') {
+    if (renderData.type === 'single') {
+      let pxValue = this.getPxValue(renderData);
       bar.style.top = 0 + 'px';
-      bar.style.height = firstHandle + 20 + 'px';
-    } 
+      bar.style.height = pxValue + 20 + 'px';
+    }
     
-    if(renderParams.type === 'range') {
+    if(renderData.type === 'range') {
+      let pxValue: number[] = this.getPxValue(renderData);
+      
       if (!this.isInit) {
-        bar.style.top = firstHandle < secondHandle
-        ? firstHandle + 'px'
-        : secondHandle + 'px' 
-        bar.style.height = Math.abs(secondHandle - firstHandle) + 'px';
+        bar.style.height = Math.abs(pxValue[0] - pxValue[1]) + 20 +'px';
+        bar.style.top = pxValue[0] < pxValue[1]
+        ? pxValue[0] + 'px'
+        : pxValue[1] + 'px' 
 
         this.isInit = true;
       } else {
-        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
-        console.log(handlesPosition)
-        let id = renderParams.id;
-        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
-       
+        let handlesPosition = this.getHandlesPosition(anchor, renderData.position);
+        const id = renderData.id;
+        const pxValue = renderData[id]?.pxValue ?? 0;
         if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
-          bar.style.top = correctPxValue + 'px';
-          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
+          bar.style.top = pxValue + 'px';
+          bar.style.height = Math.round(Math.abs(handlesPosition[id])) + 20  + 'px';
         } else {
-          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
-          // bar.style.top = correctPxValue - Math.abs(handlesPosition[id]) + 'px';
+          bar.style.height = Math.abs(handlesPosition[id])  + 20 + 'px';
+          bar.style.top = pxValue - Math.abs(handlesPosition[id]) + 'px';
         }
       }
     }
