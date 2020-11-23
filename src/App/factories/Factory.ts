@@ -1,4 +1,4 @@
-import { State } from '../../Helpers/Interfaces';
+import { Component, State } from '../../Helpers/Interfaces';
 abstract class Factory {
   protected componentList: any = [];
 
@@ -8,7 +8,6 @@ abstract class Factory {
     
     this.componentList.forEach( component => {
       let name = this._getCorrectComponentName(component);
-
       componentInstanceList[name] = Array.isArray(component)
       ? component.map((subComponent, id) => new subComponent(anchor, params, id))
       : new component(anchor, params)
@@ -33,27 +32,32 @@ abstract class Factory {
     }
   }
 
-  protected _getCorrectComponentList(componentList, params) {
-    const exclideList: string[] = this._getExcludeList(params);
-    if (exclideList.length === 0) {
-      return Object.values(componentList);
-    } else {
+  protected _getCorrectComponentList(componentList: {[key: string]: Component}, params): [string, Component][] {
+    const excludeComponents: string[] = this._getExcludeComponents(params);
       for (let key in componentList) {
-        if (exclideList.includes(key)) delete componentList[key];
+        if (excludeComponents.includes(key)) { delete componentList[key] }
       }
-      return Object.values(componentList);
-    }
+      return Object.entries(componentList);
   }
 
-  protected _getExcludeList(params: State): string[] {
-    const excludeList: string[] = [];
+  protected _getExcludeComponents(params: State): string[] {
+    const excludeComponents: string[] = [];
     for (let key in params) {
-      if (typeof params[key] === 'boolean' && !params[key]) {
-        excludeList.push(key);
-      }
+      if (this.isFalse(params[key])) { excludeComponents.push(key) }
     }
-    return excludeList;
+    return excludeComponents;
   }
+
+  protected _getNumberComponents(type) {
+    return type === 'range'
+    ? { handle: 2, tooltip: 2 }
+    : { handle: 1, tooltip: 1}
+  }
+
+  protected isFalse(field: boolean): boolean {
+    return typeof field === 'boolean' && !field;
+  }
+
 }
 
 export { Factory };

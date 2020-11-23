@@ -17,11 +17,7 @@ interface Factory {
 }
 
 interface Component {
-  template: string;
-  create(anchor: Element | HTMLElement, renderParams?: any): this
-  setTemplate(type: string, handleId: number): void;
-  getNode(anchor: HTMLElement | Element, handleId?: number): Element;
-  update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number | string} | any, handleId?: any): void
+  render(anchor: Element | HTMLElement, renderData: any, id?: number);
 }
 
 type MinMax = {

@@ -1,6 +1,6 @@
-import { State } from "../../../Helpers/Interfaces";
+import { Component, State } from "../../../Helpers/Interfaces";
 
-abstract class Slider {
+abstract class Slider implements Component {
   protected template: string = `
   <div class="slider-wrapper">
     <div class="slider">
@@ -46,11 +46,11 @@ abstract class Slider {
   }
 }
 
-class vSlider extends Slider {
+class vSlider extends Slider implements Component {
   render(anchor: Element | HTMLElement, renderParams:  any): void {}
 }
 
-class hSlider extends Slider {
+class hSlider extends Slider implements Component {
   render(anchor: Element | HTMLElement, renderParams: any): void {}
 }
 

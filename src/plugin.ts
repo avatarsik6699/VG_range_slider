@@ -50,11 +50,11 @@ let settings = {
 	min: 10,
   value: [30, 50],
   step: 5,
-  position: 'horizontal',
+  position: 'vertical',
   type: 'range',
-  scale: false,
-  tooltip: false,
-  bar: false,
+  scale: true,
+  tooltip: true,
+  bar: true,
 }
 
 const $slider = $('.anchor').slider(settings)

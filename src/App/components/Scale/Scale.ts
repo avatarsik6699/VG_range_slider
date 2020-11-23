@@ -1,6 +1,6 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
-abstract class Scale {
+abstract class Scale implements Component {
   protected isInit: boolean = false;
   protected template: string = '<div class="slider__scale"></div>';
   constructor(anchor: Element | HTMLElement, params: State) {
@@ -40,7 +40,7 @@ abstract class Scale {
   }
 }
 
-class hScale extends Scale {
+class hScale extends Scale implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
       const scale = this.getNode(anchor);
@@ -57,7 +57,7 @@ class hScale extends Scale {
   }
 }
 
-class vScale extends Scale {
+class vScale extends Scale implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
       const scale = this.getNode(anchor);

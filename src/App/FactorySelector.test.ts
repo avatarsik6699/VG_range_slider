@@ -1,7 +1,6 @@
 import { JSDOM } from 'jsdom';
 import { expect } from 'chai';
 import { FactorySelector } from './FactorySelector';
-import { defaultCoreState } from './../Core/defaultCoreState';
 import { HorizontalSlider } from './factories/horizontalSlider';
 import { VerticalSlider } from './factories/VerticalSlider';
 

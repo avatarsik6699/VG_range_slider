@@ -1,14 +1,21 @@
-import { State } from '../../Helpers/Interfaces';
+import { Component, State } from '../../Helpers/Interfaces';
 import { Factory } from './Factory';
-import { rangeSliderTemplate } from '../templates/rangeSliderTemplate';
-import { singleSliderTemplate } from '../templates/singleSliderTemplate';
+import { getComponentList } from '../templates/getComponentList';
 
 class VerticalSlider extends Factory {
   _setComponentList(params: State): void {
-    let componentList = params.type === 'range'
-    ? rangeSliderTemplate(params)
-    : singleSliderTemplate(params);
-    this.componentList = this._getCorrectComponentList(componentList, params);
+    const numberComponents = this._getNumberComponents(params.type);
+    const correctComponentList = this._getCorrectComponentList(getComponentList(params.position), params);
+    this.componentList = correctComponentList.map( (component: [string, Component]) => {
+      let name = component[0];
+      let element = component[1];
+
+      return Object.keys(numberComponents).includes(name) 
+        ? [...Array(numberComponents[name]).keys()].map( num => {
+          return element;
+        })
+        : element
+    })
   }
 }
 

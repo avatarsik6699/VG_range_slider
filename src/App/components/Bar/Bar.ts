@@ -1,6 +1,6 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
-abstract class Bar {
+abstract class Bar implements Component {
   protected template: string = '';
   protected isInit = false;
   constructor(anchor: Element | HTMLElement, params: State) {
@@ -68,7 +68,7 @@ abstract class Bar {
   }
 }
 
-class hBar extends Bar {
+class hBar extends Bar implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
     if (renderData.type === 'single') {
@@ -104,7 +104,7 @@ class hBar extends Bar {
   }
 }
 
-class vBar extends Bar {
+class vBar extends Bar implements Component  {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
     if (renderData.type === 'single') {

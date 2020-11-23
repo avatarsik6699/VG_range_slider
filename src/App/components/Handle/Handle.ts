@@ -1,7 +1,7 @@
 import { param } from "jquery";
 import { Component, State } from "../../../Helpers/Interfaces";
 
-abstract class Handle {
+abstract class Handle implements Component {
   protected template: string = '';
   constructor(anchor: Element | HTMLElement, params: State, protected id: number) {
     this.create(anchor, params);
@@ -42,7 +42,7 @@ abstract class Handle {
   }
 }
 
-class hHandle extends Handle {
+class hHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
@@ -53,7 +53,7 @@ class hHandle extends Handle {
 
 }
 
-class vHandle extends Handle {
+class vHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
