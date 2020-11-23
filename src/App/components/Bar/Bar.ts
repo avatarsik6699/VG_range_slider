@@ -7,7 +7,7 @@ abstract class Bar {
     this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, params: State): this { 
+  create(anchor: Element | HTMLElement, params: State): this | undefined {
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
@@ -15,7 +15,7 @@ abstract class Bar {
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
   getNode(anchor: HTMLElement | Element): Element {
@@ -25,7 +25,7 @@ abstract class Bar {
     return node;
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void
+  abstract render(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void
   
   protected setTemplate (params: State): void {
     const modifer = `slider__bar_position-${params.position}`
@@ -69,7 +69,7 @@ abstract class Bar {
 }
 
 class hBar extends Bar {
-  update(anchor: Element | HTMLElement, renderData: any): void {
+  render(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
     if (renderData.type === 'single') {
       let pxValue = this.getPxValue(renderData);
@@ -105,7 +105,7 @@ class hBar extends Bar {
 }
 
 class vBar extends Bar {
-  update(anchor: Element | HTMLElement, renderData: any): void {
+  render(anchor: Element | HTMLElement, renderData: any): void {
     const bar = (<HTMLElement>this.getNode(anchor));
     if (renderData.type === 'single') {
       let pxValue = this.getPxValue(renderData);

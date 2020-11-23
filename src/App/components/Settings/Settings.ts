@@ -11,12 +11,12 @@ class Settings {
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
-    this._updateVisualFields(anchor, params);
+    this._renderVisualFields(anchor, params);
     return this;
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
   getNode(anchor: HTMLElement | Element): Element {
@@ -26,7 +26,7 @@ class Settings {
     return node;
   }
 
-  update(anchor: Element | HTMLElement, renderData?: any): void {
+  render(anchor: Element | HTMLElement, renderData?: any): void {
     ['from', 'to'].forEach( field => {
       const input: HTMLInputElement | null = anchor.querySelector(`.settings__value[name="${field}"]`);
       if (!input) throw new Error('input not found');
@@ -64,7 +64,7 @@ class Settings {
     return root;
   }
 
-  private _updateVisualFields(anchor: Element | HTMLElement, params: State) {
+  private _renderVisualFields(anchor: Element | HTMLElement, params: State) {
     const visualFields = this.getRootElement(anchor).querySelectorAll('.settings select');
     
     Array.from(visualFields).forEach( field => {

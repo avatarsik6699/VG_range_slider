@@ -7,7 +7,7 @@ abstract class Scale {
     this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, params: State): this { 
+  create(anchor: Element | HTMLElement, params: State): this | undefined { 
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
@@ -23,10 +23,10 @@ abstract class Scale {
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract update(anchor: Element | HTMLElement, renderData: any): void;
+  abstract render(anchor: Element | HTMLElement, renderData: any): void;
 
   protected setTemplate(params: State): void {
     const modifer = `slider__scale slider__scale_position-${params.position}`;
@@ -41,7 +41,7 @@ abstract class Scale {
 }
 
 class hScale extends Scale {
-  update(anchor: Element | HTMLElement, renderData: any): void {
+  render(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
       const scale = this.getNode(anchor);
       let content: string = ``;
@@ -58,7 +58,7 @@ class hScale extends Scale {
 }
 
 class vScale extends Scale {
-  update(anchor: Element | HTMLElement, renderData: any): void {
+  render(anchor: Element | HTMLElement, renderData: any): void {
     if (!this.isInit) {
       const scale = this.getNode(anchor);
       let content: string = ``;

@@ -31,7 +31,7 @@ export class Core extends Observer {
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
 
-    const renderData = (<number[]>values).map( (value, index) => {
+    const renderData: (number | {[key: string]: number})[][] = (<number[]>values).map( (value, index) => {
       let pxValue = this._calcPxValue(value, ratio)
       let id = appData.id ? appData.id : index;
       return [id, {pxValue, value}]

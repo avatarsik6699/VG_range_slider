@@ -48,14 +48,13 @@ declare global {
 let settings = {
 	max: 100,
 	min: 10,
-  value: [10],
+  value: [30, 50],
   step: 5,
   position: 'horizontal',
-  type: 'single',
+  type: 'range',
   scale: false,
   tooltip: false,
-  handle: true,
-  bar: true,
+  bar: false,
 }
 
 const $slider = $('.anchor').slider(settings)

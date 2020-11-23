@@ -8,7 +8,6 @@ interface State {
   scale: boolean,
   tooltip: boolean,
   bar: boolean,
-  handle: boolean,
   from?: number,
   to?:number,
 }
@@ -30,4 +29,8 @@ type MinMax = {
   min: State['min'];
 }
 
-export { State, Factory, Component, MinMax };
+type ComponentProps = { 
+  [name: string]: {[key: string]: number} | number 
+};
+
+export { State, Factory, Component, MinMax, ComponentProps };

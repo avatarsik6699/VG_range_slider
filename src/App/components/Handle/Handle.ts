@@ -14,18 +14,18 @@ abstract class Handle {
     return this;
   }
 
-  getNode(anchor: HTMLElement | Element, id: number): Element | HTMLElement {
+  getNode(anchor: HTMLElement | Element): Element | HTMLElement {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector(`.slider__handle[data-id="${id}"`);
+    let node = anchor.querySelector(`.slider__handle[data-id="${this.id}"`);
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: any, id: number): void;
+  abstract render(anchor: Element | HTMLElement, renderParams: any, id: number): void;
 
   protected setTemplate(params: State): void {
     const modifer = `slider__handle slider__handle_position-${params.position}`;
@@ -43,8 +43,8 @@ abstract class Handle {
 }
 
 class hHandle extends Handle {
-  update(anchor: Element | HTMLElement, renderData: any): void {
-    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
+  render(anchor: Element | HTMLElement, renderData: any): void {
+    const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
 
     if (!renderData[this.id]) return;
@@ -54,8 +54,8 @@ class hHandle extends Handle {
 }
 
 class vHandle extends Handle {
-  update(anchor: Element | HTMLElement, renderData: any): void {
-    const handle = (<HTMLElement>this.getNode(anchor, this.id!));
+  render(anchor: Element | HTMLElement, renderData: any): void {
+    const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
 
     if (!renderData[this.id]) return;

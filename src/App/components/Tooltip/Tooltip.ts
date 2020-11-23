@@ -5,7 +5,7 @@ abstract class Tooltip {
     this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, params: State): this { 
+  create(anchor: Element | HTMLElement, params: State): this| undefined { 
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
@@ -20,17 +20,17 @@ abstract class Tooltip {
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: any, id: number): void;
+  abstract render(anchor: Element | HTMLElement, renderParams: any, id: number): void;
 
   protected setTemplate(params: State): void {
     const modifer = `slider__tooltip slider__tooltip_position-${params.position}`;
     this.template = `<div class="slider__tooltip ${modifer}" data-component="tooltip" data-id=${this.id}>0</div>`;
   }
 
-  getRootElement(anchor: Element): Element {
+  protected getRootElement(anchor: Element): Element {
     const root = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`);
     if (!root) throw new Error ('Hanlde was not found');
     return root;
@@ -38,7 +38,7 @@ abstract class Tooltip {
 }
 
 class hTooltip extends Tooltip {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+  render(anchor: Element | HTMLElement, renderParams: any, id: number): void {
     if (renderParams[id] === undefined) return;
     const toolTip = (<HTMLElement>this.getNode(anchor, id));
     const offset = (String(renderParams[id].value).split('').length - 1) * 4;
@@ -49,7 +49,7 @@ class hTooltip extends Tooltip {
 }
 
 class vTooltip extends Tooltip {
-  update(anchor: Element | HTMLElement, renderParams: any, id: number): void {
+  render(anchor: Element | HTMLElement, renderParams: any, id: number): void {
     if (renderParams[id] === undefined) return;
     const toolTip = (<HTMLElement>this.getNode(anchor, id));
     toolTip.innerHTML = renderParams[id].value;

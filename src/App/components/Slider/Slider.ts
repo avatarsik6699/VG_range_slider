@@ -18,7 +18,7 @@ abstract class Slider {
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
   getNode(anchor: HTMLElement | Element): Element {
@@ -28,7 +28,7 @@ abstract class Slider {
     return node;
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: any): void
+  abstract render(anchor: Element | HTMLElement, renderParams: any): void
   
   setTemplate (params: State): void {
     const modifer = `slider_position-${params.position}`
@@ -47,11 +47,11 @@ abstract class Slider {
 }
 
 class vSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams:  any): void {}
+  render(anchor: Element | HTMLElement, renderParams:  any): void {}
 }
 
 class hSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams: any): void {}
+  render(anchor: Element | HTMLElement, renderParams: any): void {}
 }
 
 export { vSlider, hSlider };
