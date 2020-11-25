@@ -1,21 +1,17 @@
 import { Component, State } from '../../Helpers/Interfaces';
 import { Factory } from './Factory';
 import { getComponentList } from '../templates/getComponentList';
+import { vSlider } from '../components/Slider/Slider';
+import { vHandle } from '../components/Handle/Handle';
+import { vTooltip } from '../components/Tooltip/Tooltip';
+import { vScale } from '../components/Scale/Scale';
+import { vBar } from '../components/Bar/Bar';
+import { Settings } from '../components/Settings/Settings';
 
 class VerticalSlider extends Factory {
-  _setComponentList(params: State): void {
-    const numberComponents = this._getNumberComponents(params.type);
-    const correctComponentList = this._getCorrectComponentList(getComponentList(params.position), params);
-    this.componentList = correctComponentList.map( (component: [string, Component]) => {
-      let name = component[0];
-      let element = component[1];
-
-      return Object.keys(numberComponents).includes(name) 
-        ? [...Array(numberComponents[name]).keys()].map( num => {
-          return element;
-        })
-        : element
-    })
+  private components = [vSlider, vHandle, vTooltip, vScale, vBar, Settings]
+  _getComponentList(params: State) {
+    return this._getCorrectComponents(this.components, params);
   }
 }
 

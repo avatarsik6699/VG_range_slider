@@ -19,6 +19,7 @@ export class Controller {
     this.app.subscribe('touchEvent', (appData) => this.core.getRenderData(appData));
     this.app.subscribe('settingsEvent', (settings: State) => this.core.setState(settings));
     this.app.subscribe('moveEvent', (appData) => this.core.getRenderData(appData));
+    this.app.subscribe('scaleEvent', (appData) => this.core.getRenderData(appData));
 
     this.core.subscribe('getRenderData', (renderData) => this.app.renderUI(renderData));
     this.core.subscribe('updateState', (state: State) => this.app.reCreate(state));

@@ -59,7 +59,6 @@ abstract class Bar implements Component {
   }
 
   protected getPxValue(renderData) {
-    
     if (renderData.type === 'single') {
       return renderData[0]?.pxValue;
     } else {
@@ -70,18 +69,18 @@ abstract class Bar implements Component {
 
 class hBar extends Bar implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
+    console.log(renderData);
     const bar = (<HTMLElement>this.getNode(anchor));
+    const handleSize = 20;
     if (renderData.type === 'single') {
-      let pxValue = this.getPxValue(renderData);
+      const pxValue = this.getPxValue(renderData);
       bar.style.left = 0 + 'px';
-      bar.style.width = pxValue + 20 + 'px';
-    } 
-
-    if(renderData.type === 'range') {
-      let pxValue: number[] = this.getPxValue(renderData);
+      bar.style.width = pxValue + handleSize + 'px';
+    } else if (renderData.type === 'range') {
+      const pxValue: number[] = this.getPxValue(renderData);
       
       if (!this.isInit) {
-        bar.style.width = Math.abs(pxValue[0] - pxValue[1]) + 20 +'px';
+        bar.style.width = Math.abs(pxValue[0] - pxValue[1]) + handleSize +'px';
         bar.style.left = pxValue[0] < pxValue[1]
         ? pxValue[0] + 'px'
         : pxValue[1] + 'px' 

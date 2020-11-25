@@ -1,35 +1,37 @@
+import { throws } from "assert";
 import { ComponentProps, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
+import { getDefaultSpecialCoords } from "./templates/getDefaultSpeicalCoords";
 
 export class App extends Observer {
 	private componentInstanceList: {} = {};
 	constructor(
-		private anchor: HTMLElement, 
-		private params: State, 
+		public anchor: HTMLElement, 
+		public params: State, 
 		private factorySelector: FactorySelector) 
 		{
 			super();
 		}
 
 		create(params: State): void {
-			this.params = params;
+			this.params = params; //update params
 			this._createComponents(params);
-			const componentProps = this._getComponentProps(params);
-			this.notify('finishCreate', componentProps);
+			const sliderCoords = this._getCoord('slider', ['top', 'width']);
+			const limit = this._getSpecialCoord('limit');
+			const handleSize = this._getSpecialCoord('handleSize');
+			this.notify('finishCreate', {slider: sliderCoords, limit, handleSize});
 		}
 
 		reCreate(params: State): void {
-			if (!this._isEmpty()) { this.destroy() }
+			if (!this._isEmpty(this.anchor)) { this.destroy() }
 			this.create(params);
 		}
 
 		renderUI(renderData) {
 			Object.values(this.componentInstanceList).forEach( (instance: any) => {
 				if (Array.isArray(instance)) {
-					instance.forEach((subInstance, id) => {
-						subInstance.render(this.anchor, renderData, id);
-					})
+					instance.forEach((subInstance, id) => subInstance.render(this.anchor, renderData, id))
 				} else {
 					instance.render(this.anchor, renderData);
 				}
@@ -43,20 +45,6 @@ export class App extends Observer {
 				if (!eventName) return;
 				this[eventName](e);
 			})
-		}
-
-		show(): void {
-			this.anchor.style.display = '';
-		}
-
-		hide(): void {
-			this.anchor.style.display = 'none';
-		}
-
-		destroy(): void {
-			Array.from(this.anchor.children).forEach( node => {
-				node.remove();
-			});
 		}
 
 		private _settingsEvent(e) {
@@ -92,17 +80,22 @@ export class App extends Observer {
 		}
 
 		private _sliderEvent(e) {
-			// добавить событие со шкалй
+			if (e.target.closest(`[data-component="scale"]`)) {
+				this._scaleEvent(e);
+				return;
+			}
+
 			e.preventDefault();
-			const componentProps = this._getComponentProps(this.params);
+			const sliderCoord = this._getCoord('slider', ['top', 'width']);
+			const limit = this._getSpecialCoord('limit');
 			let pxValue = this._getPxValue(e);
-			let id: number | undefined = this.defineCloseHandle(pxValue);
-			this.notify('touchEvent', {pxValue, id, ...componentProps})
+			// let id: number | undefined = this.defineCloseHandle(pxValue);
+			// this.notify('touchEvent', {pxValue, id, ...{slider: sliderCoord, limit}})
 			
 
 			const handleMove = (e: MouseEvent): void => {
 				pxValue = this._getPxValue(e);
-				this.notify('moveEvent', {pxValue, id, ...componentProps})
+				// this.notify('moveEvent',  {pxValue, id, ...{slider: sliderCoord, limit}})
 			}
 
 			const finishMove = (): void => {
@@ -118,31 +111,32 @@ export class App extends Observer {
 		}
 
 		private _scaleEvent(e) {
+			const id = this._defineCloseHandle(this._getPxValue(e));
+			const limit = this._getSpecialCoord('limit');
+			const handleSize = this._getSpecialCoord('handleSize');
+			const scaleValue = Number(e.target.textContent);
 
-		}
-
-		private _createComponents(params: State): void {
-			this.componentInstanceList = this.factorySelector
-			.getFactory(params.position)
-			.createComponents(this.anchor, params);
+			const handlesValue = (<HTMLElement[]>this._getComponentNode('handle', {allNodes: true}))
+			.map( handle => Number(handle.dataset.value))
+			
+			handlesValue.splice(id,1,scaleValue);
+			// console.log({value: handlesValue, limit, handleSize})
+			this.notify('scaleEvent', {value: handlesValue, limit, handleSize, id})
 		}
 
 		private _getPxValue(e: MouseEvent) {
-			const componentProps = this._getComponentProps(this.params);
-			const halfHandle = (<number>componentProps['handleSize']) / 2;
-			const top = componentProps.slider['top']
-			const left = componentProps.slider['left']
+			const sliderCoord = this._getCoord('slider', ['top', 'left']);
+			const halfHandle = this._getSpecialCoord('handleSize') / 2;
 			return this.params.position === 'horizontal'
-			? e.clientX - left - halfHandle	
-			: e.clientY - top - halfHandle
+			? e.clientX - sliderCoord['left'] - halfHandle	
+			: e.clientY - sliderCoord['top'] - halfHandle
 		}
 
-		private _getEventName(target: HTMLElement | Element| undefined): string {
-			if (!target) this._throwException("Не передан target");
-			const eventList = ['slider', 'settings'];
-			let eventName: string = '';
-			eventList.forEach( name => {
-				if (target.closest(`[data-component="${name}"]`)) eventName = name;
+		private _getEventName(target: HTMLElement | Element| undefined): string | undefined {
+			if (!target) this._throwException("Не передан target") 
+
+			const eventName = ['slider', 'settings'].find( name => {
+				if (target.closest(`[data-component="${name}"]`)) return name;
 			});
 			
 			return !eventName
@@ -150,25 +144,18 @@ export class App extends Observer {
 			:	`_${eventName}Event`
 		}
 
-		private _getComponentNode(name: string, config?: {allNodes: boolean}): HTMLElement {
+		private _getComponentNode(name: string, config?: {allNodes: boolean}): HTMLElement | HTMLElement[] {
 			if (!this.componentInstanceList) this._throwException('First you need to get component instances')
 			
-			if (config?.allNodes) {
-				return this.componentInstanceList[name].map( instance => {
-					return instance.getNode(this.anchor);
-				}) 
-			} else {
-				return Array.isArray(this.componentInstanceList[name])
-				? this.componentInstanceList[name][0].getNode(this.anchor)
-				: this.componentInstanceList[name].getNode(this.anchor)
-			}
-			
+			return config?.allNodes
+			? this.componentInstanceList[name].map( instance => instance.getNode(this.anchor))
+			: this.componentInstanceList[name][0].getNode(this.anchor)
 		}
 
-		private defineCloseHandle(pxValue): number | undefined{
-			const handles = this._getComponentNode('handles', {allNodes: true})
+		private _defineCloseHandle(pxValue): number {
+			const handles = this._getComponentNode('handle', {allNodes: true})
+			if (!handles) this._throwException('handles not found');
 			const diffBetweenHandles: number[] = this._getDiffBetweenHandles(handles, pxValue);
-
 			if (diffBetweenHandles.length === 1) {
 				return Number(handles[0].dataset.id);
 			} else {
@@ -184,59 +171,71 @@ export class App extends Observer {
 		}
 
 		private _getHandlesCoord(handles): number[] {
-			const componentProps = this._getComponentProps(this.params, ['slider','handles']);
-			const halfHandleSize = (<number>componentProps['handleSize']) / 2;
+			const sliderTop = this._getCoord('slider', 'top');
+			const halfHandleSize = this._getSpecialCoord('handleSize') / 2;
 
 			return this.params.position === 'horizontal'
-			? handles.map( (handle, id) => {
-				let left = componentProps['handles']['left'][id];
+			? handles.map( handle => {
+				let left = this._getCoord(handle, 'left');
 				return left + halfHandleSize
 			})
-			: handles.map( (handle, id) => {
-				let sliderTop = componentProps['slider']['top'];
-				let handleTop = componentProps['handles']['top'][id];
+			: handles.map( handle => {
+				let handleTop = this._getCoord(handle, 'top');
 				return Math.abs(sliderTop - handleTop) + halfHandleSize;
 			})
 		}
 
-		private _getComponentProps(params: State, customCompList?: string[], customProps?: string[]): ComponentProps {
-			const props = customProps ?? ['left', 'right', 'width', 'height', 'top', 'bottom'];
-			const componentList = customCompList ?? ['slider'];
-			const componentProps = {};
-			const specialProps = [
-				['handleSize', () => {
-					const handle: HTMLElement = this._getComponentNode('handles');
-					return params.position === 'vertical'
-					? handle.getBoundingClientRect().height
-					: handle.getBoundingClientRect().width
-				}],
-				['limit', () => {
-					const slider: HTMLElement = this._getComponentNode('slider');
-					return params.position === 'vertical'
-					? slider.getBoundingClientRect().height
-					: slider.getBoundingClientRect().width
-				}]
-			];
+		private _getCoord(elemName: string, coord: string | string[]) {
+			const elem = typeof elemName === 'string' 
+			? <HTMLElement>this._getComponentNode(elemName)
+			: elemName;
 
-			// calculation default properties-----------------
-			componentList.forEach( name => {
-				let node = this._getComponentNode(name);
-				componentProps[name] = {};
-				props.forEach( prop => componentProps[name][prop] = node.getBoundingClientRect()[prop]);
-			})
-
-			// calculation special properties--------------------
-			specialProps.forEach( prop => {
-				let name = <string>prop[0];
-				let func = <(() => number)>prop[1];
-				componentProps[name] = func();
-			})
-
-			return componentProps;
+			if (typeof coord === 'string') {
+				return elem.getBoundingClientRect()[coord];
+			} else if (Array.isArray(coord)) {
+				const coords = {}
+				coord.forEach( coordName => {
+					coords[coordName] = elem.getBoundingClientRect()[coordName]
+				})
+				return coords;
+			} else {
+				return this._throwException('incorrect coord')
+			}
 		}
 
-		private _isEmpty() {
-			return this.anchor.children.length === 0;
+		private _getSpecialCoord(coord: string | (() => number)): number {
+			const defaultSpeicalCoords = getDefaultSpecialCoords.call(this);
+			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
+				return defaultSpeicalCoords[coord]();
+			} else if (typeof coord === 'function') {
+				return coord();
+			} else {
+				this._throwException(`${coord} was not found in defaultCoords or incorrect function`)
+			}
+		}
+
+		show(): void {
+			this.anchor.style.display = '';
+		}
+
+		hide(): void {
+			this.anchor.style.display = 'none';
+		}
+
+		destroy(): void {
+			Array.from(this.anchor.children).forEach( node => {
+				node.remove();
+			});
+		}
+
+		private _createComponents(params: State): void {
+			this.componentInstanceList = this.factorySelector
+			.getFactory(params.position)
+			.createComponents(this.anchor, params);
+		}
+
+		private _isEmpty<T extends HTMLElement>(elem: T) {
+			return elem.children.length === 0;
 		}
 
 		private _throwException(message: string): never {

@@ -29,4 +29,10 @@ type ComponentProps = {
   [name: string]: {[key: string]: number} | number 
 };
 
+// type SpecialCoord = {
+//   (coord: string | [string, () => number]): {
+//     [name: string]: number
+//   }
+// }
+
 export { State, Factory, Component, MinMax, ComponentProps };

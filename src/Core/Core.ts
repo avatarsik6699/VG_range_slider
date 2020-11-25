@@ -31,12 +31,13 @@ export class Core extends Observer {
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
 
-    const renderData: (number | {[key: string]: number})[][] = (<number[]>values).map( (value, index) => {
+    
+    const renderData: (number | {[key: string]: number})[][] = values.map( (value, index) => {
       let pxValue = this._calcPxValue(value, ratio)
       let id = appData.id ? appData.id : index;
       return [id, {pxValue, value}]
     })
-    
+    // console.log(...Object.fromEntries(renderData))
     this.notify('getRenderData', {
       scaleValues, 
       ...{id: appData.id, type: this.state.type, position: this.state.position},
@@ -55,14 +56,20 @@ export class Core extends Observer {
   private _getUnifyValue(appData): number[] {
     const distance: number = this.state.max - this.state.min; 
     const ratio: number = (appData.limit - appData.handleSize) / (distance / this.state.step);
-
+    
     // унифицируем данные (переводим px в value, либо берем value из state, если init)
-    return !appData.pxValue
-    ? this.state.value
-    : this._calcCorrectValue(
-      Math.round(appData.pxValue / ratio) * this.state.step + this.state.min, 
-      this.state.max,
-      this.state.min) 
+    if (appData.pxValue) {
+      return appData.pxValue.map( px => {
+        return this._calcCorrectValue(
+        Math.round(px / ratio) * this.state.step + this.state.min, 
+        this.state.max,
+        this.state.min)
+      })
+    } else if (appData.value) {
+      return appData.value
+    } else {
+      return this.state.value
+    }
   }
 
   private _calcCorrectValue(value: State['value'] | number, max: State['max'], min: State['min']): number[] {

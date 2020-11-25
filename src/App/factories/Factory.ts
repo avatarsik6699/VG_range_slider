@@ -1,43 +1,48 @@
 import { Component, State } from '../../Helpers/Interfaces';
 abstract class Factory {
-  protected componentList: any = [];
+  protected multiplyComponents = ['tooltip', 'handle'];
+  
+  createComponents(anchor: HTMLElement | Element, params: State) {
+    const components = this._getComponentList(params);
+    const componentInstanceList = {};
+    const defaultId = 0;
 
-  createComponents(anchor: HTMLElement | Element, params: State): {} {
-    this._setComponentList(params);
-    let componentInstanceList = {};
-    
-    this.componentList.forEach( component => {
-      let name = this._getCorrectComponentName(component);
-      componentInstanceList[name] = Array.isArray(component)
-      ? component.map((subComponent, id) => new subComponent(anchor, params, id))
-      : new component(anchor, params)
+    components.forEach( component => {
+      let name = this._getComponentName(component);
+      if (this.multiplyComponents.includes(name) && params.type === 'range') {
+        componentInstanceList[name] = params.value.map( (_,id) => new component(anchor, params, id));
+      } else {
+        componentInstanceList[name] = [new component(anchor, params, defaultId)]
+      }
     })
-
+    console.log(componentInstanceList)
     return componentInstanceList;
   }
 
-  abstract _setComponentList(params: State): void;
+  abstract _getComponentList(params: State): any;
 
   protected _getComponentName(component): string {
-    return component.prototype.constructor.name
-  }
-
-  protected _getCorrectComponentName(component): string {
-    if (Array.isArray(component)) {
-      return this._getComponentName(component[0]).slice(1).toLowerCase() + 's';
-    } else if (this._getComponentName(component) === 'Settings') {
-      return this._getComponentName(component).toLowerCase()
+    const name = component.prototype.constructor.name;
+    if (name === 'Settings') {
+      return name.toLowerCase()
     } else {
-      return this._getComponentName(component).slice(1).toLowerCase();
+      return name.slice(1).toLowerCase();
     }
   }
 
-  protected _getCorrectComponentList(componentList: {[key: string]: Component}, params): [string, Component][] {
-    const excludeComponents: string[] = this._getExcludeComponents(params);
-      for (let key in componentList) {
-        if (excludeComponents.includes(key)) { delete componentList[key] }
+  protected _getCorrectComponents(components, params) {
+    const correctComponents: any[] = [];
+    const excludeComponents = this._getExcludeComponents(params)
+
+    components.forEach( element => {
+      let name = this._getComponentName(element);
+      
+      if (!excludeComponents.includes(name)) {
+        correctComponents.push(element);
       }
-      return Object.entries(componentList);
+    });
+
+    return correctComponents;
   }
 
   protected _getExcludeComponents(params: State): string[] {
@@ -46,12 +51,6 @@ abstract class Factory {
       if (this.isFalse(params[key])) { excludeComponents.push(key) }
     }
     return excludeComponents;
-  }
-
-  protected _getNumberComponents(type) {
-    return type === 'range'
-    ? { handle: 2, tooltip: 2 }
-    : { handle: 1, tooltip: 1}
   }
 
   protected isFalse(field: boolean): boolean {
