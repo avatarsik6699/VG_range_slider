@@ -1,5 +1,6 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 abstract class Tooltip implements Component {
+  protected prevSpeed = 0;
   protected template: string = '';
   constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
     this.create(anchor, params);
@@ -38,12 +39,12 @@ abstract class Tooltip implements Component {
 }
 
 class hTooltip extends Tooltip {
-  render(anchor: Element | HTMLElement, renderParams: any, id: number): void {
-    if (renderParams[id] === undefined) return;
+  render(anchor: Element | HTMLElement, renderData: any, id: number): void {
+    if (renderData[id] === undefined) return;
+    
     const toolTip = (<HTMLElement>this.getNode(anchor, id));
-    const offset = (String(renderParams[id].value).split('').length - 1) * 4;
-  
-    toolTip.innerHTML = renderParams[id].value;
+    const offset = (String(renderData[id].value).split('').length - 1) * 4;
+    toolTip.innerHTML = renderData[id].value;
     toolTip.style.left = -offset + 'px';
   }
 }

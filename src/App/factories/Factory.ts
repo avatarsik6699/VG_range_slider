@@ -15,7 +15,6 @@ abstract class Factory {
         componentInstanceList[name] = [new component(anchor, params, defaultId)]
       }
     })
-    console.log(componentInstanceList)
     return componentInstanceList;
   }
 
@@ -54,7 +53,9 @@ abstract class Factory {
   }
 
   protected isFalse(field: boolean): boolean {
-    return typeof field === 'boolean' && !field;
+    return typeof field === 'boolean'
+    ? !field
+    : field === 'false'
   }
 
 }

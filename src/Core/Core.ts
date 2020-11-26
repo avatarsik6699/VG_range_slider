@@ -25,19 +25,16 @@ export class Core extends Observer {
 
   getRenderData(appData): void {
     if (!appData) this._throwException('Не переданы данные об приложении, нужные для проведения рассчетов');
-
+    
     const values = this._getUnifyValue(appData)
     const distance = this._getDistance(); 
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
-
-    
-    const renderData: (number | {[key: string]: number})[][] = values.map( (value, index) => {
+    const renderData: (number | {[key: string]: number})[][] = values.map( (value, id) => {
       let pxValue = this._calcPxValue(value, ratio)
-      let id = appData.id ? appData.id : index;
       return [id, {pxValue, value}]
     })
-    // console.log(...Object.fromEntries(renderData))
+    
     this.notify('getRenderData', {
       scaleValues, 
       ...{id: appData.id, type: this.state.type, position: this.state.position},

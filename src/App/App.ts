@@ -1,4 +1,3 @@
-import { throws } from "assert";
 import { ComponentProps, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
@@ -6,6 +5,7 @@ import { getDefaultSpecialCoords } from "./templates/getDefaultSpeicalCoords";
 
 export class App extends Observer {
 	private componentInstanceList: {} = {};
+	private flag = true;
 	constructor(
 		public anchor: HTMLElement, 
 		public params: State, 
@@ -17,10 +17,7 @@ export class App extends Observer {
 		create(params: State): void {
 			this.params = params; //update params
 			this._createComponents(params);
-			const sliderCoords = this._getCoord('slider', ['top', 'width']);
-			const limit = this._getSpecialCoord('limit');
-			const handleSize = this._getSpecialCoord('handleSize');
-			this.notify('finishCreate', {slider: sliderCoords, limit, handleSize});
+			this.notify('finishCreate', {...this._getAppData()});
 		}
 
 		reCreate(params: State): void {
@@ -39,112 +36,165 @@ export class App extends Observer {
 		}
 
 		bindEvents(): void {
-			this.anchor.addEventListener('mousedown', (e: MouseEvent): void => {
+			const initEvent = (e: MouseEvent | TouchEvent): void => {
 				const target = <HTMLElement>e.target;
 				const eventName = this._getEventName(target);
 				if (!eventName) return;
 				this[eventName](e);
-			})
+			}
+			
+			this.anchor.addEventListener('mousedown', initEvent);
+			this.anchor.addEventListener('touchstart', initEvent);
+
 		}
 
 		private _settingsEvent(e) {
 			const target = e.target;
-			const settings = (document.forms.namedItem('settings'));
+			const settings: HTMLFormElement = this._getNode('settings');
 			if (!settings) throw new Error('Settings not found');
-			const params: any = {};
-			const getSettings = (e: Event) => {
-				e.preventDefault();
-				Array.from(settings?.elements!).forEach( el => {
-					let value: unknown  = (<HTMLInputElement | HTMLSelectElement>el).value
+
+			const settingsData: any = {};
+			const getSettingsData = (e: Event) => {
+				
+				Array.from(settings.elements).forEach( el => {
+					let value: unknown = (<HTMLInputElement | HTMLSelectElement>el).value
 					let name: string = (<HTMLInputElement | HTMLSelectElement>el).name
-					params[name] = isNaN(<number>value)
+					settingsData[name] = isNaN(<number>value)
 					? value
 					: Number(value)
 				}) 
 				
-				if (!params.value) {
-					params.value = ['from', 'to'].map( field => {
-						let valueNum = params[field];
-						delete params[field];
-						return valueNum;
-					}).sort( (a,b) => a - b);
-				}
+				const values = settingsData.type === 'single'
+				? ['from']
+				: ['from', 'to']
 
-				this.notify('settingsEvent', params);
-				target.removeEventListener('blur', getSettings);
+				settingsData.value = values.map( field => {
+					let valueNum = settingsData[field];
+					delete settingsData[field];
+					return valueNum;
+				});
+				
+				this.flag = true;
+				console.log(settingsData);
+				target.removeEventListener('blur', getSettingsData);
+				this.notify('settingsEvent', settingsData);
+				// target.removeEventListener('change', getSettings);
 			}
 
 			if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
-				target.addEventListener('blur', getSettings);
+				if (this.flag) {
+					this.flag = false
+					target.addEventListener('blur', getSettingsData, {once: true});
+				} else {
+					return
+				}
+				
+				// target.addEventListener('change', getSettings);
 			}
 		}
 
-		private _sliderEvent(e) {
-			if (e.target.closest(`[data-component="scale"]`)) {
+		private _sliderEvent(e: MouseEvent| TouchEvent) {
+			const target = <HTMLElement>e.target;
+			if (target.closest(`[data-component="scale"]`)) {
 				this._scaleEvent(e);
-				return;
+			} else {
+				const appData = this._getAppData(e);
+				let handlesPxValues = this._getHandlesPxValues(e, appData.id, appData.handleSize)
+				this.notify('touchEvent', {pxValue: handlesPxValues, ...appData})
+	
+				const handleMove = (e: MouseEvent| TouchEvent): void => {
+					handlesPxValues = this._getHandlesPxValues(e,appData.id, appData.handleSize)
+					this.notify('moveEvent',  {pxValue: handlesPxValues, ...appData})
+				}
+	
+				const finishMove = (): void => {
+					document.removeEventListener('mousemove', handleMove);
+					document.removeEventListener('mouseup', finishMove);
+					document.removeEventListener('touchmove', handleMove);
+					document.removeEventListener('touchend', finishMove);
+				}
+				
+				if (e instanceof TouchEvent) {
+					document.addEventListener('touchmove', handleMove);
+					document.addEventListener('touchend', finishMove);
+				} else {
+					e.preventDefault();
+					document.addEventListener('mousemove', handleMove);
+					document.addEventListener('mouseup', finishMove);
+				}
+	
+				(this.componentInstanceList['handle'] as HTMLElement[]).forEach( handle => {
+					handle.ondragstart = () => false;
+				});
 			}
-
-			e.preventDefault();
-			const sliderCoord = this._getCoord('slider', ['top', 'width']);
-			const limit = this._getSpecialCoord('limit');
-			let pxValue = this._getPxValue(e);
-			// let id: number | undefined = this.defineCloseHandle(pxValue);
-			// this.notify('touchEvent', {pxValue, id, ...{slider: sliderCoord, limit}})
-			
-
-			const handleMove = (e: MouseEvent): void => {
-				pxValue = this._getPxValue(e);
-				// this.notify('moveEvent',  {pxValue, id, ...{slider: sliderCoord, limit}})
-			}
-
-			const finishMove = (): void => {
-				document.removeEventListener('mousemove', handleMove);
-				document.removeEventListener('mouseup', finishMove);
-			}
-			
-			document.addEventListener('mousemove', handleMove);
-			document.addEventListener('mouseup', finishMove);
-			(this.componentInstanceList['handles'] as HTMLElement[]).forEach( handle => {
-				handle.ondragstart = () => false;
-			});
 		}
 
 		private _scaleEvent(e) {
-			const id = this._defineCloseHandle(this._getPxValue(e));
-			const limit = this._getSpecialCoord('limit');
-			const handleSize = this._getSpecialCoord('handleSize');
+			const appData = this._getAppData(e);
 			const scaleValue = Number(e.target.textContent);
-
-			const handlesValue = (<HTMLElement[]>this._getComponentNode('handle', {allNodes: true}))
+			const handlesValue = (<HTMLElement[]>this._getNode('handle', {allNodes: true}))
 			.map( handle => Number(handle.dataset.value))
 			
-			handlesValue.splice(id,1,scaleValue);
-			// console.log({value: handlesValue, limit, handleSize})
-			this.notify('scaleEvent', {value: handlesValue, limit, handleSize, id})
+			// меняем value по id у того handle, который должен переместиться
+			handlesValue.splice(appData.id,1,scaleValue);
+
+			this.notify('scaleEvent', {value: handlesValue, ...appData})
 		}
 
-		private _getPxValue(e: MouseEvent) {
+		private _getAppData(e?: MouseEvent | TouchEvent) {
+			const id = !e 
+			? 0
+			: this._defineCloseHandle(this._getCursorPxValue(e));
+			const limit = this._getSpecialCoord('limit');
+			const handleSize = <number>this._getSpecialCoord('handleSize');
+			return {id, limit, handleSize}
+		}
+
+		private _getHandlesPxValues(e,id, handleSize) {
+			const handles = <HTMLElement[]>this._getNode('handle', {allNodes: true});
+			const pxValue = this._getCursorPxValue(e);
+			const handlesPxValue = (handles)
+			.map( handle => this._getCoord(handle, 'left') - handleSize / 2)
+
+			// меняем value по id у того handle, который должен переместиться
+			handlesPxValue.splice(id,1,pxValue);
+
+			return handlesPxValue
+		}
+
+		private _getCursorPxValue(e: MouseEvent| TouchEvent) {
 			const sliderCoord = this._getCoord('slider', ['top', 'left']);
-			const halfHandle = this._getSpecialCoord('handleSize') / 2;
+			const halfHandle = <number>this._getSpecialCoord('handleSize') / 2;
+			const clientX = e instanceof  TouchEvent 
+			? e.touches[0].clientX
+			: e.clientX
+
+			const clientY = e instanceof  TouchEvent 
+			? e.touches[0].clientY
+			: e.clientY
+
 			return this.params.position === 'horizontal'
-			? e.clientX - sliderCoord['left'] - halfHandle	
-			: e.clientY - sliderCoord['top'] - halfHandle
+			? clientX - sliderCoord['left'] - halfHandle	
+			: clientY - sliderCoord['top'] - halfHandle
 		}
 
-		private _getEventName(target: HTMLElement | Element| undefined): string | undefined {
-			if (!target) this._throwException("Не передан target") 
-
-			const eventName = ['slider', 'settings'].find( name => {
-				if (target.closest(`[data-component="${name}"]`)) return name;
-			});
+		private _defineCloseHandle(pxValue): number {
+			const handles: HTMLElement[] = this._getNode('handle', {allNodes: true});
+			const handlesCoord = <number[]>this._getSpecialCoord('handlesCoord');
+			const relativeCoords: number[] = handlesCoord.map(
+				handleCoord =>  Math.abs(pxValue - handleCoord)
+			);
 			
-			return !eventName
-			? eventName
-			:	`_${eventName}Event`
+			if (relativeCoords.length === 1) {
+				return Number(handles[0].dataset.id);
+			} else {
+				return relativeCoords[0] < relativeCoords[1]
+				? Number(handles[0].dataset.id)
+				: Number(handles[1].dataset.id)
+			}
 		}
 
-		private _getComponentNode(name: string, config?: {allNodes: boolean}): HTMLElement | HTMLElement[] {
+		_getNode<T>(name: string, config?: {allNodes: boolean}): T {
 			if (!this.componentInstanceList) this._throwException('First you need to get component instances')
 			
 			return config?.allNodes
@@ -152,42 +202,9 @@ export class App extends Observer {
 			: this.componentInstanceList[name][0].getNode(this.anchor)
 		}
 
-		private _defineCloseHandle(pxValue): number {
-			const handles = this._getComponentNode('handle', {allNodes: true})
-			if (!handles) this._throwException('handles not found');
-			const diffBetweenHandles: number[] = this._getDiffBetweenHandles(handles, pxValue);
-			if (diffBetweenHandles.length === 1) {
-				return Number(handles[0].dataset.id);
-			} else {
-				return diffBetweenHandles[0] < diffBetweenHandles[1]
-				? Number(handles[0].dataset.id)
-				: Number(handles[1].dataset.id)
-			}
-		}
-
-		private _getDiffBetweenHandles(handles, pxValue): number[] {
-			const handlesCoord = this._getHandlesCoord(handles);
-			return handlesCoord.map(handleCoord => Math.abs(pxValue - handleCoord));
-		}
-
-		private _getHandlesCoord(handles): number[] {
-			const sliderTop = this._getCoord('slider', 'top');
-			const halfHandleSize = this._getSpecialCoord('handleSize') / 2;
-
-			return this.params.position === 'horizontal'
-			? handles.map( handle => {
-				let left = this._getCoord(handle, 'left');
-				return left + halfHandleSize
-			})
-			: handles.map( handle => {
-				let handleTop = this._getCoord(handle, 'top');
-				return Math.abs(sliderTop - handleTop) + halfHandleSize;
-			})
-		}
-
-		private _getCoord(elemName: string, coord: string | string[]) {
+		_getCoord(elemName: string | HTMLElement, coord: string | string[]) {
 			const elem = typeof elemName === 'string' 
-			? <HTMLElement>this._getComponentNode(elemName)
+			? <HTMLElement>this._getNode(elemName)
 			: elemName;
 
 			if (typeof coord === 'string') {
@@ -199,11 +216,11 @@ export class App extends Observer {
 				})
 				return coords;
 			} else {
-				return this._throwException('incorrect coord')
+				return this._throwException('incorrect coord or elemName')
 			}
 		}
 
-		private _getSpecialCoord(coord: string | (() => number)): number {
+		_getSpecialCoord(coord: string | (() => number)): number | number[] {
 			const defaultSpeicalCoords = getDefaultSpecialCoords.call(this);
 			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
 				return defaultSpeicalCoords[coord]();
@@ -226,6 +243,18 @@ export class App extends Observer {
 			Array.from(this.anchor.children).forEach( node => {
 				node.remove();
 			});
+		}
+
+		private _getEventName(target: HTMLElement | Element| undefined): string | undefined {
+			if (!target) this._throwException("Не передан target") 
+
+			const eventName = ['slider', 'settings'].find( name => {
+				if (target.closest(`[data-component="${name}"]`)) return name;
+			});
+			
+			return !eventName
+			? eventName
+			:	`_${eventName}Event`
 		}
 
 		private _createComponents(params: State): void {

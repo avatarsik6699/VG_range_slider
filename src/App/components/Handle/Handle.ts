@@ -46,7 +46,6 @@ class hHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
-
     if (!renderData[this.id]) return;
     handle.style.left = renderData[this.id].pxValue + 'px';
   }
@@ -57,7 +56,7 @@ class vHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
     const handle = (<HTMLElement>this.getNode(anchor));
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
-
+   
     if (!renderData[this.id]) return;
     handle.style.top = renderData[this.id].pxValue + 'px';
   }

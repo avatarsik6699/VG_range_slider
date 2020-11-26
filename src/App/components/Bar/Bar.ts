@@ -69,7 +69,6 @@ abstract class Bar implements Component {
 
 class hBar extends Bar implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
-    console.log(renderData);
     const bar = (<HTMLElement>this.getNode(anchor));
     const handleSize = 20;
     if (renderData.type === 'single') {
@@ -78,7 +77,6 @@ class hBar extends Bar implements Component {
       bar.style.width = pxValue + handleSize + 'px';
     } else if (renderData.type === 'range') {
       const pxValue: number[] = this.getPxValue(renderData);
-      
       if (!this.isInit) {
         bar.style.width = Math.abs(pxValue[0] - pxValue[1]) + handleSize +'px';
         bar.style.left = pxValue[0] < pxValue[1]

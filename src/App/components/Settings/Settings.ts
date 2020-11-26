@@ -11,7 +11,7 @@ class Settings implements Component {
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
-    this._renderVisualFields(anchor, params);
+    this._setVisualFields(anchor, params);
     return this;
   }
 
@@ -19,38 +19,37 @@ class Settings implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement | Element): Element {
+  getNode(anchor: HTMLElement): HTMLFormElement {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector('.settings');
+    const node: HTMLFormElement | null = anchor.querySelector('.settings');
     if (!node) throw new Error(`Settings wasn't found. Also, for this to work, you must call the 'render' method`);
     return node;
   }
 
-  render(anchor: Element | HTMLElement, renderData?: any): void {
-    ['from', 'to'].forEach( field => {
-      const input: HTMLInputElement | null = anchor.querySelector(`.settings__value[name="${field}"]`);
-      if (!input) throw new Error('input not found');
-      this._setValuesField(anchor, field, input)
-    })
+  render(anchor: HTMLElement, renderData?: any): void {
+    if (renderData.type === 'single') {
+      this._disableField('to', anchor);
+      this._setDataInFields(anchor, this._getHandlesValue(anchor))
+    } else {
+      this._setDataInFields(anchor, this._getHandlesValue(anchor))
+    }
   }
 
-  private _setValuesField(anchor: Element | HTMLElement, field: string, input: HTMLInputElement): void {
-    const handles: HTMLElement[] = Array.from(anchor.querySelectorAll('.slider__handle'));
-    const values = handles.map( handle => Number(handle.dataset.value));
-    if (values.length < 2) {
-      values.push(0);
-      (<HTMLInputElement>anchor.querySelector('.settings__value[name="to"]')).disabled = true;
-    }
-    
-    if (field === 'from') {
-      input.value = values[0] < values[1]
-      ? String(values[0])
-      : String(values[1])
-    } else {
-      input.value = values[0] > values[1]
-      ? String(values[0])
-      : String(values[1])
-    }
+  private _disableField(field: string, anchor: HTMLElement) {
+    (<HTMLInputElement>anchor.querySelector(`.settings__value[name="${field}"]`)).disabled = true;
+  }
+
+  private _getHandlesValue(anchor: Element | HTMLElement): number[] {
+    return Array.from(anchor.querySelectorAll('.slider__handle'))
+    .map( handle => Number((<HTMLInputElement>handle).dataset.value)).sort( (a,b) => a-b)
+  }
+
+  private _setDataInFields(anchor: HTMLElement, handlesValue: number[]) {
+    const fields = ['from', 'to'];
+    handlesValue.forEach( (number, index) => {
+      let input = (<HTMLInputElement>anchor.querySelector(`.settings__value[name="${fields[index]}"]`))
+      input.value = String(number)
+    })
   }
   
   setTemplate (options: State | {} = {}): void {
@@ -64,7 +63,7 @@ class Settings implements Component {
     return root;
   }
 
-  private _renderVisualFields(anchor: Element | HTMLElement, params: State) {
+  private _setVisualFields(anchor: Element | HTMLElement, params: State) {
     const visualFields = this.getRootElement(anchor).querySelectorAll('.settings select');
     
     Array.from(visualFields).forEach( field => {
@@ -74,7 +73,7 @@ class Settings implements Component {
         if (params[fieldName] === option.text) {
           option.selected = true;
         }
-      });
+      }); 
     })
   } 
 }

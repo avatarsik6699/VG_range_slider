@@ -1,18 +1,14 @@
-// <label class="settings__item">
-// <input name="value" type="number" value="${options.value}" class="settings__value"/>
-// <span class="settings__name">value</span>
-// </label>
 const getSettingsContent = options => `
   <label class="settings__item">
-      <input name="max" type="number" value="${options.max}" class="settings__value"/>
+      <input name="max" type="number" step="${options.step}" value="${options.max}" class="settings__value"/>
       <span class="settings__name">max</span>
   </label>
   <label class="settings__item">
-      <input name="min" type="number" value="${options.min}" class="settings__value"/>
+      <input name="min" type="number" step="${options.step}" value="${options.min}" class="settings__value"/>
       <span class="settings__name">min</span>
   </label>
   <label class="settings__item">
-      <input name="step" type="number" value="${options.step}" class="settings__value"/>
+      <input name="step" type="number" min="1" value="${options.step}" class="settings__value"/>
       <span class="settings__name">step</span>
   </label>
   <label class="settings__item">
@@ -51,13 +47,6 @@ const getSettingsContent = options => `
     <option>false</option>
   </select>
   <span class="settings__name">tooltip</span>
-  </label>
-  <label class="settings__item">
-  <select name="handle">
-    <option>true</option>
-    <option>false</option>
-  </select>
-  <span class="settings__name">handle</span>
   </label>
   <label class="settings__item">
   <select name="bar">
