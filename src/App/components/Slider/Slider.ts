@@ -1,6 +1,6 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 
-abstract class Slider implements Component {
+abstract class Slider {
   protected template: string = `
   <div class="slider-wrapper">
     <div class="slider">
@@ -21,7 +21,7 @@ abstract class Slider implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement | Element): Element {
+  getNode(anchor: HTMLElement): Element {
     if (!anchor) throw new Error(`didn't get anchor`);
     let node = anchor.querySelector('.slider');
     if (!node) throw new Error(`slider wasn't found. Also, for this to work, you must call the 'render' method`);
@@ -46,11 +46,11 @@ abstract class Slider implements Component {
   }
 }
 
-class vSlider extends Slider implements Component {
+class vSlider extends Slider {
   render(anchor: Element | HTMLElement, renderParams:  any): void {}
 }
 
-class hSlider extends Slider implements Component {
+class hSlider extends Slider {
   render(anchor: Element | HTMLElement, renderParams: any): void {}
 }
 

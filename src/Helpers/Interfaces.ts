@@ -29,10 +29,21 @@ type ComponentProps = {
   [name: string]: {[key: string]: number} | number 
 };
 
-// type SpecialCoord = {
-//   (coord: string | [string, () => number]): {
-//     [name: string]: number
-//   }
-// }
+type ValuePxValue = { pxValue: number; value: number }
 
-export { State, Factory, Component, MinMax, ComponentProps };
+interface RenderData {
+  id: number;
+  type: string;
+  position: string;
+  scaleValues: ValuePxValue[];
+  handleSize: number;
+  [key: number]: ValuePxValue;
+}
+
+interface Component {
+  getName(): string;
+  getNode(anchor: HTMLElement): HTMLElement;
+  getRootElement(anchor: Element): Element;
+}
+
+export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue };

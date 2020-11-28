@@ -48,10 +48,10 @@ declare global {
 let settings = {
 	max: 1000,
 	min: 100,
-  value: [305],
+  value: [305, 444],
   step: 1,
   position: 'horizontal',
-  type: 'single',
+  type: 'range',
   scale: true,
   tooltip: true,
   bar: true,

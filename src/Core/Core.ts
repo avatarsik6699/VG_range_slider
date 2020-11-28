@@ -1,4 +1,4 @@
-import { MinMax, State } from "../Helpers/Interfaces";
+import { MinMax, RenderData, State, ValuePxValue } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { defaultCoreState } from "./defaultCoreState";
 
@@ -25,21 +25,24 @@ export class Core extends Observer {
 
   getRenderData(appData): void {
     if (!appData) this._throwException('Не переданы данные об приложении, нужные для проведения рассчетов');
-    
     const values = this._getUnifyValue(appData)
     const distance = this._getDistance(); 
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
-    const renderData: (number | {[key: string]: number})[][] = values.map( (value, id) => {
-      let pxValue = this._calcPxValue(value, ratio)
-      return [id, {pxValue, value}]
-    })
     
-    this.notify('getRenderData', {
-      scaleValues, 
+    const valuePxValue: {[key: string]: ValuePxValue} = Object.fromEntries(values.map( (value, id) => {
+      let pxValue = Math.round(this._calcPxValue(value, ratio))
+      return [id, {pxValue, value}]
+    }))
+    
+    const renderData: RenderData = {
+      scaleValues,
+      handleSize: appData.handleSize, 
       ...{id: appData.id, type: this.state.type, position: this.state.position},
-      ...Object.fromEntries(renderData)
-    });
+      ...valuePxValue
+    }
+  
+    this.notify('getRenderData', renderData);
   }
 
   private _getRatio(limit: number, handleSize: number, distance: number): number {
@@ -56,16 +59,28 @@ export class Core extends Observer {
     
     // унифицируем данные (переводим px в value, либо берем value из state, если init)
     if (appData.pxValue) {
-      return appData.pxValue.map( px => {
-        return this._calcCorrectValue(
+      const values: number[] = [];
+      appData.pxValue.forEach( px => {
+      let value = this._calcCorrectValue(
         Math.round(px / ratio) * this.state.step + this.state.min, 
         this.state.max,
         this.state.min)
+      values.push(...value);    
       })
+    
+      return values;
     } else if (appData.value) {
-      return appData.value
+      return this._calcCorrectValue(
+        appData.value,
+        this.state.max,
+        this.state.min
+      )
     } else {
-      return this.state.value
+      return this._calcCorrectValue(
+        this.state.value,
+        this.state.max,
+        this.state.min
+      )
     }
   }
 

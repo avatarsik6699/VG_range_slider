@@ -29,12 +29,12 @@ describe('FactorySelector', () => {
   })
 
   it('throw mistake if position isn\'t valid', () => {
-    const mistakesPosition = [55, true, false, 'mistake', null, undefined, '']
+    const mistakePositions = [55, true, false, 'mistake', null, undefined, '']
     const factorySelector = new FactorySelector;
     
-    mistakesPosition.forEach( mistake => {
-      let mistakeFunc = factorySelector.getFactory.bind(factorySelector, <string>mistake)
-      expect(mistakeFunc).to.throw();
+    mistakePositions.forEach( mistake => {
+      //@ts-ignore
+      expect(() => factorySelector.getFactory(mistake)).to.throw();
     })   
   })
 })

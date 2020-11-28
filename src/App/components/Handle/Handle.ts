@@ -1,4 +1,3 @@
-import { param } from "jquery";
 import { Component, State } from "../../../Helpers/Interfaces";
 
 abstract class Handle implements Component {
@@ -14,9 +13,9 @@ abstract class Handle implements Component {
     return this;
   }
 
-  getNode(anchor: HTMLElement | Element): Element | HTMLElement {
+  getNode(anchor: HTMLElement | Element): HTMLElement {
     if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector(`.slider__handle[data-id="${this.id}"`);
+    let node: HTMLElement | null = anchor.querySelector(`.slider__handle[data-id="${this.id}"`);
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
@@ -44,9 +43,8 @@ abstract class Handle implements Component {
 
 class hHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
-    const handle = (<HTMLElement>this.getNode(anchor));
+    const handle = this.getNode(anchor);
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
-    if (!renderData[this.id]) return;
     handle.style.left = renderData[this.id].pxValue + 'px';
   }
 
@@ -54,10 +52,8 @@ class hHandle extends Handle implements Component {
 
 class vHandle extends Handle implements Component {
   render(anchor: Element | HTMLElement, renderData: any): void {
-    const handle = (<HTMLElement>this.getNode(anchor));
+    const handle = this.getNode(anchor);
     handle.dataset.value = renderData[this.id]?.value ?? handle.dataset.value;
-   
-    if (!renderData[this.id]) return;
     handle.style.top = renderData[this.id].pxValue + 'px';
   }
 }

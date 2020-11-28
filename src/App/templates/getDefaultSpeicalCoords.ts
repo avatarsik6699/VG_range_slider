@@ -17,13 +17,13 @@ const getDefaultSpecialCoords = function(this: App): {[name: string]: () => numb
     },
 
     'handlesCoord': (): number[] => {
-      const handles = <HTMLElement[]>this._getNode('handle', {allNodes: true});
-      const sliderTop = this._getCoord('slider', 'top');
-			const halfHandleSize = <number>this._getSpecialCoord('handleSize') / 2;
+      const handles = <HTMLElement[]>this.getNode('handle', {allNodes: true});
+      const sliderTop = this.getCoord('slider', 'top');
+			// const halfHandleSize = <number>this._getSpecialCoord('handleSize') / 2;
 
 			return this.params.position === 'horizontal'
-			? handles.map( handle => this._getCoord(handle, 'left') + halfHandleSize )
-			: handles.map( handle => Math.abs(sliderTop - this._getCoord(handle, 'top')) + halfHandleSize )
+			? handles.map( handle => this.getCoord(handle, 'left'))
+			: handles.map( handle => Math.abs(sliderTop - this.getCoord(handle, 'top')))
     }
   }
 }

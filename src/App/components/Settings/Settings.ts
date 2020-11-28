@@ -1,7 +1,7 @@
 import { Component, State } from "../../../Helpers/Interfaces";
 import { getSettingsContent } from "../../templates/settingsTemplate";
 
-class Settings implements Component {
+class Settings {
   private template: string = '';
   constructor(anchor: Element | HTMLElement, params: State) {
     this.create(anchor, params);

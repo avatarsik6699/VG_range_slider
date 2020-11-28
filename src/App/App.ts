@@ -1,4 +1,4 @@
-import { ComponentProps, State } from "../Helpers/Interfaces";
+import { ComponentProps, RenderData, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
 import { getDefaultSpecialCoords } from "./templates/getDefaultSpeicalCoords";
@@ -25,7 +25,7 @@ export class App extends Observer {
 			this.create(params);
 		}
 
-		renderUI(renderData) {
+		renderUI(renderData: RenderData) {
 			Object.values(this.componentInstanceList).forEach( (instance: any) => {
 				if (Array.isArray(instance)) {
 					instance.forEach((subInstance, id) => subInstance.render(this.anchor, renderData, id))
@@ -45,12 +45,62 @@ export class App extends Observer {
 			
 			this.anchor.addEventListener('mousedown', initEvent);
 			this.anchor.addEventListener('touchstart', initEvent);
+		}
 
+		getNode<T>(name: string, config?: {allNodes: boolean}): T {
+			if (!this.componentInstanceList) this._throwException('First you need to get component instances')
+			
+			return config?.allNodes
+			? this.componentInstanceList[name].map( instance => instance.getNode(this.anchor))
+			: this.componentInstanceList[name][0].getNode(this.anchor)
+		}
+
+		getCoord(elemName: string | HTMLElement, coord: string | string[]) {
+			const elem = typeof elemName === 'string' 
+			? <HTMLElement>this.getNode(elemName)
+			: elemName;
+
+			if (typeof coord === 'string') {
+				return elem.getBoundingClientRect()[coord];
+			} else if (Array.isArray(coord)) {
+				const coords = {}
+				coord.forEach( coordName => {
+					coords[coordName] = elem.getBoundingClientRect()[coordName]
+				})
+				return coords;
+			} else {
+				return this._throwException('incorrect coord or elemName')
+			}
+		}
+
+		getSpecialCoord(coord: string | (() => number)): number | number[] {
+			const defaultSpeicalCoords = getDefaultSpecialCoords.call(this);
+			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
+				return defaultSpeicalCoords[coord]();
+			} else if (typeof coord === 'function') {
+				return coord();
+			} else {
+				this._throwException(`${coord} was not found in defaultCoords or incorrect function`)
+			}
+		}
+
+		show(): void {
+			this.anchor.style.display = '';
+		}
+
+		hide(): void {
+			this.anchor.style.display = 'none';
+		}
+
+		destroy(): void {
+			Array.from(this.anchor.children).forEach( node => {
+				node.remove();
+			});
 		}
 
 		private _settingsEvent(e) {
 			const target = e.target;
-			const settings: HTMLFormElement = this._getNode('settings');
+			const settings: HTMLFormElement = this.getNode('settings');
 			if (!settings) throw new Error('Settings not found');
 
 			const settingsData: any = {};
@@ -99,11 +149,11 @@ export class App extends Observer {
 				this._scaleEvent(e);
 			} else {
 				const appData = this._getAppData(e);
-				let handlesPxValues = this._getHandlesPxValues(e, appData.id, appData.handleSize)
+				let handlesPxValues = this._getHandlesPxValues(e, appData.id)
 				this.notify('touchEvent', {pxValue: handlesPxValues, ...appData})
-	
+
 				const handleMove = (e: MouseEvent| TouchEvent): void => {
-					handlesPxValues = this._getHandlesPxValues(e,appData.id, appData.handleSize)
+					handlesPxValues = this._getHandlesPxValues(e,appData.id)
 					this.notify('moveEvent',  {pxValue: handlesPxValues, ...appData})
 				}
 	
@@ -115,6 +165,7 @@ export class App extends Observer {
 				}
 				
 				if (e instanceof TouchEvent) {
+					e.preventDefault();
 					document.addEventListener('touchmove', handleMove);
 					document.addEventListener('touchend', finishMove);
 				} else {
@@ -129,14 +180,14 @@ export class App extends Observer {
 			}
 		}
 
-		private _scaleEvent(e) {
+		private _scaleEvent(e: MouseEvent | TouchEvent) {
 			const appData = this._getAppData(e);
-			const scaleValue = Number(e.target.textContent);
-			const handlesValue = (<HTMLElement[]>this._getNode('handle', {allNodes: true}))
+			const scaleValue = Number((<HTMLElement>e.target)?.textContent);
+			const handlesValue = (<HTMLElement[]>this.getNode('handle', {allNodes: true}))
 			.map( handle => Number(handle.dataset.value))
 			
 			// меняем value по id у того handle, который должен переместиться
-			handlesValue.splice(appData.id,1,scaleValue);
+			handlesValue.splice(appData.id, 1, scaleValue);
 
 			this.notify('scaleEvent', {value: handlesValue, ...appData})
 		}
@@ -145,26 +196,32 @@ export class App extends Observer {
 			const id = !e 
 			? 0
 			: this._defineCloseHandle(this._getCursorPxValue(e));
-			const limit = this._getSpecialCoord('limit');
-			const handleSize = <number>this._getSpecialCoord('handleSize');
+			const limit = this.getSpecialCoord('limit');
+			const handleSize = <number>this.getSpecialCoord('handleSize');
 			return {id, limit, handleSize}
 		}
 
-		private _getHandlesPxValues(e,id, handleSize) {
-			const handles = <HTMLElement[]>this._getNode('handle', {allNodes: true});
-			const pxValue = this._getCursorPxValue(e);
-			const handlesPxValue = (handles)
-			.map( handle => this._getCoord(handle, 'left') - handleSize / 2)
+		private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
+			const handles = <HTMLElement[]>this.getNode('handle', {allNodes: true});
+			const pxValue = Math.round(this._getCursorPxValue(e));
+			const sliderTop = this.getCoord('slider', 'top');
+			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
+
+			const handlesPxValue = handles.map( handle => {
+				return this.params.position === 'horizontal'
+				? Math.round(this.getCoord(handle, 'left') - halfHandleSize)
+				: Math.round(Math.abs(sliderTop - this.getCoord(handle, 'top')))
+			})
 
 			// меняем value по id у того handle, который должен переместиться
 			handlesPxValue.splice(id,1,pxValue);
-
 			return handlesPxValue
 		}
 
 		private _getCursorPxValue(e: MouseEvent| TouchEvent) {
-			const sliderCoord = this._getCoord('slider', ['top', 'left']);
-			const halfHandle = <number>this._getSpecialCoord('handleSize') / 2;
+			const sliderCoord = this.getCoord('slider', ['top', 'left']);
+			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
+			
 			const clientX = e instanceof  TouchEvent 
 			? e.touches[0].clientX
 			: e.clientX
@@ -174,13 +231,13 @@ export class App extends Observer {
 			: e.clientY
 
 			return this.params.position === 'horizontal'
-			? clientX - sliderCoord['left'] - halfHandle	
-			: clientY - sliderCoord['top'] - halfHandle
+			? clientX - sliderCoord['left'] - halfHandleSize	
+			: clientY - sliderCoord['top'] - halfHandleSize
 		}
 
 		private _defineCloseHandle(pxValue): number {
-			const handles: HTMLElement[] = this._getNode('handle', {allNodes: true});
-			const handlesCoord = <number[]>this._getSpecialCoord('handlesCoord');
+			const handles: HTMLElement[] = this.getNode('handle', {allNodes: true});
+			const handlesCoord = <number[]>this.getSpecialCoord('handlesCoord');
 			const relativeCoords: number[] = handlesCoord.map(
 				handleCoord =>  Math.abs(pxValue - handleCoord)
 			);
@@ -192,57 +249,6 @@ export class App extends Observer {
 				? Number(handles[0].dataset.id)
 				: Number(handles[1].dataset.id)
 			}
-		}
-
-		_getNode<T>(name: string, config?: {allNodes: boolean}): T {
-			if (!this.componentInstanceList) this._throwException('First you need to get component instances')
-			
-			return config?.allNodes
-			? this.componentInstanceList[name].map( instance => instance.getNode(this.anchor))
-			: this.componentInstanceList[name][0].getNode(this.anchor)
-		}
-
-		_getCoord(elemName: string | HTMLElement, coord: string | string[]) {
-			const elem = typeof elemName === 'string' 
-			? <HTMLElement>this._getNode(elemName)
-			: elemName;
-
-			if (typeof coord === 'string') {
-				return elem.getBoundingClientRect()[coord];
-			} else if (Array.isArray(coord)) {
-				const coords = {}
-				coord.forEach( coordName => {
-					coords[coordName] = elem.getBoundingClientRect()[coordName]
-				})
-				return coords;
-			} else {
-				return this._throwException('incorrect coord or elemName')
-			}
-		}
-
-		_getSpecialCoord(coord: string | (() => number)): number | number[] {
-			const defaultSpeicalCoords = getDefaultSpecialCoords.call(this);
-			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
-				return defaultSpeicalCoords[coord]();
-			} else if (typeof coord === 'function') {
-				return coord();
-			} else {
-				this._throwException(`${coord} was not found in defaultCoords or incorrect function`)
-			}
-		}
-
-		show(): void {
-			this.anchor.style.display = '';
-		}
-
-		hide(): void {
-			this.anchor.style.display = 'none';
-		}
-
-		destroy(): void {
-			Array.from(this.anchor.children).forEach( node => {
-				node.remove();
-			});
 		}
 
 		private _getEventName(target: HTMLElement | Element| undefined): string | undefined {

@@ -1,5 +1,5 @@
 import { Component, State } from "../../../Helpers/Interfaces";
-abstract class Tooltip implements Component {
+abstract class Tooltip {
   protected prevSpeed = 0;
   protected template: string = '';
   constructor(anchor: Element | HTMLElement, params: State, protected id?: number) {
