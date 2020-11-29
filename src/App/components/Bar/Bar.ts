@@ -1,4 +1,4 @@
-import { Component, RenderData, State } from "../../../Helpers/Interfaces";
+import { Component, RenderData } from "../../../Helpers/Interfaces";
 
 interface BarInterface {
   render(anchor: HTMLElement, renderData: RenderData): void;
@@ -21,8 +21,12 @@ abstract class Bar implements Component {
   }
 
   getNode(anchor: HTMLElement): HTMLElement {
-    let node: HTMLElement | null = anchor.querySelector('.slider__bar');
-    if (!node) throw new Error(`bar wasn't found. Also, for this to work, you must call the 'render' method`);
+    const node: HTMLElement | null = anchor.querySelector('.slider__bar');
+    if (!node || node === undefined) { 
+      throw new Error(`Bar wasn't found. 
+      Also, for this to work, you must call the 'create' method`);
+    }
+
     return node;
   }
 
@@ -45,15 +49,8 @@ abstract class Bar implements Component {
 
   protected getPxValue(renderData: RenderData): number | number[] {
     if (renderData.type === 'single') {
-      // if (renderData[0].pxValue === undefined) throw new Error('pxValue wasn\'t found')
-
       return renderData[0]['pxValue'];
     } else {
-      // if (
-      //   renderData[0].pxValue === undefined && 
-      //   renderData[1].pxValue === undefined
-      // ) throw new Error('pxValues wasn\'t found') 
-
       return [renderData[0].pxValue, renderData[1].pxValue]
     }
   }

@@ -23,6 +23,13 @@ describe('Bar', () => {
       anchor.innerHTML = '';
     })
 
+    it('throw expection if node(bar) not found', () => {
+      const hbar = new hBar(anchor, {position: 'horizontal'});
+      document.querySelector('.slider__bar')?.remove();
+      expect(() => hbar.getNode(anchor)).to.throw(`Bar wasn't found. 
+      Also, for this to work, you must call the 'create' method`)
+    })
+
     it('should throw exception if the position is invalid', () => {
       const invalidPositions = ['',1,true,false];
       const hbar = new hBar(anchor, {position: 'horizontal'});
@@ -68,8 +75,6 @@ describe('Bar', () => {
   describe('hBar', () => {
     it('should render the single correctly', () => {
       const hbar = new hBar(anchor, {position: 'horizontal'});
-      
-      
       hbar.render(anchor, {
         //@ts-ignore
         0: {pxValue: 50},
@@ -84,7 +89,6 @@ describe('Bar', () => {
 
     it('should render the range correctly', () => {
       const hbar = new hBar(anchor, {position: 'horizontal'});
-      
       hbar.render(anchor, {
         //@ts-ignore
         0: {pxValue: 20},
@@ -103,8 +107,6 @@ describe('Bar', () => {
   describe('vBar', () => {
     it('should render the single correctly', () => {
       const vbar = new vBar(anchor, {position: 'horizontal'});
-      
-      
       vbar.render(anchor, {
         //@ts-ignore
         0: {pxValue: 50},
@@ -119,7 +121,6 @@ describe('Bar', () => {
 
     it('should render the range correctly', () => {
       const vbar = new vBar(anchor, {position: 'horizontal'});
-      
       vbar.render(anchor, {
         //@ts-ignore
         0: {pxValue: 20},
