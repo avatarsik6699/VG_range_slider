@@ -17,7 +17,7 @@ abstract class Handle implements Component {
   }
 
   getNode(anchor: HTMLElement): HTMLElement {
-    const node: HTMLElement = anchor.querySelector(`.slider__handle[data-id="${this.id}"`) as HTMLElement;
+    const node: HTMLElement = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }

@@ -21,7 +21,6 @@ class Slider implements Component {
   }
 
   getNode(anchor: HTMLElement): HTMLElement {
-    if (!anchor) throw new Error(`didn't get anchor`);
     let node = anchor.querySelector('.slider') as HTMLElement;
     if (!node) throw new Error(`slider wasn't found`);
     return node;

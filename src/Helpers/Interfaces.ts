@@ -42,7 +42,7 @@ interface RenderData {
 
 interface Component {
   getName(): string;
-  getNode(anchor: HTMLElement): HTMLElement;
+  getNode(anchor: HTMLElement, id?: number): HTMLElement;
   getRootElement(anchor: Element): Element;
 }
 
