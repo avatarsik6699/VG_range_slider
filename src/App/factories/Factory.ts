@@ -24,6 +24,8 @@ abstract class Factory {
     const name = component.prototype.constructor.name;
     if (name === 'Settings') {
       return name.toLowerCase()
+    } else if (name === 'Slider') {
+      return name.toLowerCase()
     } else {
       return name.slice(1).toLowerCase();
     }
