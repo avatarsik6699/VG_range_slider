@@ -1,36 +1,41 @@
-import { State } from "../../../Helpers/Interfaces";
+import { Component, RenderData, State } from "../../../Helpers/Interfaces";
 
-abstract class Slider {
+class Slider implements Component {
   protected template: string = `
   <div class="slider-wrapper">
     <div class="slider">
     </div>
   </div>`;
-  constructor(anchor: Element | HTMLElement, params: State) {
+  constructor(anchor: HTMLElement, params: {position: string}) {
     this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, params: State): this { 
+  create(anchor: HTMLElement, params: {position: string}) { 
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('afterbegin', this.template);
-    return this;
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement | Element): Element {
-    if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector('.slider');
-    if (!node) throw new Error(`slider wasn't found. Also, for this to work, you must call the 'render' method`);
+  getNode(anchor: HTMLElement): HTMLElement {
+    let node = anchor.querySelector('.slider') as HTMLElement;
+    if (!node) throw new Error(`slider wasn't found`);
     return node;
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: any): void
+  getRootElement(anchor: HTMLElement): HTMLElement {
+    const root = anchor;
+    if (!root) throw new Error (`root 'Slider' wasn't found`);
+    return root;
+  }
+
+  render(anchor: HTMLElement, renderData: RenderData): void {}
   
-  setTemplate (params: State): void {
+  protected setTemplate (params: {position: string}) {
+    if (!params.position) throw new Error('position wasn\'t found in params')
     const modifer = `slider_position-${params.position}`
     this.template = `
     <div class="slider-wrapper">
@@ -38,20 +43,6 @@ abstract class Slider {
       </div>
     </div>`;
   }
-
-  protected getRootElement(anchor: Element): Element {
-    const root = anchor;
-    if (!root) throw new Error (`root 'Slider' wasn't found`);
-    return root;
-  }
 }
 
-class vSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams:  any): void {}
-}
-
-class hSlider extends Slider {
-  update(anchor: Element | HTMLElement, renderParams: any): void {}
-}
-
-export { vSlider, hSlider };
+export { Slider };

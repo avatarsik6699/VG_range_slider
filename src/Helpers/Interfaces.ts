@@ -8,7 +8,8 @@ interface State {
   scale: boolean,
   tooltip: boolean,
   bar: boolean,
-  handle: boolean,
+  from?: number,
+  to?:number,
 }
 
 interface Factory {
@@ -16,11 +17,7 @@ interface Factory {
 }
 
 interface Component {
-  template: string;
-  create(anchor: Element | HTMLElement, renderParams?: any): this
-  setTemplate(type: string, handleId: number): void;
-  getNode(anchor: HTMLElement | Element, handleId?: number): Element;
-  update?(anchor: Element | HTMLElement, renderParams: {[name: string]: number | string} | any, handleId?: any): void
+  render(anchor: Element | HTMLElement, renderData: any, id?: number);
 }
 
 type MinMax = {
@@ -28,4 +25,25 @@ type MinMax = {
   min: State['min'];
 }
 
-export { State, Factory, Component, MinMax };
+type ComponentProps = { 
+  [name: string]: {[key: string]: number} | number 
+};
+
+type ValuePxValue = { pxValue: number; value: number }
+
+interface RenderData {
+  id: number;
+  type: string;
+  position: string;
+  scaleValues: ValuePxValue[];
+  handleSize: number;
+  [key: number]: ValuePxValue;
+}
+
+interface Component {
+  getName(): string;
+  getNode(anchor: HTMLElement, id?: number): HTMLElement;
+  getRootElement(anchor: Element): Element;
+}
+
+export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue };

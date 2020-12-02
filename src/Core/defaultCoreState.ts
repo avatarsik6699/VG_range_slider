@@ -9,6 +9,5 @@ export const defaultCoreState: State = {
   type: 'single',
   scale: true,
   tooltip: true,
-  handle: true,
   bar: true,
 }

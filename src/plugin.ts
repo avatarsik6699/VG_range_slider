@@ -46,15 +46,14 @@ declare global {
 })(jQuery)
 
 let settings = {
-	max: 100,
-	min: 10,
-  value: [11],
-  step: 3,
+	max: 1000,
+	min: 100,
+  value: [305, 444],
+  step: 1,
   position: 'horizontal',
-  type: 'single',
-  scale: false,
-  tooltip: false,
-  handle: true,
+  type: 'range',
+  scale: true,
+  tooltip: true,
   bar: true,
 }
 

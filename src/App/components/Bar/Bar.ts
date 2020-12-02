@@ -1,129 +1,90 @@
-import { Component, State } from "../../../Helpers/Interfaces";
+import { Component, RenderData } from "../../../Helpers/Interfaces";
 
-abstract class Bar {
+interface BarInterface {
+  render(anchor: HTMLElement, renderData: RenderData): void;
+}
+
+abstract class Bar implements Component {
   protected template: string = '';
-  protected isInit = false;
-  constructor(anchor: Element | HTMLElement, params: State) {
+  constructor(anchor: HTMLElement, params: {position: string}) {
     this.create(anchor, params);
   }
 
-  create(anchor: Element | HTMLElement, params: State): this { 
+  create(anchor: HTMLElement, params: {position: string}) {
     this.setTemplate(params);
     const root = this.getRootElement(anchor);
     root.insertAdjacentHTML('beforeend', this.template);
-    return this;
   }
 
   getName(): string {
-    return Object.getPrototypeOf(this).constructor.name.slice(1);
+    return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement | Element): Element {
-    if (!anchor) throw new Error(`didn't get anchor`);
-    let node = anchor.querySelector('.slider__bar');
-    if (!node) throw new Error(`bar wasn't found. Also, for this to work, you must call the 'render' method`);
+  getNode(anchor: HTMLElement): HTMLElement {
+    const node: HTMLElement | null = anchor.querySelector('.slider__bar');
+    if (!node || node === undefined) { 
+      throw new Error(`Bar wasn't found. 
+      Also, for this to work, you must call the 'create' method`);
+    }
+
     return node;
   }
 
-  abstract update(anchor: Element | HTMLElement, renderParams: {pxValue: number} | any): void
-  
-  protected setTemplate (params: State): void {
-    const modifer = `slider__bar_position-${params.position}`
-    this.template = `<div class="slider__bar ${modifer}" data-component="bar"></div>`;
-  }
-
-  protected getRootElement(anchor: Element): Element {
+  getRootElement(anchor: Element): Element {
     const root = anchor.querySelector('.slider');
     if (!root) throw new Error (`root 'Slider' wasn't found`);
     return root;
   }
 
-  protected getHandlesPosition(anchor, position): number[] {
-    let handles: HTMLElement[] = anchor.querySelectorAll('.slider__handle');
-    if (position === 'horizontal') {
-        return [
-        handles[0].getBoundingClientRect().left - handles[1].getBoundingClientRect().left,
-        handles[1].getBoundingClientRect().left - handles[0].getBoundingClientRect().left
-      ]
+  abstract render(anchor: HTMLElement, renderData: RenderData): void;
+
+  protected setTemplate (params: {position: string}): void {
+    if (typeof params.position !== 'string' || !params.position) {
+      throw new Error('position wasn\'t found or incorrect')
+    }
+
+    const modifer = `slider__bar_position-${params.position}`
+    this.template = `<div class="slider__bar ${modifer}" data-component="bar"></div>`;
+  }
+
+  protected getPxValue(renderData: RenderData): number | number[] {
+    if (renderData.type === 'single') {
+      return renderData[0]['pxValue'];
     } else {
-      return [
-          Math.round(handles[0].getBoundingClientRect().top - handles[1].getBoundingClientRect().top),
-        Math.round(handles[1].getBoundingClientRect().top - handles[0].getBoundingClientRect().top)
-      ]
+      return [renderData[0].pxValue, renderData[1].pxValue]
     }
-    
   }
 }
 
-class hBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
-    const bar = (<HTMLElement>this.getNode(anchor));
-    let firstHandle = renderParams['0']?.correctPxValue;
-    let secondHandle = renderParams['1']?.correctPxValue;
-    
-    if (renderParams.type === 'single') {
+class hBar extends Bar implements BarInterface {
+  render(anchor: HTMLElement, renderData: RenderData): void {
+    if (renderData.type === undefined || renderData.handleSize === undefined) {
+      throw new Error('type or handleSize wasn\'t found in renderData');
+    }
+
+    const bar = this.getNode(anchor);
+    const pxValue = this.getPxValue(renderData) as number;
+    if (renderData.type === 'single') {
       bar.style.left = 0 + 'px';
-      bar.style.width = firstHandle + 20 + 'px';
-    } 
-    
-    if(renderParams.type === 'range') {
-      if (!this.isInit) {
-        bar.style.left = firstHandle < secondHandle
-        ? firstHandle + 'px'
-        : secondHandle + 'px' 
-        bar.style.width = Math.abs(secondHandle - firstHandle) + 'px';
-
-        this.isInit = true;
-      } else {
-        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
-        let id = renderParams.id;
-        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
-       
-        if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
-          bar.style.left = correctPxValue + 'px';
-          bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
-        } else {
-          bar.style.width = Math.abs(handlesPosition[id]) + 20 + 'px';
-          bar.style.left = correctPxValue - Math.abs(handlesPosition[id]) + 'px';;
-        }
-      }
+      bar.style.width = pxValue + renderData.handleSize + 'px';
+    } else {
+      bar.style.width = Math.abs(pxValue[0] - pxValue[1]) + renderData.handleSize +'px';
+      bar.style.left = pxValue[0] < pxValue[1] ? pxValue[0] + 'px' : pxValue[1] + 'px' 
     }
   }
 }
 
-class vBar extends Bar {
-  update(anchor: Element | HTMLElement, renderParams: any): void {
-    const bar = (<HTMLElement>this.getNode(anchor));
-    let firstHandle = renderParams['0']?.correctPxValue;
-    let secondHandle = renderParams['1']?.correctPxValue;
-    
-    if (renderParams.type === 'single') {
+class vBar extends Bar implements BarInterface  {
+  render(anchor: HTMLElement, renderData: RenderData): void {
+    if (renderData.type === undefined) throw new Error('type wasn\'t found in renderData');
+    const bar = this.getNode(anchor);
+    const pxValue = this.getPxValue(renderData);
+    if (renderData.type === 'single') {
       bar.style.top = 0 + 'px';
-      bar.style.height = firstHandle + 20 + 'px';
-    } 
-    
-    if(renderParams.type === 'range') {
-      if (!this.isInit) {
-        bar.style.top = firstHandle < secondHandle
-        ? firstHandle + 'px'
-        : secondHandle + 'px' 
-        bar.style.height = Math.abs(secondHandle - firstHandle) + 'px';
-
-        this.isInit = true;
-      } else {
-        let handlesPosition = this.getHandlesPosition(anchor, renderParams.position);
-        console.log(handlesPosition)
-        let id = renderParams.id;
-        let correctPxValue = renderParams[id]?.correctPxValue ?? 0;
-       
-        if(handlesPosition[id] <= 0 || handlesPosition[id] === 0) {
-          bar.style.top = correctPxValue + 'px';
-          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
-        } else {
-          bar.style.height = Math.abs(handlesPosition[id]) + 20 + 'px';
-          // bar.style.top = correctPxValue - Math.abs(handlesPosition[id]) + 'px';
-        }
-      }
+      bar.style.height = (pxValue as number) + renderData.handleSize + 'px';
+    } else {
+      bar.style.height = Math.abs(pxValue[0] - pxValue[1]) + renderData.handleSize +'px';
+      bar.style.top = pxValue[0] < pxValue[1] ? pxValue[0] + 'px' : pxValue[1] + 'px' 
     }
   }
 }
