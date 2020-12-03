@@ -1,1 +1,1 @@
-JQuery slider
+Customizible slider
