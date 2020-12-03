@@ -16,10 +16,6 @@ interface Factory {
   createComponents(params: {type: string, scale: boolean, tooltip: boolean}): {};
 }
 
-interface Component {
-  render(anchor: Element | HTMLElement, renderData: any, id?: number);
-}
-
 type MinMax = {
   max: State['max'];
   min: State['min'];
@@ -44,6 +40,7 @@ interface Component {
   getName(): string;
   getNode(anchor: HTMLElement, id?: number): HTMLElement;
   getRootElement(anchor: Element): Element;
+  render?(anchor: HTMLElement, renderData: RenderData);
 }
 
 interface AppData {

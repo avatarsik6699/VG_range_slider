@@ -55,6 +55,7 @@ let settings = {
   scale: true,
   tooltip: true,
   bar: true,
+  settings: false,
 }
 
 const $slider = $('.anchor').slider(settings)

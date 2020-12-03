@@ -26,7 +26,7 @@ abstract class Handle implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract render(anchor: HTMLElement, renderData: RenderData, id: number): void;
+  abstract render(anchor: HTMLElement, renderData: RenderData): void;
 
   protected setTemplate(params: {position: string, value: number[]}): void {
     if (params.position === undefined && params.value === undefined) {

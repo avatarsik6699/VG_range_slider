@@ -58,6 +58,7 @@ abstract class Bar implements Component {
 
 class hBar extends Bar implements BarInterface {
   render(anchor: HTMLElement, renderData: RenderData): void {
+    console.log(renderData)
     if (renderData.type === undefined || renderData.handleSize === undefined) {
       throw new Error('type or handleSize wasn\'t found in renderData');
     }

@@ -21,7 +21,7 @@ abstract class Tooltip implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract render(anchor: HTMLElement, renderData: RenderData, id: number): void;
+  abstract render(anchor: HTMLElement, renderData: RenderData): void;
 
   protected setTemplate(params: {position: string}): void {
     if(!params.position) throw new Error('position in params wasn\'t found')
