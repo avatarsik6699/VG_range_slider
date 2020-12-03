@@ -1,6 +1,6 @@
 import { State } from "../Helpers/Interfaces";
 
-export const defaultCoreState: State = {
+const defaultState: State = {
 	max: 500,
 	min: 10,
   value: [50],
@@ -11,3 +11,5 @@ export const defaultCoreState: State = {
   tooltip: true,
   bar: true,
 }
+
+export { defaultState }

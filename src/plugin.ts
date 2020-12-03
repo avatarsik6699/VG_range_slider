@@ -1,5 +1,5 @@
 import { Controller } from "./Controller/Controller";
-import { defaultCoreState } from "./Core/defaultCoreState";
+import { defaultState } from "./Core/defaultState";
 import { State } from "./Helpers/Interfaces";
 declare global {
     interface JQuery {
@@ -30,11 +30,11 @@ declare global {
       slider.app.destroy();
     },
     reset() {
-      this.data('slider').core.setState(defaultCoreState);
+      this.data('slider').core.setState(defaultState);
     }
   }
   
-  $.fn.slider = function(settings = defaultCoreState) {
+  $.fn.slider = function(settings = defaultState) {
     if (methods[<string>settings]) {
       return methods[<string>settings].call(this)
     } else if (typeof settings === 'object') {

@@ -1,6 +1,5 @@
 import { Component, State } from '../../Helpers/Interfaces';
 import { Factory } from './Factory';
-import { getComponentList } from '../templates/getComponentList';
 import { Slider } from '../components/Slider/Slider';
 import { vHandle } from '../components/Handle/Handle';
 import { vTooltip } from '../components/Tooltip/Tooltip';

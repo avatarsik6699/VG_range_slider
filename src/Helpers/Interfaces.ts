@@ -46,4 +46,12 @@ interface Component {
   getRootElement(anchor: Element): Element;
 }
 
-export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue };
+interface AppData {
+  handleSize: number;
+  limit: number;
+  id: number;
+  pxValue?: number[];
+  value?: number[];
+}
+
+export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue, AppData };

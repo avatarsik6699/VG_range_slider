@@ -61,7 +61,6 @@ class hBar extends Bar implements BarInterface {
     if (renderData.type === undefined || renderData.handleSize === undefined) {
       throw new Error('type or handleSize wasn\'t found in renderData');
     }
-
     const bar = this.getNode(anchor);
     const pxValue = this.getPxValue(renderData) as number;
     if (renderData.type === 'single') {
