@@ -2,7 +2,7 @@ import { Component, State } from '../../Helpers/Interfaces';
 abstract class Factory {
   protected multiplyComponents = ['tooltip', 'handle'];
   
-  createComponents(anchor: HTMLElement | Element, params: State) {
+  createComponents(anchor: HTMLElement, params: State) {
     const components = this._getComponentList(params);
     const componentInstanceList = {};
     const defaultId = 0;

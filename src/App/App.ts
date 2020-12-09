@@ -1,4 +1,4 @@
-import { Component, ComponentProps, RenderData, State } from "../Helpers/Interfaces";
+import { Component, RenderData, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
 import { getDefaultSpecialCoords } from "./templates/getDefaultSpeicalCoords";

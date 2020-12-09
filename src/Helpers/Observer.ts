@@ -1,30 +1,27 @@
 export class Observer {
-  eventList: any = {};
-  constructor() {}
+  eventList: {[key: string]: Function[]} = {};
   
-  notify(type: string, data: object = {}): void {
-
-    if(this.eventList[type]) {
-       this.eventList[type].forEach( event => {
-        event(data);
-      })
+  notify<T>(eventType: string, data: T): void {
+    if(this.eventList[eventType]) {
+       this.eventList[eventType].forEach( func => func(data))
     }
   }
 
-  subscribe(type: string, event: Function): void { 
-    if (!this.eventList[type]) {
-      this.eventList[type] = [event];
+  subscribe(eventType: string, callback: Function): void { 
+    if (!this.eventList[eventType]) {
+      this.eventList[eventType] = [callback];
       return;
+    } else if (this.isExist(eventType, callback)) {
+      return;
+    } else {
+      this.eventList[eventType].push(callback);
     }
-
-    if (this.isExist(type, event)) { return };
-    this.eventList[type].push(event);
   }
 
-  isExist(type: string, event: Function): boolean {
+  isExist(eventType: string, callback: Function): boolean {
     let exist: boolean = false;
-    this.eventList[type].find(item => {
-      exist = item.name === event.name ? true : false;
+    this.eventList[eventType].find( func => {
+      exist = func.name === callback.name ? true : false;
     })
 
     return exist;
