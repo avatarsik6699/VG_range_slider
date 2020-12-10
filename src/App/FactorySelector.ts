@@ -1,15 +1,12 @@
-import { HorizontalSlider } from "./factories/horizontalSlider";
-import { VerticalSlider } from "./factories/VerticalSlider";
+import { Factory } from "./factories/Factory";
 
 class FactorySelector {
   getFactory(position: string) {
     if (!this._isCorrectPosition(position)) {
       throw new Error('Didn\'t get position or mistake position')
     }
-  
-    return position === 'horizontal'
-    ? new HorizontalSlider
-    : new VerticalSlider
+    
+    return new Factory;
   }
 
   _isCorrectPosition(position: string): boolean {

@@ -1,65 +1,48 @@
 import { Component, State } from '../../Helpers/Interfaces';
-abstract class Factory {
-  protected multiplyComponents = ['tooltip', 'handle'];
+import { Bar } from '../components/Bar/Bar';
+import { Handle } from '../components/Handle/Handle';
+import { Scale } from '../components/Scale/Scale';
+import { Settings } from '../components/Settings/Settings';
+import { Slider } from '../components/Slider/Slider';
+import { Tooltip } from '../components/Tooltip/Tooltip';
+class Factory {
+  private multiplyComponents = ['tooltip', 'handle'];
+  private components = [Slider, Handle, Tooltip, Scale, Bar, Settings]
   
-  createComponents(anchor: HTMLElement, params: State) {
-    const components = this._getComponentList(params);
-    const componentInstanceList = {};
-    const defaultId = 0;
+  createComponents(anchor: HTMLElement, state: State) {
+    const DEFAULT_ID = 0;
 
-    components.forEach( component => {
-      let name = this._getComponentName(component);
-      if (this.multiplyComponents.includes(name) && params.type === 'range') {
-        componentInstanceList[name] = params.value.map( (_,id) => new component(anchor, params, id));
-      } else {
-        componentInstanceList[name] = [new component(anchor, params, defaultId)]
-      }
-    })
-    return componentInstanceList;
+    return this._getCorrectComps(this.components, state).reduce( (instances, component) => {
+      let name = this._getComponentName(component)
+      return this.multiplyComponents.includes(name) && state.type === 'range'
+      ? {...instances, [name]: state.value.map((_,id) => new component(anchor, state, id))}
+      : {...instances, [name]: [new component(anchor, state, DEFAULT_ID)]}
+    }, {})
   }
 
-  abstract _getComponentList(params: State): any;
-
-  protected _getComponentName(component): string {
-    const name = component.prototype.constructor.name;
-    if (name === 'Settings') {
-      return name.toLowerCase()
-    } else if (name === 'Slider') {
-      return name.toLowerCase()
-    } else {
-      return name.slice(1).toLowerCase();
-    }
+  private _getCorrectComps(components, state: State) {
+    return components.reduce( (correctComps, component) => {
+      return !this._getExcludeComps(state).includes(this._getComponentName(component))
+      ? [...correctComps, component]
+      : [...correctComps]
+    }, [])
   }
 
-  protected _getCorrectComponents(components, params) {
-    const correctComponents: any[] = [];
-    const excludeComponents = this._getExcludeComponents(params)
-
-    components.forEach( element => {
-      let name = this._getComponentName(element);
-      
-      if (!excludeComponents.includes(name)) {
-        correctComponents.push(element);
-      }
-    });
-
-    return correctComponents;
+  private _getExcludeComps(state: State) {
+    return Object.keys(state).reduce((excludeComps: string[] | never[], key) => {
+      return this._isFalse(state[key]) ? [...excludeComps, key] : [...excludeComps];
+    }, [])
   }
 
-  protected _getExcludeComponents(params: State): string[] {
-    const excludeComponents: string[] = [];
-    for (let key in params) {
-      if (this.isFalse(params[key])) { excludeComponents.push(key) }
-    }
-    return excludeComponents;
-  }
-
-  protected isFalse(field: boolean): boolean {
+  private _isFalse(field: boolean): boolean {
     return typeof field === 'boolean'
     ? !field
     : field === 'false'
   }
 
+  private _getComponentName(component): string {
+    return component.prototype.constructor.name.toLowerCase();
+  }
 }
 
 export { Factory };
