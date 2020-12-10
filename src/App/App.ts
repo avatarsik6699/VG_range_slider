@@ -1,6 +1,9 @@
 import { Component, RenderData, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
+const SLIDER_IS_CREATED = 'SLIDER_IS_CREATED';
+const EVENT_TRIGGERED = 'EVENT_TRIGGERED';
+const RECRATE_APP = 'RECRATE_APP';
 
 export class App extends Observer {
 	private instances: {[key: string]: Component[]} = {};
@@ -12,14 +15,13 @@ export class App extends Observer {
 		private factorySelector: FactorySelector) 
 		{
 			super();
-			this.create(state)
 		}
 
 		create(state: State): void {
 			this.instances = this._createComponents(state);
 			this.position = state.position;
 			// после начальной отрисовки данные об сладйере отправляются в core
-			this.notify('finishCreate', {...this._getAppData()});
+			this.notify('finishCreate', {...this._getAppData(), action: SLIDER_IS_CREATED});
 		}
 
 		reCreate(params: State): void {
@@ -149,7 +151,7 @@ export class App extends Observer {
 				
 				this.flag = true;
 				target.removeEventListener('blur', getSettingsData);
-				this.notify('settingsEvent', settingsData);
+				this.notify('settingsEvent', {...settingsData, action: RECRATE_APP});
 			}
 
 			if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
@@ -169,11 +171,12 @@ export class App extends Observer {
 			} else {
 				const appData = this._getAppData(e);
 				let handlesPxValues = this._getHandlesPxValues(e, appData.id)
-				this.notify('touchEvent', {pxValue: handlesPxValues, ...appData})
+				this.notify('touchEvent', {action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData})
 
 				const handleMove = (e: MouseEvent | TouchEvent): void => {
-					handlesPxValues = this._getHandlesPxValues(e,appData.id)
-					this.notify('moveEvent',  {pxValue: handlesPxValues, ...appData})
+					
+					handlesPxValues = this._getHandlesPxValues(e, appData.id)
+					this.notify('moveEvent',  {action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData})
 				}
 	
 				const finishMove = (): void => {
@@ -207,7 +210,7 @@ export class App extends Observer {
 			// меняем value по id у того handle, который должен переместиться
 			handlesValue.splice(appData.id, 1, scaleValue);
 
-			this.notify('scaleEvent', {value: handlesValue, ...appData})
+			this.notify('scaleEvent', {action: EVENT_TRIGGERED, value: handlesValue, ...appData})
 		}
 
 		private _getAppData(e?: MouseEvent | TouchEvent) {
@@ -221,14 +224,14 @@ export class App extends Observer {
 
 		private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
 			const handles = this.getNodes('handle');
-			const pxValue = Math.round(this._getCursorPxValue(e));
+			const pxValue = this._getCursorPxValue(e);
 			const sliderTop = this.getCoord('slider', 'top');
 			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
 
 			const handlesPxValue = handles.map( handle => {
 				return this.position === 'horizontal'
-				? Math.round(this.getCoord(handle, 'left') - halfHandleSize)
-				: Math.round(Math.abs(sliderTop - this.getCoord(handle, 'top')))
+				? this.getCoord(handle, 'left') - halfHandleSize
+				: Math.abs(sliderTop - this.getCoord(handle, 'top'))
 			})
 
 			// меняем value по id у того handle, который должен переместиться
