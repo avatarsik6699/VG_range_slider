@@ -11,8 +11,8 @@ declare global {
   const methods = {
     init(settings)  {
       let anchor: HTMLElement = this[0];
-      this.data('slider', new Controller(anchor))
-      this.data('slider').core.setState(settings);
+      this.data('slider', new Controller(anchor, settings))
+      // this.data('slider').core.setState(settings);
     },
     hide() {
       const slider = this.data('slider');

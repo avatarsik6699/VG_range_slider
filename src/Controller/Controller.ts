@@ -5,12 +5,11 @@ import { AppData, RenderData, State } from "../Helpers/Interfaces";
 export class Controller {
   core: Core;
   app: App;
-  constructor(anchor: HTMLElement) 
+  constructor(anchor: HTMLElement, settings: State) 
   {
-    this.core = new Core;
+    this.core = new Core(settings);
     this.app = new App(anchor, this.core.getState(), new FactorySelector) 
     this.bindEvents();
-    this.app.create(this.core.getState());
     this.app.bindEvents();
   }
 

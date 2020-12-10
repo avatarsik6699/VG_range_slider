@@ -1,22 +1,24 @@
 import { Component, RenderData, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
-import { getDefaultSpecialCoords } from "./templates/getDefaultSpeicalCoords";
 
 export class App extends Observer {
-	private componentInstanceList;
+	private instances: {[key: string]: Component[]} = {};
+	private position: string = 'horizontal';
 	private flag = true;
 	constructor(
-		public anchor: HTMLElement, 
-		public params: State, 
+		private anchor: HTMLElement, 
+		state: State,
 		private factorySelector: FactorySelector) 
 		{
 			super();
+			this.create(state)
 		}
 
-		create(params: State): void {
-			this.params = params; //update params
-			this._createComponents(params);
+		create(state: State): void {
+			this.instances = this._createComponents(state);
+			this.position = state.position;
+			// после начальной отрисовки данные об сладйере отправляются в core
 			this.notify('finishCreate', {...this._getAppData()});
 		}
 
@@ -26,8 +28,10 @@ export class App extends Observer {
 		}
 
 		renderUI(renderData: RenderData) {
-			Object.values(this.componentInstanceList).forEach( instance => {
-				(instance as Component[]).forEach(subInstance => subInstance.render!(this.anchor, renderData))
+			Object.values(this.instances).forEach( instance => {
+				instance.forEach(subInstance => subInstance.render 
+					? subInstance.render(this.anchor, renderData)
+					: '') 
 			});
 		}
 
@@ -43,12 +47,15 @@ export class App extends Observer {
 			this.anchor.addEventListener('touchstart', initEvent);
 		}
 
-		getNode<T>(name: string, config?: {allNodes: boolean}): T {
-			if (!this.componentInstanceList) this._throwException('First you need to get component instances')
-			
-			return config?.allNodes
-			? this.componentInstanceList[name].map( instance => instance.getNode(this.anchor))
-			: this.componentInstanceList[name][0].getNode(this.anchor)
+		getNode(name: string): HTMLElement {
+			if (!this.instances) this._throwException('First you need to get component instances');
+			return this.instances[name][0].getNode(this.anchor)
+		}
+
+		getNodes(name: string): HTMLElement[] {
+			if (!this.instances) this._throwException('First you need to get component instances');
+
+			return this.instances[name].map( instance => instance.getNode(this.anchor))
 		}
 
 		getCoord(elemName: string | HTMLElement, coord: string | string[]) {
@@ -70,7 +77,27 @@ export class App extends Observer {
 		}
 
 		getSpecialCoord(coord: string | (() => number)): number | number[] {
-			const defaultSpeicalCoords = getDefaultSpecialCoords.call(this);
+			const defaultSpeicalCoords = { 
+					handleSize: (): number => {
+						return this.position === 'vertical'
+						? this.getNode('handle').getBoundingClientRect().height
+						: this.getNode('handle').getBoundingClientRect().width
+					},
+
+					limit: (): number => {
+						return this.position === 'vertical'
+						? this.getNode('slider').getBoundingClientRect().height
+						: this.getNode('slider').getBoundingClientRect().width
+					},
+			
+					handlesCoord: (): number[] => {
+						const handles = this.getNodes('handle');
+						const sliderTop = this.getCoord('slider', 'top');
+						return this.position === 'horizontal'
+						? handles.map( handle => this.getCoord(handle, 'left'))
+						: handles.map( handle => Math.abs(sliderTop - this.getCoord(handle, 'top')))
+					}
+			}
 			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
 				return defaultSpeicalCoords[coord]();
 			} else if (typeof coord === 'function') {
@@ -96,7 +123,7 @@ export class App extends Observer {
 
 		private _settingsEvent(e) {
 			const target = e.target;
-			const settings: HTMLFormElement = this.getNode('settings');
+			const settings = this.getNode('settings') as HTMLFormElement;
 			if (!settings) throw new Error('Settings not found');
 
 			const settingsData: any = {};
@@ -166,7 +193,7 @@ export class App extends Observer {
 					document.addEventListener('mouseup', finishMove);
 				}
 	
-				(this.componentInstanceList['handle'] as HTMLElement[]).forEach( handle => {
+				this.getNodes('handle').forEach( handle => {
 					handle.ondragstart = () => false;
 				});
 			}
@@ -174,9 +201,8 @@ export class App extends Observer {
 
 		private _scaleEvent(e: MouseEvent | TouchEvent) {
 			const appData = this._getAppData(e);
-			const scaleValue = Number((<HTMLElement>e.target)?.textContent);
-			const handlesValue = (<HTMLElement[]>this.getNode('handle', {allNodes: true}))
-			.map( handle => Number(handle.dataset.value))
+			const scaleValue = Number((e.target as HTMLElement)?.textContent);
+			const handlesValue = this.getNodes('handle').map( handle => Number(handle.dataset.value))
 			
 			// меняем value по id у того handle, который должен переместиться
 			handlesValue.splice(appData.id, 1, scaleValue);
@@ -194,13 +220,13 @@ export class App extends Observer {
 		}
 
 		private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
-			const handles = <HTMLElement[]>this.getNode('handle', {allNodes: true});
+			const handles = this.getNodes('handle');
 			const pxValue = Math.round(this._getCursorPxValue(e));
 			const sliderTop = this.getCoord('slider', 'top');
 			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
 
 			const handlesPxValue = handles.map( handle => {
-				return this.params.position === 'horizontal'
+				return this.position === 'horizontal'
 				? Math.round(this.getCoord(handle, 'left') - halfHandleSize)
 				: Math.round(Math.abs(sliderTop - this.getCoord(handle, 'top')))
 			})
@@ -216,13 +242,13 @@ export class App extends Observer {
 			const clientX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX
 			const clientY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY
 
-			return this.params.position === 'horizontal'
+			return this.position === 'horizontal'
 			? clientX - sliderCoord['left'] - halfHandleSize	
 			: clientY - sliderCoord['top'] - halfHandleSize
 		}
 
 		private _defineCloseHandle(pxValue: number): number {
-			const handles: HTMLElement[] = this.getNode('handle', {allNodes: true});
+			const handles = this.getNodes('handle');
 			const handlesCoord = <number[]>this.getSpecialCoord('handlesCoord');
 			const relativeCoords: number[] = handlesCoord.map(
 				handleCoord => Math.abs(pxValue - handleCoord)
@@ -249,8 +275,8 @@ export class App extends Observer {
 			return eventName === undefined ? '' :	`_${eventName}Event`
 		}
 
-		private _createComponents(params: State): void {
-			this.componentInstanceList = this.factorySelector
+		private _createComponents(params: State) {
+			return this.factorySelector
 			.getFactory(params.position)
 			.createComponents(this.anchor, params);
 		}

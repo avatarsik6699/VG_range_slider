@@ -1,23 +1,18 @@
-import { Component, RenderData, State } from "../../../Helpers/Interfaces";
+import { Component, RenderData } from "../../../Helpers/Interfaces";
 
-interface HandleInterface {
-  render(anchor: HTMLElement, renderData: RenderData): void;
-}
-
-abstract class Handle implements Component {
-  protected template: string = '';
-  constructor(anchor: HTMLElement, params: {position: string, value: number[]}, protected id: number) {
-    this.create(anchor, params);
+class Handle implements Component {
+  private template: string = '';
+  constructor(anchor: HTMLElement, state: {position: string, value: number[]}, private id: number) {
+    this.create(anchor, state);
   }
 
-  create(anchor: HTMLElement, params: {position: string, value: number[]}): void { 
-    this.setTemplate(params);
-    const root = this.getRootElement(anchor);
-    root.insertAdjacentHTML('beforeend', this.template);
+  create(anchor: HTMLElement, state: {position: string, value: number[]}): void { 
+    this._setTemplate(state);
+    this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
   }
 
-  getNode(anchor: HTMLElement): HTMLElement {
-    const node: HTMLElement = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
+  getNode(anchor: HTMLElement) {
+    const node = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
@@ -26,41 +21,41 @@ abstract class Handle implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  abstract render(anchor: HTMLElement, renderData: RenderData): void;
-
-  protected setTemplate(params: {position: string, value: number[]}): void {
-    if (params.position === undefined && params.value === undefined) {
-      throw new Error('incorrect params: wasn\'t found position or value');
-    }
-    const modifer = `slider__handle slider__handle_position-${params.position}`;
-    const value = params.value[this.id] ?? 0;
-    this.template = `
-    <div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id} data-value=${value}></div>
-    `;
-  }
-
-  getRootElement(anchor: HTMLElement): HTMLElement {
+  getRootElement(anchor: HTMLElement) {
     const root = anchor.querySelector('.slider') as HTMLElement;
     if (!root) throw new Error ('Root wasn\'t found');
     return root;
   }
-}
 
-class hHandle extends Handle implements HandleInterface {
   render(anchor: HTMLElement, renderData: RenderData): void {
-    const handle = this.getNode(anchor);
-    handle.dataset.value = String(renderData[this.id].value) ?? handle.dataset.value;
-    handle.style.left = renderData[this.id].pxValue + 'px';
-  }
+    switch(renderData.position) {
+      case 'horizontal':
+        this._update('left', renderData, anchor)
+        break
+      case 'vertical':
+        this._update('top', renderData, anchor)
+        break
+    }
+  };
 
-}
-
-class vHandle extends Handle implements HandleInterface {
-  render(anchor: HTMLElement, renderData: RenderData): void {
+  private _update(side, renderData, anchor) {
     const handle = this.getNode(anchor);
     handle.dataset.value = String(renderData[this.id]?.value) ?? handle.dataset.value;
-    handle.style.top = renderData[this.id].pxValue + 'px';
+    handle.style[side] = renderData[this.id].pxValue + 'px';
+  }
+
+  private _setTemplate(state: {position: string, value: number[]}): void {
+    if (state.position === undefined && state.value === undefined) {
+      throw new Error('incorrect params: wasn\'t found position or value');
+    }
+    const INITIAL_VALUE = 0;
+    const modifer = `slider__handle slider__handle_position-${state.position}`;
+    const value = state.value[this.id] ?? INITIAL_VALUE;
+    this.template = `
+    <div class="slider__handle ${modifer}" data-component="handle" data-id=${this.id} data-value=${value}></div>
+    `;
   }
 }
 
-export { hHandle, vHandle }
+
+export { Handle }

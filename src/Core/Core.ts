@@ -4,8 +4,9 @@ import { defaultState } from "./defaultState";
 
 export class Core extends Observer {
   private state: State = defaultState;
-  constructor() {
+  constructor(settings: State) {
     super();
+    // this.setState(settings)
   }
 
   setState(settings: State) {
