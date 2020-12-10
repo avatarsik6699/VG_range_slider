@@ -48,7 +48,7 @@ declare global {
 let settings = {
 	max: 1000,
 	min: 100,
-  value: [305, 444],
+  value: [300, 400],
   step: 1,
   position: 'horizontal',
   type: 'range',

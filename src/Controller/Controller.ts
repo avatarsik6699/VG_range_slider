@@ -10,15 +10,16 @@ export class Controller {
     this.core = new Core(settings);
     this.app = new App(anchor, this.core.getState(), new FactorySelector) 
     this.bindEvents();
+    this.app.create(this.core.getState())
     this.app.bindEvents();
   }
 
   bindEvents() {
-    this.app.subscribe('finishCreate', (appData: AppData) => this.core.getRenderData(appData));
-    this.app.subscribe('touchEvent', (appData: AppData) => this.core.getRenderData(appData));
+    this.app.subscribe('finishCreate', (appData: AppData) => this.core.setState(appData));
+    this.app.subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
     this.app.subscribe('settingsEvent', (state: State) => this.core.setState(state));
-    this.app.subscribe('moveEvent', (appData: AppData) => this.core.getRenderData(appData));
-    this.app.subscribe('scaleEvent', (appData: AppData) => this.core.getRenderData(appData));
+    this.app.subscribe('moveEvent', (appData: AppData) => this.core.setState(appData));
+    this.app.subscribe('scaleEvent', (appData: AppData) => this.core.setState(appData));
 
     this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderUI(renderData));
     this.core.subscribe('updateState', (state: State) => this.app.reCreate(state));

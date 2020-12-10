@@ -6,18 +6,40 @@ export class Core extends Observer {
   private state: State = defaultState;
   constructor(settings: State) {
     super();
-    // this.setState(settings)
+    this.setState(settings)
   }
 
-  setState(settings: State) {
-    if (!settings) this._throwException('Не переданы настройки для обновления состояния')
+  setState(settings) {
+    const defaultSettings = {...this.state, ...settings};
+    const {max, min}: MinMax = this._calcCorrectMinMax(defaultSettings.max, defaultSettings.min)
+    const correctStep: number = this._calcCorrectStep(defaultSettings.step, max);
+    const correctValue = this._calcCorrectValue(defaultSettings.value, max, min);
+    const value = this._getUnifyValue(settings)
 
-    const {max, min}: MinMax = this._calcCorrectMinMax(settings.max, settings.min);
-    const correctStep: number = this._calcCorrectStep(settings.step, max);
-    const correctValue = this._calcCorrectValue(settings.value, max, min);
+    switch (defaultSettings.action) {
+      case 'SLIDER_IS_CREATED':
+        this.state = {...this.state, value};
+        this.notify('getRenderData', this.getRenderData(settings));
+        break
+      case 'EVENT_TRIGGERED':
+        this.state = {...this.state, value};
+        this.notify('getRenderData', this.getRenderData(settings));
+        break
+      case 'RECRATE_APP':
+        console.log(defaultSettings)
+        this.state = {...defaultSettings, max, min, ...{step: correctStep, value}};
+        this.notify('updateState', this.state);
+        break
+      default:
+        this.state = {...defaultSettings, max, min, ...{step: correctStep, value: correctValue}};
+    }
 
-    this.state = {...defaultState, ...settings, max, min, ...{step: correctStep, value: correctValue}};
-    this.notify('updateState', this.state);
+    // const {max, min}: MinMax = this._calcCorrectMinMax(settings.max, settings.min);
+    // const correctStep: number = this._calcCorrectStep(settings.step, max);
+    // const correctValue = this._calcCorrectValue(settings.value, max, min);
+
+    // this.state = {...defaultState, ...settings, max, min, ...{step: correctStep, value: correctValue}};
+    
   }
 
   getState(): State {
@@ -26,25 +48,20 @@ export class Core extends Observer {
 
   getRenderData(appData: AppData): void {
     if (!appData) this._throwException('Не переданы данные об приложении, нужные для проведения рассчетов');
-
-    const values = this._getUnifyValue(appData)
+    const value = this.state.value
     const distance = this._getDistance(this.state.min, this.state.max); 
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
+    const valuePxValue = value.map( (value, id) => [id, { pxValue: this._calcPxValue(value, ratio), value}])
     
-    const valuePxValue: {[key: string]: ValuePxValue} = Object.fromEntries(values.map( (value, id) => {
-      let pxValue = Math.round(this._calcPxValue(value, ratio))
-      return [id, {pxValue, value}]
-    }))
-    
-    const renderData: RenderData = {
+    return {
       scaleValues,
       handleSize: appData.handleSize, 
-      ...{id: appData.id, type: this.state.type, position: this.state.position},
-      ...valuePxValue
+      id: appData.id, 
+      type: this.state.type, 
+      position: this.state.position,
+      ...Object.fromEntries(valuePxValue)
     }
-  
-    this.notify('getRenderData', renderData);
   }
 
   private _getRatio(limit: number, handleSize: number, distance: number): number {
@@ -57,22 +74,18 @@ export class Core extends Observer {
 
   private _getUnifyValue(appData: AppData): number[] {
     const distance: number = this._getDistance(this.state.min, this.state.max); 
-    const ratio: number = this._getRatio(appData.limit, appData.handleSize, distance);
     
     // унифицируем данные (переводим px в value, либо берем value из state если init)
     if (appData.pxValue) {
-      const values: number[] = [];
-      
-      appData.pxValue.forEach( px => {
+      const ratio: number = this._getRatio(appData.limit, appData.handleSize, distance);
+      return appData.pxValue.reduce( (values: number[], px) => {
       let valueFromPxValue = Math.round(px / ratio) * this.state.step + this.state.min;
       let value = this._calcCorrectValue(
         valueFromPxValue, 
         this.state.max,
         this.state.min)
-      values.push(...value);    
-      })
-    
-      return values;
+      return [...values, ...value];
+      }, [])
     } else if (appData.value) {
       return this._calcCorrectValue(
         appData.value,
