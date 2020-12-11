@@ -1,22 +1,16 @@
 import { Component, RenderData, State } from "../../../Helpers/Interfaces";
-import { getSettingsContent } from "../../templates/settingsTemplate";
+import { getSettingsContent } from "../../templates/settings.template";
 
 class Settings implements Component {
   private template: string = '';
-  constructor(anchor: HTMLElement, params: State) {
-    this.create(anchor, params);
+  constructor(anchor: HTMLElement, state: State) {
+    this.create(anchor, state);
   }
 
-  create(anchor: HTMLElement, params: State): void { 
-    this.setTemplate(params);
-    const root = this.getRootElement(anchor);
-    root.insertAdjacentHTML('beforeend', this.template);
-    this._setVisualFields(anchor, params);
-  }
-
-  setTemplate (params: State): void {
-    const content = getSettingsContent(params);
-    this.template = `<form class="settings" name="settings" data-component="settings">${content}</form>`;
+  create(anchor: HTMLElement, state: State): void { 
+    this._setTemplate(state);
+    this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
+    this._setVisualFields(anchor, state);
   }
 
   getRootElement(anchor: HTMLElement): HTMLElement {
@@ -46,38 +40,43 @@ class Settings implements Component {
   }
 
   private _disableField(fieldName: string, anchor: HTMLElement) {
-    const filed: HTMLInputElement | null = anchor.querySelector(`.settings__value[name="${fieldName}"]`)
+    const filed = anchor.querySelector(`.settings__value[name="${fieldName}"]`) as HTMLInputElement
     if (!filed) throw new Error('field wasn\'t found')
     filed.disabled = true;
   }
 
   private _getHandlesValue(anchor: HTMLElement): number[] {
     return Array.from(anchor.querySelectorAll('.slider__handle'))
-    .map( handle => Number((handle as HTMLInputElement).dataset.value)).sort( (a,b) => a-b)
+    .map( handle => Number((handle as HTMLElement).dataset.value)).sort( (a,b) => a-b)
   }
 
   private _setDataInFields(anchor: HTMLElement, handlesValue: number[]) {
     const fields = ['from', 'to'];
     handlesValue.forEach( (number, index) => {
-      let input: HTMLInputElement | null = anchor.querySelector(`.settings__value[name="${fields[index]}"]`)
-      if (!input) throw new Error('input not found')
+      let input = anchor.querySelector(`.settings__value[name="${fields[index]}"]`) as HTMLInputElement
+      if (!input) throw new Error('input wasn\'t found')
       input.value = String(number);
     })
   }
 
-  private _setVisualFields(anchor: HTMLElement, params: State) {
+  private _setVisualFields(anchor: HTMLElement, state: State) {
     const visualFields = this.getRootElement(anchor).querySelectorAll('.settings select');
     
     Array.from(visualFields).forEach( field => {
       let fieldName = (field as HTMLSelectElement).name;
       let options = (field as HTMLSelectElement).options
       Array.from(options).forEach( option => {
-        if (params[fieldName] === option.text) {
+        if (state[fieldName] === option.text) {
           option.selected = true;
         }
       }); 
     })
-  } 
+  }
+  
+  private _setTemplate (state: State): void {
+    const content = getSettingsContent(state);
+    this.template = `<form class="settings" name="settings" data-component="settings">${content}</form>`;
+  }
 }
 
 export { Settings };

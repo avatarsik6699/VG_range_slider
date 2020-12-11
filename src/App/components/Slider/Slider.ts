@@ -1,7 +1,7 @@
 import { Component, RenderData } from "../../../Helpers/Interfaces";
 
 class Slider implements Component {
-  protected template: string = `<div class="slider"></div>`;
+  private template: string = `<div class="slider"></div>`;
   constructor(anchor: HTMLElement, state: {position: string}) {
     this.create(anchor, state);
   }
@@ -26,8 +26,6 @@ class Slider implements Component {
     if (!root) throw new Error (`root 'Slider' wasn't found`);
     return root;
   }
-
-  render(anchor: HTMLElement, renderData: RenderData): void {}
   
   private _setTemplate (state: {position: string}) {
     if (!state.position) throw new Error('position wasn\'t found in params')

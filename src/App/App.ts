@@ -1,9 +1,8 @@
+import { EVENT_TRIGGERED, RECRATE_APP, SLIDER_IS_CREATED } from "../Helpers/Constants";
 import { Component, RenderData, State } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { FactorySelector } from "./FactorySelector";
-const SLIDER_IS_CREATED = 'SLIDER_IS_CREATED';
-const EVENT_TRIGGERED = 'EVENT_TRIGGERED';
-const RECRATE_APP = 'RECRATE_APP';
+
 
 export class App extends Observer {
 	private instances: {[key: string]: Component[]} = {};

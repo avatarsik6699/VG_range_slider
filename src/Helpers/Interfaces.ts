@@ -37,9 +37,10 @@ interface RenderData {
 }
 
 interface Component {
+  create(anchor: HTMLElement, state: State | {position: string}, id?: number);
   getName(): string;
-  getNode(anchor: HTMLElement, id?: number): HTMLElement;
-  getRootElement(anchor: Element): Element;
+  getNode(anchor: HTMLElement): HTMLElement;
+  getRootElement(anchor: HTMLElement): HTMLElement;
   render?(anchor: HTMLElement, renderData: RenderData);
 }
 

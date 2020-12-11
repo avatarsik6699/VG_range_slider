@@ -1,3 +1,4 @@
+import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from "../../../Helpers/Constants";
 import { Component, RenderData } from "../../../Helpers/Interfaces";
 
 class Bar implements Component {
@@ -16,10 +17,10 @@ class Bar implements Component {
       throw new Error('type or handleSize wasn\'t found in renderData');
     }
     switch (renderData.position) {
-      case 'horizontal':
+      case HORIZONTAL_SLIDER:
         this._update('left', 'width', renderData, anchor)
         break
-      case 'vertical':
+      case VERTICAL_SLIDER:
         this._update('top', 'height', renderData, anchor)
         break
     }
@@ -35,8 +36,8 @@ class Bar implements Component {
     return node;
   }
 
-  getRootElement(anchor: Element): Element {
-    const root = anchor.querySelector('.slider');
+  getRootElement(anchor: HTMLElement): HTMLElement {
+    const root = anchor.querySelector('.slider') as HTMLElement ;
     if (!root) throw new Error (`root 'Slider' wasn't found`);
     return root;
   }

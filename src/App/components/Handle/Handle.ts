@@ -1,3 +1,4 @@
+import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from "../../../Helpers/Constants";
 import { Component, RenderData } from "../../../Helpers/Interfaces";
 
 class Handle implements Component {
@@ -29,10 +30,10 @@ class Handle implements Component {
 
   render(anchor: HTMLElement, renderData: RenderData): void {
     switch(renderData.position) {
-      case 'horizontal':
+      case HORIZONTAL_SLIDER:
         this._update('left', renderData, anchor)
         break
-      case 'vertical':
+      case VERTICAL_SLIDER:
         this._update('top', renderData, anchor)
         break
     }
