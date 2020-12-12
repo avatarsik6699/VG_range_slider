@@ -12,9 +12,8 @@ export class Core extends Observer {
   setState(settings) {
     const defaultSettings = {...this.state, ...settings};
     const {max, min}: MinMax = this._calcCorrectMinMax(defaultSettings.max, defaultSettings.min)
-    const correctStep: number = this._calcCorrectStep(defaultSettings.step, max);
-    const correctValue = this._calcCorrectValue(defaultSettings.value, max, min);
-    const value = this._getUnifyValue(settings)
+    const step: number = this._calcCorrectStep(defaultSettings.step, max);
+    const value = this._getUnifyValue(settings);
 
     switch (defaultSettings.action) {
       case 'SLIDER_IS_CREATED':
@@ -26,20 +25,12 @@ export class Core extends Observer {
         this.notify('getRenderData', this.getRenderData(settings));
         break
       case 'RECRATE_APP':
-        console.log(defaultSettings)
-        this.state = {...defaultSettings, max, min, ...{step: correctStep, value}};
+        this.state = {...defaultSettings, max, min, step, value};
         this.notify('updateState', this.state);
         break
       default:
-        this.state = {...defaultSettings, max, min, ...{step: correctStep, value: correctValue}};
-    }
-
-    // const {max, min}: MinMax = this._calcCorrectMinMax(settings.max, settings.min);
-    // const correctStep: number = this._calcCorrectStep(settings.step, max);
-    // const correctValue = this._calcCorrectValue(settings.value, max, min);
-
-    // this.state = {...defaultState, ...settings, max, min, ...{step: correctStep, value: correctValue}};
-    
+        this.state = {...defaultSettings, max, min, step, value};
+    }    
   }
 
   getState(): State {
@@ -158,10 +149,10 @@ export class Core extends Observer {
     const step = this.state.step;
     const steps = new Set([min, max])
     const offset = min - Math.round(min / step) * step;
-    
-    for (let i = min; i <= max; i += distance * 0.2) {
+    const factor = 0.2;
+
+    for (let i = min; i <= max; i += distance * factor) {
       let value = Math.round(i / step) * step + offset;
-      
       if (value >= max) {
         steps.add(max);
       } else if (value <= min) {
@@ -170,10 +161,12 @@ export class Core extends Observer {
         steps.add(value);
       }
     }
+    
+    const arr = Array.from(steps).sort( (a,b) => a-b );
+    const diff = (arr[1] - arr[0]) / 2;
+    if (max - arr[arr.length - 2] < diff) {arr.splice(arr.length - 2, 1)};
 
-    return Array.from(steps)
-    .sort( (a,b) => a-b )
-    .map( value => ({pxValue: this._calcPxValue(value, ratio), value}) )
+    return arr.map( value => ({pxValue: this._calcPxValue(value, ratio), value}) )
   }
 
   private _throwException(message: string): never {

@@ -1,3 +1,4 @@
+import { off } from "process";
 import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from "../../../Helpers/Constants";
 import { Component, RenderData } from "../../../Helpers/Interfaces";
 
@@ -45,10 +46,12 @@ class Scale implements Component {
     if (!this.isInit) {
       const scale = this.getNode(anchor);
       let content: string = ``;
-      
+     
       renderData.scaleValues.forEach( (values) => {
+        let offset = 6 - ( (String(values.value).length - 1) * 4);
+        console.log(offset, values.value);
         content += `
-        <div class="slider__scale-item" style="${side}: ${values.pxValue}px">${values.value}</div>`
+        <div class="slider__scale-item" style="${side}: ${values.pxValue + offset}px">${values.value}</div>`
       });
       
       scale.insertAdjacentHTML('afterbegin', content);

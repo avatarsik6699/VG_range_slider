@@ -251,18 +251,13 @@ export class App extends Observer {
 
 		private _defineCloseHandle(pxValue: number): number {
 			const handles = this.getNodes('handle');
-			const handlesCoord = <number[]>this.getSpecialCoord('handlesCoord');
-			const relativeCoords: number[] = handlesCoord.map(
+			const handlesCoord = this.getSpecialCoord('handlesCoord') as number[];
+			const relativeCoords = handlesCoord.map(
 				handleCoord => Math.abs(pxValue - handleCoord)
 			);
-			
-			if (relativeCoords.length === 1) {
-				return Number(handles[0].dataset.id);
-			} else {
-				return relativeCoords[0] < relativeCoords[1]
-				? Number(handles[0].dataset.id)
-				: Number(handles[1].dataset.id)
-			}
+			return relativeCoords.length === 1
+			? Number(handles[0].dataset.id)
+			: relativeCoords[0] < relativeCoords[1] ? Number(handles[0].dataset.id) : Number(handles[1].dataset.id)
 		}
 
 		private _getEventName(target: HTMLElement): string {
