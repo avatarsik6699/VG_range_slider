@@ -16,7 +16,7 @@ class Bar implements Component {
     if (renderData.type === undefined || renderData.handleSize === undefined) {
       throw new Error('type or handleSize wasn\'t found in renderData');
     }
-    switch (renderData.position) {
+    switch (renderData.position) {  
       case HORIZONTAL_SLIDER:
         this._update('left', 'width', renderData, anchor)
         break
@@ -32,7 +32,7 @@ class Bar implements Component {
 
   getNode(anchor: HTMLElement): HTMLElement {
     const node = anchor.querySelector('.slider__bar') as HTMLElement;
-    if (!node || node === undefined) throw new Error(`Bar wasn't found`);
+    if (!node || node === undefined) throw new Error('Bar wasn\'t found');
     return node;
   }
 
@@ -43,7 +43,7 @@ class Bar implements Component {
   }
 
   private _setTemplate (state: {position: string}): void {
-    if (!state.position) throw new Error('position wasn\'t found or incorrect');
+    if (state.position === undefined) throw new Error('position wasn\'t found or incorrect');
     const modifer = `slider__bar_position-${state.position}`
     this.template = `<div class="slider__bar ${modifer}" data-component="bar"></div>`;
   }

@@ -8,10 +8,7 @@ export class App extends Observer {
 	private instances: {[key: string]: Component[]} = {};
 	private position: string = 'horizontal';
 	private flag = true;
-	constructor(
-		private anchor: HTMLElement, 
-		state: State,
-		private factorySelector: FactorySelector) 
+	constructor(private anchor: HTMLElement, private factorySelector: FactorySelector) 
 		{
 			super();
 		}
@@ -273,9 +270,8 @@ export class App extends Observer {
 		}
 
 		private _createComponents(params: State) {
-			return this.factorySelector
-			.getFactory(params.position)
-			.createComponents(this.anchor, params);
+			console.log(this.factorySelector)
+			return this.factorySelector.getFactory().createComponents(this.anchor, params);
 		}
 
 		private _isEmpty<T extends HTMLElement>(elem: T) {

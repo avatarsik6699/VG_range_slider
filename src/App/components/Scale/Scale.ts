@@ -48,7 +48,9 @@ class Scale implements Component {
       let content: string = ``;
      
       renderData.scaleValues.forEach( (values) => {
-        let offset = 6 - ( (String(values.value).length - 1) * 4);
+        let offset = renderData.position === 'horizontal'
+        ? 6 - ( (String(values.value).length - 1) * 4)
+        : 4
         console.log(offset, values.value);
         content += `
         <div class="slider__scale-item" style="${side}: ${values.pxValue + offset}px">${values.value}</div>`

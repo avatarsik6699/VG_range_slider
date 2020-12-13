@@ -1,10 +1,6 @@
 import { expect } from 'chai';
 import { Core } from './Core';
-import { JSDOM } from 'jsdom';
-import { defaultState } from './defaultState';
 
-// const DOM = new JSDOM('<html><body><div class="anchor"></div></body></html>');
-// const document = DOM.window.document
 const newState = {
 	max: 1000,
 	min: 100,

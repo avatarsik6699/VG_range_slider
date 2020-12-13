@@ -8,7 +8,7 @@ export class Controller {
   constructor(anchor: HTMLElement, settings: State) 
   {
     this.core = new Core(settings);
-    this.app = new App(anchor, this.core.getState(), new FactorySelector) 
+    this.app = new App(anchor, new FactorySelector) 
     this.bindEvents();
     this.app.create(this.core.getState())
     this.app.bindEvents();
