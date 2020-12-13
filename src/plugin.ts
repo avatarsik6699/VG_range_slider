@@ -46,16 +46,15 @@ declare global {
 })(jQuery)
 
 let settings = {
-	max: 2321,
-	min: 334,
-  value: [10, 20],
-  step: 52,
+	max: 1000,
+	min: 100,
+  value: [355],
+  step: 1,
   position: 'horizontal',
-  type: 'range',
+  type: 'single',
   scale: true,
   tooltip: true,
   bar: true,
-  settings: true,
 }
 
 const $slider = $('.anchor').slider(settings)

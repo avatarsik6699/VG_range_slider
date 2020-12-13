@@ -50,6 +50,19 @@ interface AppData {
   id: number;
   pxValue?: number[];
   value?: number[];
+  action?: string;
 }
 
-export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue, AppData };
+type ScaleValues = {pxValue: number, value: number}[]
+
+export { 
+  State, 
+  Factory, 
+  Component, 
+  MinMax, 
+  ComponentProps, 
+  RenderData, 
+  ValuePxValue, 
+  AppData, 
+  ScaleValues 
+};

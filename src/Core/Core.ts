@@ -1,4 +1,5 @@
-import { AppData, MinMax, RenderData, State, ValuePxValue } from "../Helpers/Interfaces";
+import { Scale } from "../App/components/Scale/Scale";
+import { AppData, MinMax, RenderData, ScaleValues, State, ValuePxValue } from "../Helpers/Interfaces";
 import { Observer } from "../Helpers/Observer";
 import { defaultState } from "./defaultState";
 
@@ -13,7 +14,9 @@ export class Core extends Observer {
     const defaultSettings = {...this.state, ...settings};
     const {max, min}: MinMax = this._calcCorrectMinMax(defaultSettings.max, defaultSettings.min)
     const step: number = this._calcCorrectStep(defaultSettings.step, max);
-    const value = this._getUnifyValue(settings);
+    const value = !settings.action
+    ? this._calcCorrectValue(defaultSettings.value, max, min)
+    : this._getUnifyValue(settings, defaultSettings)
 
     switch (defaultSettings.action) {
       case 'SLIDER_IS_CREATED':
@@ -23,6 +26,7 @@ export class Core extends Observer {
       case 'EVENT_TRIGGERED':
         this.state = {...this.state, value};
         this.notify('getRenderData', this.getRenderData(settings));
+        console.log(this.state)
         break
       case 'RECRATE_APP':
         this.state = {...defaultSettings, max, min, step, value};
@@ -44,7 +48,7 @@ export class Core extends Observer {
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
     const valuePxValue = value.map( (value, id) => [id, { pxValue: this._calcPxValue(value, ratio), value}])
-    
+  
     return {
       scaleValues,
       handleSize: appData.handleSize, 
@@ -63,36 +67,37 @@ export class Core extends Observer {
     return max - min;
   }
 
-  private _getUnifyValue(appData: AppData): number[] {
-    const distance: number = this._getDistance(this.state.min, this.state.max); 
+  private _getUnifyValue(appData: AppData, state: State): number[] {
+    const distance: number = this._getDistance(state.min, state.max); 
     
-    // унифицируем данные (переводим px в value, либо берем value из state если init)
+    // унифицируем данные (переводим px в value, либо берем value из state
+    // если не был передан action и, как следствие, pxValue/value)
     if (appData.pxValue) {
-      const ratio: number = this._getRatio(appData.limit, appData.handleSize, distance);
+      const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
       return appData.pxValue.reduce( (values: number[], px) => {
-      let valueFromPxValue = Math.round(px / ratio) * this.state.step + this.state.min;
+      let valueFromPxValue = Math.round(px / ratio) * state.step + state.min;
       let value = this._calcCorrectValue(
         valueFromPxValue, 
-        this.state.max,
-        this.state.min)
+        state.max,
+        state.min)
       return [...values, ...value];
       }, [])
     } else if (appData.value) {
       return this._calcCorrectValue(
         appData.value,
-        this.state.max,
-        this.state.min
+        state.max,
+        state.min
       )
     } else {
       return this._calcCorrectValue(
-        this.state.value,
-        this.state.max,
-        this.state.min
+        state.value,
+        state.max,
+        state.min
       )
     }
   }
 
-  private _calcCorrectValue(value: State['value'] | number, max: State['max'], min: State['min']): number[] {
+  private _calcCorrectValue(value: number[] | number, max: number, min: number): number[] {
     // переводим value -> [value] для правильной работы метода getRenderData
     const preValue: number[] = Array.isArray(value) 
     ? value
@@ -112,7 +117,7 @@ export class Core extends Observer {
     })
   }
 
-  private _calcCorrectMinMax(max: State['max'], min: State['min']): MinMax {
+  private _calcCorrectMinMax(max: number, min: number): MinMax {
     let correctMax: number;
     let correctMin: number;
     
@@ -129,7 +134,7 @@ export class Core extends Observer {
     }
   }
 
-  private _calcCorrectStep(step: State['step'], max: State['max']): number {
+  private _calcCorrectStep(step: number, max: number): number {
     if (step >= max) {
       return 1;
     } else if (step <= 0) {
@@ -143,7 +148,7 @@ export class Core extends Observer {
       return (value - this.state.min) / this.state.step * ratio;
   }
 
-  private _calcScaleValues(ratio: number, distance: number): any {
+  private _calcScaleValues(ratio: number, distance: number): ScaleValues {
     const min = this.state.min;
     const max = this.state.max;
     const step = this.state.step;
@@ -165,7 +170,6 @@ export class Core extends Observer {
     const arr = Array.from(steps).sort( (a,b) => a-b );
     const diff = (arr[1] - arr[0]) / 2;
     if (max - arr[arr.length - 2] < diff) {arr.splice(arr.length - 2, 1)};
-
     return arr.map( value => ({pxValue: this._calcPxValue(value, ratio), value}) )
   }
 
