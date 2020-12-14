@@ -1,0 +1,26 @@
+.slider__handle {
+  width: 20px;
+  height: 20px;
+  z-index: 1;
+  background: #42aafe;
+  position: absolute;
+  border-radius: 10em;
+  bottom: -6px;
+  left: 0;
+  cursor: pointer;
+
+  &:hover {
+    background: #77bdf7;
+  }
+
+  &_position-horizontal {
+    bottom: -6px;
+    left: 0;
+  }
+
+  &_position-vertical {
+    bottom: 0;
+    left: -5px;
+    top: 0;
+  }
+}

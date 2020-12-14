@@ -1,0 +1,26 @@
+@import '~normalize.css';
+@import './App/components/Slider/Slider.scss';
+@import './App/components/Handle/Handle.scss';
+@import './App/components/Bar/Bar.scss';
+@import './App/components/Scale/Scale.scss';
+@import './App/components/Settings/Settings.scss';
+@import './App/components/Tooltip/Tooltip.scss';
+:root {
+  font: normal normal .875em/1.2 Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.anchor {
+  max-width: 500px;
+}
+
+.root {
+  max-width: 500px;
+  margin: 15px 0px 0px 15px;
+}

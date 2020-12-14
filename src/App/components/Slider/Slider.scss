@@ -1,0 +1,26 @@
+.slider-wrapper_vertical {
+  height: 300px;
+}
+
+.slider-wrapper_horizontal {
+  width: 100%;
+}
+
+.slider {
+  height: 10px;
+  background: #b0ecfa;
+  margin: 0;
+  position: relative;
+  border-radius: 10em;
+  cursor: pointer;
+
+  &_position-horizontal {
+    width: 100%;
+    height: 10px;
+  }
+
+  &_position-vertical {
+    max-width: 10px;
+    height: 100%;
+  }
+}

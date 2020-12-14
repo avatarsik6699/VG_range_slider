@@ -40,6 +40,7 @@ class Handle implements Component {
   };
 
   private _update(side, renderData, anchor) {
+    console.log(renderData)
     const handle = this.getNode(anchor);
     handle.dataset.value = String(renderData[this.id]?.value) ?? handle.dataset.value;
     handle.style[side] = renderData[this.id].pxValue + 'px';

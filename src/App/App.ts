@@ -167,6 +167,7 @@ export class App extends Observer {
 			} else {
 				const appData = this._getAppData(e);
 				let handlesPxValues = this._getHandlesPxValues(e, appData.id)
+				console.log(handlesPxValues)
 				this.notify('touchEvent', {action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData})
 
 				const handleMove = (e: MouseEvent | TouchEvent): void => {
@@ -220,18 +221,15 @@ export class App extends Observer {
 
 		private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
 			const handles = this.getNodes('handle');
-			const pxValue = this._getCursorPxValue(e);
-			const sliderTop = this.getCoord('slider', 'top');
-			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
-
+			const cursorPxValue = this._getCursorPxValue(e);
 			const handlesPxValue = handles.map( handle => {
 				return this.position === 'horizontal'
-				? this.getCoord(handle, 'left') - halfHandleSize
-				: Math.abs(sliderTop - this.getCoord(handle, 'top'))
+				? this.getCoord(handle, 'left') - this.getCoord('slider', 'left')
+				: Math.abs(this.getCoord('slider', 'top') - this.getCoord(handle, 'top'))
 			})
 
 			// меняем value по id у того handle, который должен переместиться
-			handlesPxValue.splice(id,1,pxValue);
+			handlesPxValue.splice(id, 1, cursorPxValue);
 			return handlesPxValue
 		}
 
@@ -240,7 +238,7 @@ export class App extends Observer {
 			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
 			const clientX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX
 			const clientY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY
-
+			
 			return this.position === 'horizontal'
 			? clientX - sliderCoord['left'] - halfHandleSize	
 			: clientY - sliderCoord['top'] - halfHandleSize
@@ -270,7 +268,6 @@ export class App extends Observer {
 		}
 
 		private _createComponents(params: State) {
-			console.log(this.factorySelector)
 			return this.factorySelector.getFactory().createComponents(this.anchor, params);
 		}
 

@@ -1,4 +1,4 @@
-import { Component, RenderData } from "../../../Helpers/Interfaces";
+import { Component } from "../../../Helpers/Interfaces";
 
 class Slider implements Component {
   private template: string = `<div class="slider"></div>`;
@@ -30,7 +30,10 @@ class Slider implements Component {
   private _setTemplate (state: {position: string}) {
     if (!state.position) throw new Error('position wasn\'t found in params')
     const modifer = `slider_position-${state.position}`
-    this.template = `<div class="slider ${modifer}" data-component="slider"></div>`;
+    this.template = `
+    <div class="slider-wrapper slider-wrapper_${state.position}">
+      <div class="slider ${modifer}" data-component="slider"></div>
+    </div>`;
   }
 }
 

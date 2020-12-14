@@ -1,0 +1,19 @@
+.settings {
+  display: flex;
+  flex-flow: column;
+  margin-top: 35px;
+  max-width: 140px;
+  
+  &__item {
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+
+  &__name {
+    font-family: cursive;
+  }
+
+  &__value {
+    max-width: 84px;
+  }
+}

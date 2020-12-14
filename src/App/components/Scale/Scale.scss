@@ -1,0 +1,14 @@
+.slider__scale {
+  position: relative;
+  top: 21px;
+  display: flex;
+  &_position-vertical {
+    top: 0;
+    left: 21px;
+  }
+}
+
+
+.slider__scale-item {
+  position: absolute;
+}

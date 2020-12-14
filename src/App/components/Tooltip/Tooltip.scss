@@ -1,0 +1,20 @@
+.slider__tooltip {
+  position: relative;
+  display: inline-block;
+  font: normal normal 16px/1.2 Helvetica;
+  padding: 2px 5px;
+  background: #42aafe;
+  border-radius: 0.2em;
+  color: white;
+  white-space: nowrap;
+  
+  &_position-horizontal {
+    top: -29px;
+    left: 0px;
+  }
+
+  &_position-vertical {
+    top: 0;
+    left: 29px;
+  }
+}

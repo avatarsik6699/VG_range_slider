@@ -11,7 +11,7 @@ export class Observer {
     if (!this.eventList[eventType]) {
       this.eventList[eventType] = [callback];
       return;
-    } else if (this.isExist(eventType, callback)) {
+    } else if (!this.isExist(eventType, callback)) {
       return;
     } else {
       this.eventList[eventType].push(callback);

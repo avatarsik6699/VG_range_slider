@@ -26,7 +26,6 @@ export class Core extends Observer {
       case 'EVENT_TRIGGERED':
         this.state = {...this.state, value};
         this.notify('getRenderData', this.getRenderData(settings));
-        console.log(this.state)
         break
       case 'RECRATE_APP':
         this.state = {...defaultSettings, max, min, step, value};
@@ -47,7 +46,7 @@ export class Core extends Observer {
     const distance = this._getDistance(this.state.min, this.state.max); 
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
-    const valuePxValue = value.map( (value, id) => [id, { pxValue: this._calcPxValue(value, ratio), value}])
+    const valuePxValue = value.map( (value, id) => [id, { pxValue: Math.round(this._calcPxValue(value, ratio)), value}])
   
     return {
       scaleValues,

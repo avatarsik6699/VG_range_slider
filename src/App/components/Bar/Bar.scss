@@ -1,0 +1,16 @@
+.slider__bar {
+  background: #68d5ff;
+  border-radius: 10em;
+  position: absolute;
+  cursor: pointer;
+
+  &_position-horizontal {
+    height: 10px;
+    width: 0px;
+  }
+
+  &_position-vertical {
+    width: 10px;
+    height: 10px;
+  }
+}

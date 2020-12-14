@@ -5,7 +5,7 @@ import { AppData, RenderData, State } from "../Helpers/Interfaces";
 export class Controller {
   core: Core;
   app: App;
-  constructor(anchor: HTMLElement, settings: State) 
+  constructor(private anchor: HTMLElement, settings: State) 
   {
     this.core = new Core(settings);
     this.app = new App(anchor, new FactorySelector) 
@@ -23,5 +23,8 @@ export class Controller {
 
     this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderUI(renderData));
     this.core.subscribe('updateState', (state: State) => this.app.reCreate(state));
+    this.core.subscribe('getRenderData', () => {
+      this.anchor.dispatchEvent(new CustomEvent('getState', {detail: this.core.getState()}))
+    })
   }
 }
