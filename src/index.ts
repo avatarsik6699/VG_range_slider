@@ -11,6 +11,7 @@ const settings = {
   scale: true,
   tooltip: true,
   bar: true,
+  settings: true,
 };
 
 $('.js-anchor').slider(settings);
