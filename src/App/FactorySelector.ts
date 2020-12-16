@@ -1,9 +1,9 @@
-import { Factory } from "./factories/Factory";
+import { Factory } from './factories/Factory';
 
 class FactorySelector {
   getFactory() {
-    return new Factory;
+    return new Factory();
   }
 }
 
-export { FactorySelector }
+export { FactorySelector };

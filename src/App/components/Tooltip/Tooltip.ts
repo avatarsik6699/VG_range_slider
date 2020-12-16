@@ -1,12 +1,14 @@
-import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from "../../../Helpers/Constants";
-import { Component, RenderData } from "../../../Helpers/Interfaces";
+import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
+import { Component, RenderData } from '../../../Helpers/Interfaces';
+
 class Tooltip implements Component {
-  private template: string = '';
-  constructor(anchor: HTMLElement, state: {position: 'horizontal'}, private id: number) {
+  private template = '';
+
+  constructor(anchor: HTMLElement, state: { position: 'horizontal' }, private id: number) {
     this.create(anchor, state);
   }
 
-  create(anchor: HTMLElement, state: {position: string}) { 
+  create(anchor: HTMLElement, state: { position: string }) {
     this._setTemplate(state);
     this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
   }
@@ -23,32 +25,32 @@ class Tooltip implements Component {
 
   getRootElement(anchor: HTMLElement) {
     const root = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
-    if (!root) throw new Error ('Hanlde was not found');
+    if (!root) throw new Error('Hanlde was not found');
     return root;
   }
 
   render(anchor: HTMLElement, renderData: RenderData): void {
-    switch(renderData.position) {
+    switch (renderData.position) {
       case HORIZONTAL_SLIDER:
-        this._update('left', renderData, anchor)
-        break
+        this._update('left', renderData, anchor);
+        break;
       case VERTICAL_SLIDER:
-        this._update('top', renderData, anchor)
-        break
+        this._update('top', renderData, anchor);
+        break;
     }
-  };
+  }
 
   private _update(side, renderData, anchor) {
-    const OFFSET_FACTOR = 4
+    const OFFSET_FACTOR = 4;
     const numbersAmount = String(renderData[this.id].value).length - 1;
     const offset = numbersAmount * OFFSET_FACTOR;
     const toolTip = this.getNode(anchor);
     toolTip.innerHTML = String(renderData[this.id].value);
-    toolTip.style[side] = -offset + 'px';
+    toolTip.style[side] = `${-offset}px`;
   }
 
-  private _setTemplate(state: {position: string}): void {
-    if(!state.position) throw new Error('position in params wasn\'t found')
+  private _setTemplate(state: { position: string }): void {
+    if (!state.position) throw new Error("position in params wasn't found");
     const modifer = `slider__tooltip slider__tooltip_position-${state.position}`;
     this.template = `<div class="slider__tooltip ${modifer}" data-component="tooltip" data-id=${this.id}>0</div>`;
   }

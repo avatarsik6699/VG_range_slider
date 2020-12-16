@@ -1,31 +1,31 @@
 interface State {
-  min: number,
-  max: number,
-  value: number[],
-  step: number,
-  position: string,
-  type: string,
-  scale: boolean,
-  tooltip: boolean,
-  bar: boolean,
-  from?: number,
-  to?:number,
+  min: number;
+  max: number;
+  value: number[];
+  step: number;
+  position: string;
+  type: string;
+  scale: boolean;
+  tooltip: boolean;
+  bar: boolean;
+  from?: number;
+  to?: number;
 }
 
 interface Factory {
-  createComponents(params: {type: string, scale: boolean, tooltip: boolean}): {};
+  createComponents(params: { type: string; scale: boolean; tooltip: boolean }): {};
 }
 
 type MinMax = {
   max: State['max'];
   min: State['min'];
-}
-
-type ComponentProps = { 
-  [name: string]: {[key: string]: number} | number 
 };
 
-type ValuePxValue = { pxValue: number; value: number }
+type ComponentProps = {
+  [name: string]: { [key: string]: number } | number;
+};
+
+type ValuePxValue = { pxValue: number; value: number };
 
 interface RenderData {
   id: number;
@@ -37,7 +37,7 @@ interface RenderData {
 }
 
 interface Component {
-  create(anchor: HTMLElement, state: State | {position: string}, id?: number);
+  create(anchor: HTMLElement, state: State | { position: string }, id?: number);
   getName(): string;
   getNode(anchor: HTMLElement): HTMLElement;
   getRootElement(anchor: HTMLElement): HTMLElement;
@@ -53,16 +53,6 @@ interface AppData {
   action?: string;
 }
 
-type ScaleValues = {pxValue: number, value: number}[]
+type ScaleValues = { pxValue: number; value: number }[];
 
-export { 
-  State, 
-  Factory, 
-  Component, 
-  MinMax, 
-  ComponentProps, 
-  RenderData, 
-  ValuePxValue, 
-  AppData, 
-  ScaleValues 
-};
+export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue, AppData, ScaleValues };

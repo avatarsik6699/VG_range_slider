@@ -1,8 +1,8 @@
-import { State } from "../Helpers/Interfaces";
+import { State } from '../Helpers/Interfaces';
 
 const defaultState: State = {
-	max: 500,
-	min: 10,
+  max: 500,
+  min: 10,
   value: [50],
   step: 5,
   position: 'horizontal',
@@ -10,6 +10,6 @@ const defaultState: State = {
   scale: true,
   tooltip: true,
   bar: true,
-}
+};
 
-export { defaultState }
+export { defaultState };

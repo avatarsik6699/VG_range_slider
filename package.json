@@ -6,7 +6,9 @@
   "scripts": {
     "test": "mocha",
     "build": "cross-env NODE_ENV=production webpack --mode production",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server"
+    "dev": "cross-env NODE_ENV=development webpack-dev-server",
+    "lint": "eslint --fix src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,8 @@
     "@types/jsdom": "^16.2.5",
     "@types/mocha": "^8.0.4",
     "@types/node": "^14.14.2",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
     "@webpack-cli/serve": "^1.1.0",
     "autoprefixer": "^10.0.1",
     "chai": "^4.2.0",
@@ -36,7 +40,14 @@
     "css-loader": "^5.0.0",
     "css-minimizer-webpack-plugin": "^1.1.5",
     "cssnano": "^4.1.10",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^12.0.0",
+    "eslint-plugin-fsd": "^1.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
     "file-loader": "^6.1.1",
+    "fork-ts-checker-webpack-plugin": "^6.0.7",
     "html-webpack-plugin": "^4.5.0",
     "ignore-styles": "^5.0.1",
     "image-webpack-loader": "^7.0.1",
@@ -62,8 +73,11 @@
   },
   "dependencies": {
     "@types/jquery": "^3.5.3",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.3.0",
     "jquery": "^3.5.1",
     "normalize.css": "^8.0.1",
+    "prettier": "^2.2.1",
     "ts-node": "^9.0.0"
   },
   "browserslist": [

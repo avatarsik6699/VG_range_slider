@@ -1,4 +1,4 @@
-const getSettingsContent = options => `
+const getSettingsContent = (options) => `
   <label class="settings__item">
       <input name="max" type="number" step="${options.step}" value="${options.max}" class="settings__value"/>
       <span class="settings__name">max</span>
@@ -55,5 +55,5 @@ const getSettingsContent = options => `
   </select>
   <span class="settings__name">bar</span>
   </label>
-  `
-export {getSettingsContent};
+  `;
+export { getSettingsContent };

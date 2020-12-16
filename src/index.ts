@@ -2,8 +2,8 @@ import './style.scss';
 import './plugin';
 
 const settings = {
-	max: 1000,
-	min: 100,
+  max: 1000,
+  min: 100,
   value: [355],
   step: 1,
   position: 'horizontal',
@@ -11,7 +11,7 @@ const settings = {
   scale: true,
   tooltip: true,
   bar: true,
-}
+};
 
-$('.anchor').slider(settings)
-$('.root').slider(settings)
+$('.js-anchor').slider(settings);
+$('.js-root').slider(settings);

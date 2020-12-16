@@ -1,281 +1,271 @@
-import { EVENT_TRIGGERED, RECRATE_APP, SLIDER_IS_CREATED } from "../Helpers/Constants";
-import { Component, RenderData, State } from "../Helpers/Interfaces";
-import { Observer } from "../Helpers/Observer";
-import { FactorySelector } from "./FactorySelector";
-
+import { EVENT_TRIGGERED, RECRATE_APP, SLIDER_IS_CREATED } from '../Helpers/Constants';
+import { Component, RenderData, State } from '../Helpers/Interfaces';
+import Observer from '../Helpers/Observer';
+import { FactorySelector } from './FactorySelector';
 
 export class App extends Observer {
-	private instances: {[key: string]: Component[]} = {};
-	private position: string = 'horizontal';
-	private flag = true;
-	constructor(private anchor: HTMLElement, private factorySelector: FactorySelector) 
-		{
-			super();
-		}
+  private instances: { [key: string]: Component[] } = {};
 
-		create(state: State): void {
-			this.instances = this._createComponents(state);
-			this.position = state.position;
-			// после начальной отрисовки данные об сладйере отправляются в core
-			this.notify('finishCreate', {...this._getAppData(), action: SLIDER_IS_CREATED});
-		}
+  private position = 'horizontal';
 
-		reCreate(params: State): void {
-			if (!this._isEmpty(this.anchor)) { this.destroy() }
-			this.create(params);
-		}
+  private flag = true;
 
-		renderUI(renderData: RenderData) {
-			Object.values(this.instances).forEach( instance => {
-				instance.forEach(subInstance => subInstance.render 
-					? subInstance.render(this.anchor, renderData)
-					: '') 
-			});
-		}
+  constructor(private anchor: HTMLElement, private factorySelector: FactorySelector) {
+    super();
+  }
 
-		bindEvents(): void {
-			const initEvent = (e: MouseEvent | TouchEvent): void => {
-				const target = <HTMLElement>e.target;
-				const eventName = this._getEventName(target);
-				if (!eventName) return;
-				this[eventName](e);
-			}
-			
-			this.anchor.addEventListener('mousedown', initEvent);
-			this.anchor.addEventListener('touchstart', initEvent);
-		}
+  create(state: State): void {
+    this.instances = this._createComponents(state);
+    this.position = state.position;
+    // после начальной отрисовки данные об сладйере отправляются в core
+    this.notify('finishCreate', { ...this._getAppData(), action: SLIDER_IS_CREATED });
+  }
 
-		getNode(name: string): HTMLElement {
-			if (!this.instances) this._throwException('First you need to get component instances');
-			return this.instances[name][0].getNode(this.anchor)
-		}
+  reCreate(params: State): void {
+    if (!this._isEmpty(this.anchor)) {
+      this.destroy();
+    }
+    this.create(params);
+  }
 
-		getNodes(name: string): HTMLElement[] {
-			if (!this.instances) this._throwException('First you need to get component instances');
+  renderUI(renderData: RenderData) {
+    Object.values(this.instances).forEach((instance) => {
+      instance.forEach((subInstance) => (subInstance.render ? subInstance.render(this.anchor, renderData) : ''));
+    });
+  }
 
-			return this.instances[name].map( instance => instance.getNode(this.anchor))
-		}
+  bindEvents(): void {
+    const initEvent = (e: MouseEvent | TouchEvent): void => {
+      const target = <HTMLElement>e.target;
+      const eventName = this._getEventName(target);
+      if (!eventName) return;
+      this[eventName](e);
+    };
 
-		getCoord(elemName: string | HTMLElement, coord: string | string[]) {
-			const elem = typeof elemName === 'string' 
-			? <HTMLElement>this.getNode(elemName)
-			: elemName;
+    this.anchor.addEventListener('mousedown', initEvent);
+    this.anchor.addEventListener('touchstart', initEvent);
+  }
 
-			if (typeof coord === 'string') {
-				return elem.getBoundingClientRect()[coord];
-			} else if (Array.isArray(coord)) {
-				const coords = {}
-				coord.forEach( coordName => {
-					coords[coordName] = elem.getBoundingClientRect()[coordName]
-				})
-				return coords;
-			} else {
-				return this._throwException('incorrect coord or elemName')
-			}
-		}
+  getNode(name: string): HTMLElement {
+    if (!this.instances) this._throwException('First you need to get component instances');
+    return this.instances[name][0].getNode(this.anchor);
+  }
 
-		getSpecialCoord(coord: string | (() => number)): number | number[] {
-			const defaultSpeicalCoords = { 
-					handleSize: (): number => {
-						return this.position === 'vertical'
-						? this.getNode('handle').getBoundingClientRect().height
-						: this.getNode('handle').getBoundingClientRect().width
-					},
+  getNodes(name: string): HTMLElement[] {
+    if (!this.instances) this._throwException('First you need to get component instances');
 
-					limit: (): number => {
-						return this.position === 'vertical'
-						? this.getNode('slider').getBoundingClientRect().height
-						: this.getNode('slider').getBoundingClientRect().width
-					},
-			
-					handlesCoord: (): number[] => {
-						const handles = this.getNodes('handle');
-						const sliderTop = this.getCoord('slider', 'top');
-						return this.position === 'horizontal'
-						? handles.map( handle => this.getCoord(handle, 'left'))
-						: handles.map( handle => Math.abs(sliderTop - this.getCoord(handle, 'top')))
-					}
-			}
-			if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
-				return defaultSpeicalCoords[coord]();
-			} else if (typeof coord === 'function') {
-				return coord();
-			} else {
-				this._throwException(`${coord} was not found in defaultCoords or incorrect function`)
-			}
-		}
+    return this.instances[name].map((instance) => instance.getNode(this.anchor));
+  }
 
-		show(): void {
-			this.anchor.style.display = '';
-		}
+  getCoord(elemName: string | HTMLElement, coord: string | string[]) {
+    const elem = typeof elemName === 'string' ? <HTMLElement>this.getNode(elemName) : elemName;
 
-		hide(): void {
-			this.anchor.style.display = 'none';
-		}
+    if (typeof coord === 'string') {
+      return elem.getBoundingClientRect()[coord];
+    }
+    if (Array.isArray(coord)) {
+      const coords = {};
+      coord.forEach((coordName) => {
+        coords[coordName] = elem.getBoundingClientRect()[coordName];
+      });
+      return coords;
+    }
+    return this._throwException('incorrect coord or elemName');
+  }
 
-		destroy(): void {
-			Array.from(this.anchor.children).forEach( node => {
-				node.remove();
-			});
-		}
+  getSpecialCoord(coord: string | (() => number)): number | number[] {
+    const defaultSpeicalCoords = {
+      handleSize: (): number => {
+        return this.position === 'vertical'
+          ? this.getNode('handle').getBoundingClientRect().height
+          : this.getNode('handle').getBoundingClientRect().width;
+      },
 
-		private _settingsEvent(e) {
-			const target = e.target;
-			const settings = this.getNode('settings') as HTMLFormElement;
-			if (!settings) throw new Error('Settings not found');
+      limit: (): number => {
+        return this.position === 'vertical'
+          ? this.getNode('slider').getBoundingClientRect().height
+          : this.getNode('slider').getBoundingClientRect().width;
+      },
 
-			const settingsData: any = {};
-			const getSettingsData = (e: Event) => {
-				
-				Array.from(settings.elements).forEach( el => {
-					let value: unknown = (<HTMLInputElement | HTMLSelectElement>el).value
-					let name: string = (<HTMLInputElement | HTMLSelectElement>el).name
-					settingsData[name] = isNaN(<number>value)
-					? value
-					: Number(value)
-				}) 
-				
-				const values = settingsData.type === 'single'
-				? ['from']
-				: ['from', 'to']
+      handlesCoord: (): number[] => {
+        const handles = this.getNodes('handle');
+        const sliderTop = this.getCoord('slider', 'top');
+        return this.position === 'horizontal'
+          ? handles.map((handle) => this.getCoord(handle, 'left'))
+          : handles.map((handle) => Math.abs(sliderTop - this.getCoord(handle, 'top')));
+      },
+    };
+    if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
+      return defaultSpeicalCoords[coord]();
+    }
+    if (typeof coord === 'function') {
+      return coord();
+    }
+    this._throwException(`${coord} was not found in defaultCoords or incorrect function`);
+  }
 
-				settingsData.value = values.map( field => {
-					let valueNum = settingsData[field];
-					delete settingsData[field];
-					return valueNum;
-				});
-				
-				this.flag = true;
-				target.removeEventListener('blur', getSettingsData);
-				this.notify('settingsEvent', {...settingsData, action: RECRATE_APP});
-			}
+  show(): void {
+    this.anchor.style.display = '';
+  }
 
-			if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
-				if (this.flag) {
-					this.flag = false
-					target.addEventListener('blur', getSettingsData, {once: true});
-				} else {
-					return
-				}
-			}
-		}
+  hide(): void {
+    this.anchor.style.display = 'none';
+  }
 
-		private _sliderEvent(e: MouseEvent| TouchEvent) {
-			const target = e.target as HTMLElement;
-			if (target.closest(`[data-component="scale"]`)) {
-				this._scaleEvent(e);
-			} else {
-				const appData = this._getAppData(e);
-				let handlesPxValues = this._getHandlesPxValues(e, appData.id)
-				console.log(handlesPxValues)
-				this.notify('touchEvent', {action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData})
+  destroy(): void {
+    Array.from(this.anchor.children).forEach((node) => {
+      node.remove();
+    });
+  }
 
-				const handleMove = (e: MouseEvent | TouchEvent): void => {
-					
-					handlesPxValues = this._getHandlesPxValues(e, appData.id)
-					this.notify('moveEvent',  {action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData})
-				}
-	
-				const finishMove = (): void => {
-					document.removeEventListener('mousemove', handleMove);
-					document.removeEventListener('mouseup', finishMove);
-					document.removeEventListener('touchmove', handleMove);
-					document.removeEventListener('touchend', finishMove);
-				}
-				
-				if (e instanceof TouchEvent) {
-					e.preventDefault();
-					document.addEventListener('touchmove', handleMove);
-					document.addEventListener('touchend', finishMove);
-				} else {
-					e.preventDefault();
-					document.addEventListener('mousemove', handleMove);
-					document.addEventListener('mouseup', finishMove);
-				}
-	
-				this.getNodes('handle').forEach( handle => {
-					handle.ondragstart = () => false;
-				});
-			}
-		}
+  private _settingsEvent(e) {
+    const { target } = e;
+    const settings = this.getNode('settings') as HTMLFormElement;
+    if (!settings) throw new Error('Settings not found');
 
-		private _scaleEvent(e: MouseEvent | TouchEvent) {
-			const appData = this._getAppData(e);
-			const scaleValue = Number((e.target as HTMLElement)?.textContent);
-			const handlesValue = this.getNodes('handle').map( handle => Number(handle.dataset.value))
-			
-			// меняем value по id у того handle, который должен переместиться
-			handlesValue.splice(appData.id, 1, scaleValue);
+    const settingsData: any = {};
+    const getSettingsData = (e: Event) => {
+      Array.from(settings.elements).forEach((el) => {
+        const { value } = <HTMLInputElement | HTMLSelectElement>el;
+        const { name } = <HTMLInputElement | HTMLSelectElement>el;
+        settingsData[name] = isNaN(<number>value) ? value : Number(value);
+      });
 
-			this.notify('scaleEvent', {action: EVENT_TRIGGERED, value: handlesValue, ...appData})
-		}
+      const values = settingsData.type === 'single' ? ['from'] : ['from', 'to'];
 
-		private _getAppData(e?: MouseEvent | TouchEvent) {
-			const id = !e 
-			? 0
-			: this._defineCloseHandle(this._getCursorPxValue(e));
-			const limit = this.getSpecialCoord('limit');
-			const handleSize = <number>this.getSpecialCoord('handleSize');
-			return {id, limit, handleSize}
-		}
+      settingsData.value = values.map((field) => {
+        const valueNum = settingsData[field];
+        delete settingsData[field];
+        return valueNum;
+      });
 
-		private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
-			const handles = this.getNodes('handle');
-			const cursorPxValue = this._getCursorPxValue(e);
-			const handlesPxValue = handles.map( handle => {
-				return this.position === 'horizontal'
-				? this.getCoord(handle, 'left') - this.getCoord('slider', 'left')
-				: Math.abs(this.getCoord('slider', 'top') - this.getCoord(handle, 'top'))
-			})
+      this.flag = true;
+      target.removeEventListener('blur', getSettingsData);
+      this.notify('settingsEvent', { ...settingsData, action: RECRATE_APP });
+    };
 
-			// меняем value по id у того handle, который должен переместиться
-			handlesPxValue.splice(id, 1, cursorPxValue);
-			return handlesPxValue
-		}
+    if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
+      if (this.flag) {
+        this.flag = false;
+        target.addEventListener('blur', getSettingsData, { once: true });
+      } else {
+      }
+    }
+  }
 
-		private _getCursorPxValue(e: MouseEvent| TouchEvent): number {
-			const sliderCoord = this.getCoord('slider', ['top', 'left']);
-			const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
-			const clientX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX
-			const clientY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY
-			
-			return this.position === 'horizontal'
-			? clientX - sliderCoord['left'] - halfHandleSize	
-			: clientY - sliderCoord['top'] - halfHandleSize
-		}
+  private _sliderEvent(e: MouseEvent | TouchEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest(`[data-component="scale"]`)) {
+      this._scaleEvent(e);
+    } else {
+      const appData = this._getAppData(e);
+      let handlesPxValues = this._getHandlesPxValues(e, appData.id);
+      console.log(handlesPxValues);
+      this.notify('touchEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData });
 
-		private _defineCloseHandle(pxValue: number): number {
-			const handles = this.getNodes('handle');
-			const handlesCoord = this.getSpecialCoord('handlesCoord') as number[];
-			const relativeCoords = handlesCoord.map(
-				handleCoord => Math.abs(pxValue - handleCoord)
-			);
-			return relativeCoords.length === 1
-			? Number(handles[0].dataset.id)
-			: relativeCoords[0] < relativeCoords[1] ? Number(handles[0].dataset.id) : Number(handles[1].dataset.id)
-		}
+      const handleMove = (e: MouseEvent | TouchEvent): void => {
+        handlesPxValues = this._getHandlesPxValues(e, appData.id);
+        this.notify('moveEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData });
+      };
 
-		private _getEventName(target: HTMLElement): string {
-			if (!target) this._throwException("Не передан target") 
+      const finishMove = (): void => {
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', finishMove);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', finishMove);
+      };
 
-			const eventName = ['slider', 'settings'].find( name => {
-				if (target.closest(`[data-component="${name}"]`)) {
-					return name
-				};
-			});
-			
-			return eventName === undefined ? '' :	`_${eventName}Event`
-		}
+      if (e instanceof TouchEvent) {
+        e.preventDefault();
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('touchend', finishMove);
+      } else {
+        e.preventDefault();
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', finishMove);
+      }
 
-		private _createComponents(params: State) {
-			return this.factorySelector.getFactory().createComponents(this.anchor, params);
-		}
+      this.getNodes('handle').forEach((handle) => {
+        handle.ondragstart = () => false;
+      });
+    }
+  }
 
-		private _isEmpty<T extends HTMLElement>(elem: T) {
-			return elem.children.length === 0;
-		}
+  private _scaleEvent(e: MouseEvent | TouchEvent) {
+    const appData = this._getAppData(e);
+    const scaleValue = Number((e.target as HTMLElement)?.textContent);
+    const handlesValue = this.getNodes('handle').map((handle) => Number(handle.dataset.value));
 
-		private _throwException(message: string): never {
-			throw new Error(message);
-		}
+    // меняем value по id у того handle, который должен переместиться
+    handlesValue.splice(appData.id, 1, scaleValue);
+
+    this.notify('scaleEvent', { action: EVENT_TRIGGERED, value: handlesValue, ...appData });
+  }
+
+  private _getAppData(e?: MouseEvent | TouchEvent) {
+    const id = !e ? 0 : this._defineCloseHandle(this._getCursorPxValue(e));
+    const limit = this.getSpecialCoord('limit');
+    const handleSize = <number>this.getSpecialCoord('handleSize');
+    return { id, limit, handleSize };
+  }
+
+  private _getHandlesPxValues(e: MouseEvent | TouchEvent, id: number): number[] {
+    const handles = this.getNodes('handle');
+    const cursorPxValue = this._getCursorPxValue(e);
+    const handlesPxValue = handles.map((handle) => {
+      return this.position === 'horizontal'
+        ? this.getCoord(handle, 'left') - this.getCoord('slider', 'left')
+        : Math.abs(this.getCoord('slider', 'top') - this.getCoord(handle, 'top'));
+    });
+
+    // меняем value по id у того handle, который должен переместиться
+    handlesPxValue.splice(id, 1, cursorPxValue);
+    return handlesPxValue;
+  }
+
+  private _getCursorPxValue(e: MouseEvent | TouchEvent): number {
+    const sliderCoord = this.getCoord('slider', ['top', 'left']);
+    const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
+    const clientX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX;
+    const clientY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
+
+    return this.position === 'horizontal'
+      ? clientX - sliderCoord.left - halfHandleSize
+      : clientY - sliderCoord.top - halfHandleSize;
+  }
+
+  private _defineCloseHandle(pxValue: number): number {
+    const handles = this.getNodes('handle');
+    const handlesCoord = this.getSpecialCoord('handlesCoord') as number[];
+    const relativeCoords = handlesCoord.map((handleCoord) => Math.abs(pxValue - handleCoord));
+    return relativeCoords.length === 1
+      ? Number(handles[0].dataset.id)
+      : relativeCoords[0] < relativeCoords[1]
+      ? Number(handles[0].dataset.id)
+      : Number(handles[1].dataset.id);
+  }
+
+  private _getEventName(target: HTMLElement): string {
+    if (!target) this._throwException('Не передан target');
+
+    const eventName = ['slider', 'settings'].find((name) => {
+      if (target.closest(`[data-component="${name}"]`)) {
+        return name;
+      }
+    });
+
+    return eventName === undefined ? '' : `_${eventName}Event`;
+  }
+
+  private _createComponents(params: State) {
+    return this.factorySelector.getFactory().createComponents(this.anchor, params);
+  }
+
+  private _isEmpty<T extends HTMLElement>(elem: T) {
+    return elem.children.length === 0;
+  }
+
+  private _throwException(message: string): never {
+    throw new Error(message);
+  }
 }
