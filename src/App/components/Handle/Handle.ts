@@ -1,20 +1,20 @@
 import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
-import { Component, RenderData } from '../../../Helpers/Interfaces';
+import { Component, RenderData, State } from '../../../Helpers/Interfaces';
 
 class Handle implements Component {
   private template = '';
 
-  constructor(anchor: HTMLElement, state: { position: string; value: number[] }, private id: number) {
-    this.create(anchor, state);
+  constructor(private anchor: HTMLElement, state: State, private id: number = 0) {
+    this.create(state);
   }
 
-  create(anchor: HTMLElement, state: { position: string; value: number[] }): void {
-    this._setTemplate(state);
-    this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
+  create(state: { position: string; value: number[] }): void {
+    this.setTemplate(state);
+    this.getRootElement().insertAdjacentHTML('beforeend', this.template);
   }
 
-  getNode(anchor: HTMLElement) {
-    const node = anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
+  getNode(): HTMLElement {
+    const node = this.anchor.querySelector(`.slider__handle[data-id="${this.id}"]`) as HTMLElement;
     if (!node) throw new Error(`handle wasn't found`);
     return node;
   }
@@ -23,31 +23,36 @@ class Handle implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getRootElement(anchor: HTMLElement) {
-    const root = anchor.querySelector('.slider') as HTMLElement;
+  getRootElement(): HTMLElement {
+    const root = this.anchor.querySelector('.slider') as HTMLElement;
     if (!root) throw new Error("Root wasn't found");
     return root;
   }
 
-  render(anchor: HTMLElement, renderData: RenderData): void {
+  render(renderData: RenderData): void {
     switch (renderData.position) {
       case HORIZONTAL_SLIDER:
-        this._update('left', renderData, anchor);
+        this.update('left', renderData);
         break;
       case VERTICAL_SLIDER:
-        this._update('top', renderData, anchor);
+        this.update('top', renderData);
         break;
     }
   }
 
-  private _update(side, renderData, anchor) {
-    console.log(renderData);
-    const handle = this.getNode(anchor);
-    handle.dataset.value = String(renderData[this.id]?.value) ?? handle.dataset.value;
-    handle.style[side] = `${renderData[this.id].pxValue}px`;
+  private update(side: string, renderData: RenderData) {
+    const handle = this.getNode();
+    if (renderData.eventType === 'touch' && renderData.targetId === this.id) {
+      const removeTransition = () => (handle.style.transition = '');
+      handle.style.transition = `${side} 0.2s ease`;
+      handle.addEventListener('transitionend', removeTransition, { once: true });
+    }
+
+    handle.dataset.value = String(renderData.coords[this.id]?.valuePxValue.value) ?? handle.dataset.value;
+    handle.style[side] = `${renderData.coords[this.id]?.valuePxValue.px}px`;
   }
 
-  private _setTemplate(state: { position: string; value: number[] }): void {
+  private setTemplate(state: { position: string; value: number[] }): void {
     if (state.position === undefined && state.value === undefined) {
       throw new Error("incorrect params: wasn't found position or value");
     }
@@ -60,4 +65,4 @@ class Handle implements Component {
   }
 }
 
-export { Handle };
+export default Handle;

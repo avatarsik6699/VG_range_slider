@@ -1,48 +1,57 @@
-import { Component, State } from '../../Helpers/Interfaces';
-import { Bar } from '../components/Bar/Bar';
-import { Handle } from '../components/Handle/Handle';
-import { Scale } from '../components/Scale/Scale';
-import { Settings } from '../components/Settings/Settings';
-import { Slider } from '../components/Slider/Slider';
-import { Tooltip } from '../components/Tooltip/Tooltip';
+import { ComponentInstances, IConstructorComponent, State } from '../../Helpers/Interfaces';
+import Bar from '../components/Bar/Bar';
+import Handle from '../components/Handle/Handle';
+import Scale from '../components/Scale/Scale';
+import Settings from '../components/Settings/Settings';
+import Slider from '../components/Slider/Slider';
+import Tooltip from '../components/Tooltip/Tooltip';
 
-class Factory {
-  private multiplyComponents = ['tooltip', 'handle'];
+export interface IFactory {
+  createComponents(anchor: HTMLElement, state: State): ComponentInstances;
+}
 
-  private components = [Slider, Handle, Tooltip, Scale, Bar, Settings];
+class Factory implements IFactory {
+  private multipleComponents = ['tooltip', 'handle'];
 
-  createComponents(anchor: HTMLElement, state: State) {
+  private components: IConstructorComponent[] = [Slider, Handle, Tooltip, Scale, Bar, Settings];
+
+  createComponents(anchor: HTMLElement, state: State): ComponentInstances {
     const DEFAULT_ID = 0;
 
-    return this._getCorrectComps(this.components, state).reduce((instances, component) => {
-      const name = this._getComponentName(component);
-      return this.multiplyComponents.includes(name) && state.type === 'range'
-        ? { ...instances, [name]: state.value.map((_, id) => new component(anchor, state, id)) }
-        : { ...instances, [name]: [new component(anchor, state, DEFAULT_ID)] };
+    const result = this.getCorrectComponents(this.components, state).reduce((instances, Сomponent) => {
+      const name = this.getComponentName(Сomponent);
+      return this.multipleComponents.includes(name) && (state.type === 'range' || state.type === 'multiple')
+        ? { ...instances, [name]: state.value.map((_, id) => new Сomponent(anchor, state, id)) }
+        : { ...instances, [name]: [new Сomponent(anchor, state, DEFAULT_ID)] };
     }, {});
+    return result;
   }
 
-  private _getCorrectComps(components, state: State) {
-    return components.reduce((correctComps, component) => {
-      return !this._getExcludeComps(state).includes(this._getComponentName(component))
-        ? [...correctComps, component]
-        : [...correctComps];
-    }, []);
+  private getCorrectComponents(components: IConstructorComponent[], state: State): IConstructorComponent[] {
+    return components.reduce(
+      (correctComps: IConstructorComponent[], component) =>
+        !this.getExcludeComponents(state).includes(this.getComponentName(component))
+          ? [...correctComps, component]
+          : [...correctComps],
+      [],
+    );
   }
 
-  private _getExcludeComps(state: State) {
-    return Object.keys(state).reduce((excludeComps: string[] | never[], key) => {
-      return this._isFalse(state[key]) ? [...excludeComps, key] : [...excludeComps];
-    }, []);
+  private getExcludeComponents(state: State): string[] {
+    return Object.keys(state).reduce(
+      (excludeComponents: string[], key) =>
+        this.isFalse(state[key]) ? [...excludeComponents, key] : [...excludeComponents],
+      [],
+    );
   }
 
-  private _isFalse(field: boolean): boolean {
+  private isFalse(field: boolean): boolean {
     return typeof field === 'boolean' ? !field : field === 'false';
   }
 
-  private _getComponentName(component): string {
+  private getComponentName(component: IConstructorComponent): string {
     return component.prototype.constructor.name.toLowerCase();
   }
 }
 
-export { Factory };
+export default Factory;

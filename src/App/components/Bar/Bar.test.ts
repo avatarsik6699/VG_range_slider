@@ -1,6 +1,6 @@
 import { JSDOM } from 'jsdom';
 import { expect } from 'chai';
-import { Bar } from './Bar';
+import Bar from './Bar';
 
 const DOM = new JSDOM('<html><body><div class="anchor"></div></body></html>');
 const { document } = DOM.window;

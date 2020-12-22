@@ -1,29 +1,31 @@
-import { Component } from '../../../Helpers/Interfaces';
+import { Component, State } from '../../../Helpers/Interfaces';
+import Observer from '../../../Helpers/Observer';
 
-class Slider implements Component {
+class Slider extends Observer implements Component {
   private template = `<div class="slider"></div>`;
 
-  constructor(anchor: HTMLElement, state: { position: string }) {
-    this.create(anchor, state);
+  constructor(private anchor: HTMLElement, state: State) {
+    super();
+    this.create(state);
   }
 
-  create(anchor: HTMLElement, state: { position: string }) {
+  create(state: { position: string }): void {
     this._setTemplate(state);
-    this.getRootElement(anchor).insertAdjacentHTML('afterbegin', this.template);
+    this.getRootElement().insertAdjacentHTML('afterbegin', this.template);
   }
 
   getName(): string {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement) {
-    const node = anchor.querySelector('.slider') as HTMLElement;
+  getNode(): HTMLElement {
+    const node = this.anchor.querySelector('.slider') as HTMLElement;
     if (!node) throw new Error(`slider wasn't found`);
     return node;
   }
 
-  getRootElement(anchor: HTMLElement) {
-    const root = anchor;
+  getRootElement(): HTMLElement {
+    const root = this.anchor;
     if (!root) throw new Error(`root 'Slider' wasn't found`);
     return root;
   }
@@ -38,4 +40,4 @@ class Slider implements Component {
   }
 }
 
-export { Slider };
+export default Slider;

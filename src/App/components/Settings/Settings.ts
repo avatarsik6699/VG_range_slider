@@ -4,18 +4,18 @@ import { getSettingsContent } from '../../templates/settings.template';
 class Settings implements Component {
   private template = '';
 
-  constructor(anchor: HTMLElement, state: State) {
-    this.create(anchor, state);
+  constructor(private anchor: HTMLElement, state: State) {
+    this.create(state);
   }
 
-  create(anchor: HTMLElement, state: State): void {
+  create(state: State): void {
     this._setTemplate(state);
-    this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
-    this._setVisualFields(anchor, state);
+    this.getRootElement(this.anchor).insertAdjacentHTML('beforeend', this.template);
+    this._setVisualFields(this.anchor, state);
   }
 
-  getRootElement(anchor: HTMLElement): HTMLElement {
-    const root = anchor;
+  getRootElement(): HTMLElement {
+    const root = this.anchor;
     if (!root) throw new Error(`root 'Slider' wasn't found`);
     return root;
   }
@@ -24,21 +24,21 @@ class Settings implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement): HTMLFormElement {
-    const node: HTMLFormElement | null = anchor.querySelector('.settings');
+  getNode(): HTMLFormElement {
+    const node = this.anchor.querySelector('.settings') as HTMLFormElement;
     if (!node) throw new Error(`Settings wasn't found`);
     return node;
   }
 
-  render(anchor: HTMLElement, renderData: RenderData) {
-    if (renderData.type === undefined) throw new Error("type wasn't found");
-    if (renderData.type === 'single') {
-      this._disableField('to', anchor);
-      this._setDataInFields(anchor, this._getHandlesValue(anchor));
-    } else {
-      this._setDataInFields(anchor, this._getHandlesValue(anchor));
-    }
-  }
+  // render(anchor: HTMLElement, renderData: RenderData) {
+  //   if (renderData.type === undefined) throw new Error("type wasn't found");
+  //   if (renderData.type === 'single') {
+  //     this._disableField('to', anchor);
+  //     this._setDataInFields(anchor, this._getHandlesValue(anchor));
+  //   } else {
+  //     this._setDataInFields(anchor, this._getHandlesValue(anchor));
+  //   }
+  // }
 
   private _disableField(fieldName: string, anchor: HTMLElement) {
     const filed = anchor.querySelector(`.settings__value[name="${fieldName}"]`) as HTMLInputElement;
@@ -81,4 +81,4 @@ class Settings implements Component {
   }
 }
 
-export { Settings };
+export default Settings;

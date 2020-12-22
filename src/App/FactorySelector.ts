@@ -1,9 +1,9 @@
-import { Factory } from './factories/Factory';
+import Factory, { IFactory } from './factories/Factory';
 
 class FactorySelector {
-  getFactory() {
+  static getFactory(): IFactory {
     return new Factory();
   }
 }
 
-export { FactorySelector };
+export default FactorySelector;

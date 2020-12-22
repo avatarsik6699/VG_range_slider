@@ -1,3 +1,5 @@
+import Observer from './Observer';
+
 interface State {
   min: number;
   max: number;
@@ -12,9 +14,9 @@ interface State {
   to?: number;
 }
 
-interface Factory {
-  createComponents(params: { type: string; scale: boolean; tooltip: boolean }): {};
-}
+type ComponentInstances = {
+  [key: string]: Component[];
+};
 
 type MinMax = {
   max: State['max'];
@@ -25,23 +27,32 @@ type ComponentProps = {
   [name: string]: { [key: string]: number } | number;
 };
 
-type ValuePxValue = { pxValue: number; value: number };
+type ValuePxValue = { px: number; value: number };
 
 interface RenderData {
-  id: number;
+  eventType?: string;
+  targetId: number;
   type: string;
   position: string;
   scaleValues: ValuePxValue[];
   handleSize: number;
-  [key: number]: ValuePxValue;
+  coords: {
+    [key: string]: {
+      valuePxValue: ValuePxValue;
+      prev: number | null;
+      next: number | null;
+    };
+  };
 }
 
 interface Component {
-  create(anchor: HTMLElement, state: State | { position: string }, id?: number);
+  create(state: State, id?: number);
   getName(): string;
-  getNode(anchor: HTMLElement): HTMLElement;
-  getRootElement(anchor: HTMLElement): HTMLElement;
-  render?(anchor: HTMLElement, renderData: RenderData);
+  getNode(): HTMLElement;
+  getRootElement(): HTMLElement;
+  render?(renderData: RenderData);
+  // subscribe?<T, D>(eventType: string, callback: (data: T) => D): void;
+  // notify?<T>(eventType: string, data: T): void;
 }
 
 interface AppData {
@@ -51,8 +62,23 @@ interface AppData {
   pxValue?: number[];
   value?: number[];
   action?: string;
+  eventType?: string;
 }
 
-type ScaleValues = { pxValue: number; value: number }[];
+type ScaleValues = ValuePxValue[];
+type IConstructorComponent = {
+  new (anchor: HTMLElement, state: State, id?: number): Component;
+};
 
-export { State, Factory, Component, MinMax, ComponentProps, RenderData, ValuePxValue, AppData, ScaleValues };
+export {
+  ComponentInstances,
+  State,
+  Component,
+  MinMax,
+  ComponentProps,
+  RenderData,
+  ValuePxValue,
+  AppData,
+  ScaleValues,
+  IConstructorComponent,
+};

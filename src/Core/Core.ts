@@ -1,9 +1,8 @@
-import { Scale } from '../App/components/Scale/Scale';
-import { AppData, MinMax, RenderData, ScaleValues, State, ValuePxValue } from '../Helpers/Interfaces';
+import { AppData, MinMax, RenderData, ScaleValues, State } from '../Helpers/Interfaces';
 import Observer from '../Helpers/Observer';
-import { defaultState } from './defaultState';
-
-export class Core extends Observer {
+import defaultState from './defaultState';
+//MapOfHandles
+class Core extends Observer {
   private state: State = defaultState;
 
   constructor(settings: State) {
@@ -11,29 +10,30 @@ export class Core extends Observer {
     this.setState(settings);
   }
 
-  setState(settings) {
-    const defaultSettings = { ...this.state, ...settings };
-    const { max, min }: MinMax = this._calcCorrectMinMax(defaultSettings.max, defaultSettings.min);
-    const step: number = this._calcCorrectStep(defaultSettings.step, max);
+  setState(settings: AppData | State): void {
+    const prepareState = { ...this.state, ...settings };
+    const { max, min }: MinMax = this._calcCorrectMinMax(prepareState.max, prepareState.min);
+    const step: number = this._calcCorrectStep(prepareState.step, max);
+    const { eventType } = <AppData>settings ?? null;
     const value = !settings.action
-      ? this._calcCorrectValue(defaultSettings.value, max, min)
-      : this._getUnifyValue(settings, defaultSettings);
+      ? this._calcCorrectValue(prepareState.value, max, min)
+      : this._getUnifyValue(<AppData>settings, prepareState);
 
-    switch (defaultSettings.action) {
+    switch ((prepareState as AppData).action) {
       case 'SLIDER_IS_CREATED':
         this.state = { ...this.state, value };
-        this.notify('getRenderData', this.getRenderData(settings));
+        this.notify('getRenderData', this.getRenderData(settings as AppData));
         break;
       case 'EVENT_TRIGGERED':
         this.state = { ...this.state, value };
-        this.notify('getRenderData', this.getRenderData(settings));
+        this.notify('getRenderData', { ...this.getRenderData(settings as AppData), eventType });
         break;
       case 'RECRATE_APP':
-        this.state = { ...defaultSettings, max, min, step, value };
+        this.state = { ...prepareState, max, min, step, value };
         this.notify('updateState', this.state);
         break;
       default:
-        this.state = { ...defaultSettings, max, min, step, value };
+        this.state = { ...prepareState, max, min, step, value };
     }
   }
 
@@ -41,24 +41,31 @@ export class Core extends Observer {
     return this.state;
   }
 
-  getRenderData(appData: AppData): void {
+  getRenderData(appData: AppData): RenderData {
     if (!appData) this._throwException('Не переданы данные об приложении, нужные для проведения рассчетов');
-    const { value } = this.state;
+
+    const values = this.state.value;
     const distance = this._getDistance(this.state.min, this.state.max);
     const ratio = this._getRatio(appData.limit, appData.handleSize, distance);
     const scaleValues = this._calcScaleValues(ratio, distance);
-    const valuePxValue = value.map((value, id) => [
-      id,
-      { pxValue: Math.round(this._calcPxValue(value, ratio)), value },
-    ]);
-
+    const handleCoords = values.map((value, id, arr) => {
+      return [
+        id,
+        {
+          valuePxValue: { px: Math.round(this._calcPxValue(value, ratio)), value },
+          next: arr[id + 1] ?? null,
+          prev: arr[id - 1] ?? null,
+          notCorrectValue: this._calcPxValue(value, ratio),
+        },
+      ];
+    });
     return {
       scaleValues,
       handleSize: appData.handleSize,
-      id: appData.id,
+      targetId: Number(appData.id),
       type: this.state.type,
       position: this.state.position,
-      ...Object.fromEntries(valuePxValue),
+      coords: Object.fromEntries(handleCoords),
     };
   }
 
@@ -162,10 +169,12 @@ export class Core extends Observer {
     if (max - arr[arr.length - 2] < diff) {
       arr.splice(arr.length - 2, 1);
     }
-    return arr.map((value) => ({ pxValue: this._calcPxValue(value, ratio), value }));
+    return arr.map((value) => ({ px: this._calcPxValue(value, ratio), value }));
   }
 
   private _throwException(message: string): never {
     throw new Error(message);
   }
 }
+
+export default Core;

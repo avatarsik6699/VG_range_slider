@@ -1,28 +1,29 @@
 import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
-import { Component, RenderData } from '../../../Helpers/Interfaces';
+import { Component, RenderData, State } from '../../../Helpers/Interfaces';
 
 class Bar implements Component {
   private template = '';
 
-  constructor(anchor: HTMLElement, state: { position: string }) {
-    this.create(anchor, state);
+  constructor(private anchor: HTMLElement, state: State) {
+    this.create(state);
   }
 
-  create(anchor: HTMLElement, state: { position: string }) {
-    this._setTemplate(state);
-    this.getRootElement(anchor).insertAdjacentHTML('beforeend', this.template);
+  create(state: { position: string }): void {
+    this.setTemplate(state);
+    this.getRootElement().insertAdjacentHTML('beforeend', this.template);
   }
 
-  render(anchor: HTMLElement, renderData: RenderData): void {
+  render(renderData: RenderData): void {
     if (renderData.type === undefined || renderData.handleSize === undefined) {
       throw new Error("type or handleSize wasn't found in renderData");
     }
+    // eslint-disable-next-line default-case
     switch (renderData.position) {
       case HORIZONTAL_SLIDER:
-        this._update('left', 'width', renderData, anchor);
+        this.update('left', 'width', renderData);
         break;
       case VERTICAL_SLIDER:
-        this._update('top', 'height', renderData, anchor);
+        this.update('top', 'height', renderData);
         break;
     }
   }
@@ -31,40 +32,54 @@ class Bar implements Component {
     return Object.getPrototypeOf(this).constructor.name.toLowerCase();
   }
 
-  getNode(anchor: HTMLElement): HTMLElement {
-    const node = anchor.querySelector('.slider__bar') as HTMLElement;
-    if (!node || node === undefined) throw new Error("Bar wasn't found");
+  getNode(): HTMLElement {
+    const node = this.anchor.querySelector('.slider__bar') as HTMLElement;
+    if (node === undefined) throw new Error("Bar wasn't found");
     return node;
   }
 
-  getRootElement(anchor: HTMLElement): HTMLElement {
-    const root = anchor.querySelector('.slider') as HTMLElement;
+  getRootElement(): HTMLElement {
+    const root = this.anchor.querySelector('.slider') as HTMLElement;
     if (!root) throw new Error(`root 'Slider' wasn't found`);
     return root;
   }
 
-  private _setTemplate(state: { position: string }): void {
+  private setTemplate(state: { position: string }): void {
     if (state.position === undefined) throw new Error("position wasn't found or incorrect");
     const modifer = `slider__bar_position-${state.position}`;
     this.template = `<div class="slider__bar ${modifer}" data-component="bar"></div>`;
   }
 
-  private _getPxValue(renderData: RenderData): number | number[] {
-    if (renderData.type === 'single') {
-      return renderData[0].pxValue;
+  private getPxValue(renderData: RenderData): number | number[] {
+    const { targetId } = renderData;
+    if (renderData.type === 'range') {
+      return [renderData.coords[0].valuePxValue.px, renderData.coords[1].valuePxValue.px];
     }
-    return [renderData[0].pxValue, renderData[1].pxValue];
+    if (renderData.type === 'multiple') {
+      const pxValues = Object.values(renderData.coords).map((handleCoords) => handleCoords.valuePxValue.px);
+      const [left, right] = [Math.min(...pxValues), Math.max(...pxValues)];
+      return [left, right];
+    }
+    // default - single
+    return renderData.coords[targetId].valuePxValue.px;
   }
 
-  private _update(side, size, renderData, anchor) {
+  private update(side: string, size: string, renderData: RenderData) {
     const START_PX = '0px';
     const { type } = renderData;
     const { handleSize } = renderData;
-    const px = this._getPxValue(renderData);
-    const bar = this.getNode(anchor);
+    const px = this.getPxValue(renderData);
+    const bar = this.getNode();
+    if (renderData.eventType === 'touch') {
+      const removeTransition = () => {
+        bar.style.transition = '';
+      };
+      bar.style.transition = `${side} 0.2s ease, ${size} 0.2s ease`;
+      bar.addEventListener('transitionend', removeTransition, { once: true });
+    }
     if (type === 'single') {
       bar.style[side] = START_PX;
-      bar.style[size] = `${px + handleSize}px`;
+      bar.style[size] = `${(px as number) + handleSize}px`;
     } else {
       bar.style[size] = `${Math.abs(px[0] - px[1]) + handleSize}px`;
       bar.style[side] = px[0] < px[1] ? `${px[0]}px` : `${px[1]}px`;
@@ -72,4 +87,4 @@ class Bar implements Component {
   }
 }
 
-export { Bar };
+export default Bar;

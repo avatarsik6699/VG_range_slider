@@ -1,15 +1,14 @@
-import { Controller } from './Controller/Controller';
-import { defaultState } from './Core/defaultState';
+import Controller from './Controller/Controller';
+import defaultState from './Core/defaultState';
 import { RECRATE_APP } from './Helpers/Constants';
 import { State } from './Helpers/Interfaces';
 
 declare global {
   interface JQuery {
-    slider(settings?: string | State, callback?: Function): JQuery | undefined;
+    slider(settings?: string | State, callback?: <T, D>(ev: T) => D): JQuery | undefined;
   }
 }
 
-// eslint-disable-next-line func-names
 (function ($) {
   const methods = {
     init(settings): JQuery {
@@ -19,27 +18,32 @@ declare global {
       return this;
     },
     hide(): JQuery {
+      if (!this.data('isInit')) throw new Error('Слайдер не инициализирован');
       const slider = this.data('slider');
       slider.app.hide();
       return this;
     },
     show() {
+      if (!this.data('isInit')) throw new Error('Слайдер не инициализирован');
       const slider = this.data('slider');
       slider.app.show();
       return this;
     },
     destroy(): JQuery {
+      if (!this.data('isInit')) throw new Error('Слайдер не инициализирован');
       const slider = this.data('slider');
       this.data('isInit', false);
       slider.app.destroy();
       return this;
     },
     reset(): JQuery {
+      if (!this.data('isInit')) throw new Error('Слайдер не инициализирован');
       const slider = this.data('slider');
       slider.core.setState({ ...defaultState, action: RECRATE_APP });
       return this;
     },
     getState(callback): JQuery {
+      if (!this.data('isInit')) throw new Error('Слайдер не инициализирован');
       const anchor: HTMLElement = this[0];
       anchor.addEventListener('getState', callback);
       return this;
@@ -47,13 +51,14 @@ declare global {
   };
 
   // eslint-disable-next-line no-param-reassign
-  $.fn.slider = (settings = defaultState, callback?): JQuery | undefined => {
-    if (!this.data('isInit')) {
-      const state = typeof settings === 'object' ? settings : defaultState;
-      methods.init.call(this, state);
-    } else if (settings === 'getState') {
-      methods[settings].call(this, callback);
-    } else if (methods[settings as string]) {
+  $.fn.slider = function (settings = defaultState, callback?): JQuery {
+    if (typeof settings === 'object') {
+      return methods.init.call(this, settings);
+    }
+    if (settings === 'getState') {
+      return methods[settings].call(this, callback);
+    }
+    if (methods[settings as string]) {
       return methods[settings as string].call(this);
     }
     throw new Error(`Метод ${settings} отсутствует у плагина slider`);

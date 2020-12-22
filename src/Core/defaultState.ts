@@ -12,4 +12,4 @@ const defaultState: State = {
   bar: true,
 };
 
-export { defaultState };
+export default defaultState;

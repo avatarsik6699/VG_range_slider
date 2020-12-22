@@ -32,6 +32,11 @@
       {
         "endOfLine": "auto"
       }
-    ]
+    ],
+    "func-names": "off",
+    "no-underscore-dangle": "off",
+    "class-methods-use-this": "off",
+    "default-case": "off",
+    "no-return-assign": "off"
   }
 }

@@ -1,16 +1,15 @@
 import { EVENT_TRIGGERED, RECRATE_APP, SLIDER_IS_CREATED } from '../Helpers/Constants';
 import { Component, RenderData, State } from '../Helpers/Interfaces';
 import Observer from '../Helpers/Observer';
-import { FactorySelector } from './FactorySelector';
 
-export class App extends Observer {
+class App extends Observer {
   private instances: { [key: string]: Component[] } = {};
 
   private position = 'horizontal';
 
   private flag = true;
 
-  constructor(private anchor: HTMLElement, private factorySelector: FactorySelector) {
+  constructor(private anchor: HTMLElement, private FactorySelector: FactorySelector) {
     super();
   }
 
@@ -28,9 +27,9 @@ export class App extends Observer {
     this.create(params);
   }
 
-  renderUI(renderData: RenderData) {
+  renderUI(renderData: RenderData): void {
     Object.values(this.instances).forEach((instance) => {
-      instance.forEach((subInstance) => (subInstance.render ? subInstance.render(this.anchor, renderData) : ''));
+      instance.forEach((subInstance) => (subInstance.render ? subInstance.render(renderData) : ''));
     });
   }
 
@@ -48,13 +47,13 @@ export class App extends Observer {
 
   getNode(name: string): HTMLElement {
     if (!this.instances) this._throwException('First you need to get component instances');
-    return this.instances[name][0].getNode(this.anchor);
+    return this.instances[name][0].getNode();
   }
 
   getNodes(name: string): HTMLElement[] {
     if (!this.instances) this._throwException('First you need to get component instances');
 
-    return this.instances[name].map((instance) => instance.getNode(this.anchor));
+    return this.instances[name].map((instance) => instance.getNode());
   }
 
   getCoord(elemName: string | HTMLElement, coord: string | string[]) {
@@ -87,12 +86,14 @@ export class App extends Observer {
           : this.getNode('slider').getBoundingClientRect().width;
       },
 
-      handlesCoord: (): number[] => {
+      handlesCoord: (): number[][] => {
         const handles = this.getNodes('handle');
         const sliderTop = this.getCoord('slider', 'top');
-        return this.position === 'horizontal'
-          ? handles.map((handle) => this.getCoord(handle, 'left'))
-          : handles.map((handle) => Math.abs(sliderTop - this.getCoord(handle, 'top')));
+        const result =
+          this.position === 'horizontal'
+            ? handles.map((handle) => [handle.dataset.id, this.getCoord(handle, 'left')])
+            : handles.map((handle) => [handle.dataset.id, Math.abs(sliderTop - this.getCoord(handle, 'top'))]);
+        return Object.fromEntries(result);
       },
     };
     if (typeof coord === 'string' && defaultSpeicalCoords[coord]) {
@@ -155,16 +156,21 @@ export class App extends Observer {
 
   private _sliderEvent(e: MouseEvent | TouchEvent) {
     const target = e.target as HTMLElement;
+    const appData = this._getAppData(e);
     if (target.closest(`[data-component="scale"]`)) {
       this._scaleEvent(e);
-    } else {
+    } else if (target.dataset.component !== 'handle') {
       const appData = this._getAppData(e);
-      let handlesPxValues = this._getHandlesPxValues(e, appData.id);
-      console.log(handlesPxValues);
-      this.notify('touchEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData });
-
+      const handlesPxValues = this._getHandlesPxValues(e, appData.id);
+      this.notify('touchEvent', {
+        action: EVENT_TRIGGERED,
+        eventType: 'touch',
+        pxValue: handlesPxValues,
+        ...appData,
+      });
+    } else {
       const handleMove = (e: MouseEvent | TouchEvent): void => {
-        handlesPxValues = this._getHandlesPxValues(e, appData.id);
+        const handlesPxValues = this._getHandlesPxValues(e, appData.id);
         this.notify('moveEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData });
       };
 
@@ -199,7 +205,7 @@ export class App extends Observer {
     // меняем value по id у того handle, который должен переместиться
     handlesValue.splice(appData.id, 1, scaleValue);
 
-    this.notify('scaleEvent', { action: EVENT_TRIGGERED, value: handlesValue, ...appData });
+    this.notify('scaleEvent', { action: EVENT_TRIGGERED, eventType: 'touch', value: handlesValue, ...appData });
   }
 
   private _getAppData(e?: MouseEvent | TouchEvent) {
@@ -228,21 +234,24 @@ export class App extends Observer {
     const halfHandleSize = <number>this.getSpecialCoord('handleSize') / 2;
     const clientX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX;
     const clientY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
-
     return this.position === 'horizontal'
       ? clientX - sliderCoord.left - halfHandleSize
       : clientY - sliderCoord.top - halfHandleSize;
   }
 
   private _defineCloseHandle(pxValue: number): number {
-    const handles = this.getNodes('handle');
     const handlesCoord = this.getSpecialCoord('handlesCoord') as number[];
-    const relativeCoords = handlesCoord.map((handleCoord) => Math.abs(pxValue - handleCoord));
-    return relativeCoords.length === 1
-      ? Number(handles[0].dataset.id)
-      : relativeCoords[0] < relativeCoords[1]
-      ? Number(handles[0].dataset.id)
-      : Number(handles[1].dataset.id);
+    const handlesId = Object.keys(handlesCoord);
+    const relativeCoords = Object.values(handlesCoord).reduce(
+      (current, handleCoord, index) => {
+        return Math.abs(pxValue - handleCoord) < current[1]
+          ? [handlesId[index], Math.abs(pxValue + 10 - handleCoord)]
+          : current;
+      },
+      [0, Number.MAX_SAFE_INTEGER],
+    );
+
+    return Number(relativeCoords[0]);
   }
 
   private _getEventName(target: HTMLElement): string {
@@ -258,7 +267,7 @@ export class App extends Observer {
   }
 
   private _createComponents(params: State) {
-    return this.factorySelector.getFactory().createComponents(this.anchor, params);
+    return this.FactorySelector.getFactory().createComponents(this.anchor, params);
   }
 
   private _isEmpty<T extends HTMLElement>(elem: T) {
@@ -269,3 +278,5 @@ export class App extends Observer {
     throw new Error(message);
   }
 }
+
+export default App;

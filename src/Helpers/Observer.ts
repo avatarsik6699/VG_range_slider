@@ -1,5 +1,9 @@
+type EventList = {
+  [key: string]: ((data) => unknown)[];
+};
+
 class Observer {
-  eventList: { [key: string]: Function[] } = {};
+  eventList: EventList = {};
 
   notify<T>(eventType: string, data: T): void {
     if (this.eventList[eventType]) {
@@ -7,22 +11,12 @@ class Observer {
     }
   }
 
-  subscribe(eventType: string, callback: Function): void {
+  subscribe<T, D>(eventType: string, callback: (data: T) => D): void {
     if (!this.eventList[eventType]) {
       this.eventList[eventType] = [callback];
-    } else if (!this.isExist(eventType, callback)) {
     } else {
       this.eventList[eventType].push(callback);
     }
-  }
-
-  isExist(eventType: string, callback: Function): boolean {
-    let exist = false;
-    this.eventList[eventType].find((func) => {
-      exist = func.name === callback.name;
-    });
-
-    return exist;
   }
 }
 
