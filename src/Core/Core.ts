@@ -18,7 +18,7 @@ class Core extends Observer {
     const value = !settings.action
       ? this._calcCorrectValue(prepareState.value, max, min)
       : this._getUnifyValue(<AppData>settings, prepareState);
-
+    console.log(prepareState);
     switch ((prepareState as AppData).action) {
       case 'SLIDER_IS_CREATED':
         this.state = { ...this.state, value };

@@ -51,8 +51,8 @@ interface Component {
   getNode(): HTMLElement;
   getRootElement(): HTMLElement;
   render?(renderData: RenderData);
-  // subscribe?<T, D>(eventType: string, callback: (data: T) => D): void;
-  // notify?<T>(eventType: string, data: T): void;
+  subscribe?<T, D>(eventType: string, callback: (data: T) => D): void;
+  notify?<T>(eventType: string, data: T): void;
 }
 
 interface AppData {

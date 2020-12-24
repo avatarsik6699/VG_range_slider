@@ -1,25 +1,27 @@
-const getSettingsContent = (options) => `
+const getSettingsContent = (state) => {
+  let values = '';
+  state.value.forEach((item, index) => {
+    values += `
+    <label class="settings__item">
+      <input name="value-${index}" type="number" min="1" value="${item}" class="settings__value"/>
+      <span span class="settings__name">value_${index}</span>
+    </label> 
+    `;
+  });
+  return `
   <label class="settings__item">
-      <input name="max" type="number" step="${options.step}" value="${options.max}" class="settings__value"/>
+      <input name="max" type="number" step="${state.step}" value="${state.max}" class="settings__value"/>
       <span class="settings__name">max</span>
   </label>
   <label class="settings__item">
-      <input name="min" type="number" step="${options.step}" value="${options.min}" class="settings__value"/>
+      <input name="min" type="number" step="${state.step}" value="${state.min}" class="settings__value"/>
       <span class="settings__name">min</span>
   </label>
   <label class="settings__item">
-      <input name="step" type="number" min="1" value="${options.step}" class="settings__value"/>
+      <input name="step" type="number" min="1" value="${state.step}" class="settings__value"/>
       <span class="settings__name">step</span>
-  </label>
-  <label class="settings__item">
-    <input name="from" type="number" value="${options.value[0]}" class="settings__value"/>
-    <span class="settings__name">from</span>
-  </label>
-  <label class="settings__item">
-    <input name="to" type="number" value="${options.value[1] ?? 0}" class="settings__value"/>
-    <span class="settings__name">to</span>
-  </label>
-
+  </label> 
+  ${values}
   <label class="settings__item">
   <select name="position">
     <option>horizontal</option>
@@ -31,6 +33,7 @@ const getSettingsContent = (options) => `
   <select name="type">
     <option>single</option>
     <option>range</option>
+    <option>multiple</option>
   </select>
   <span class="settings__name">type</span>
   </label>
@@ -55,5 +58,13 @@ const getSettingsContent = (options) => `
   </select>
   <span class="settings__name">bar</span>
   </label>
+  <label class="settings__item">
+  <select name="settings">
+    <option>true</option>
+    <option>false</option>
+  </select>
+  <span class="settings__name">settings</span>
+  </label>
   `;
+};
 export { getSettingsContent };

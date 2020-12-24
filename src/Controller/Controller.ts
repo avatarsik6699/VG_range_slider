@@ -11,15 +11,17 @@ class Controller {
   constructor(private anchor: HTMLElement, settings: State) {
     this.core = new Core(settings);
     this.app = new App(anchor, FactorySelector);
-    this.bindEvents();
+    this.bindBasicEvents();
     this.app.create(this.core.getState());
     this.app.bindEvents();
+    this.bindComponentEvents();
   }
 
-  bindEvents(): void {
+  bindBasicEvents(): void {
+    this.app.subscribe('finishCreate', () => this.bindComponentEvents());
     this.app.subscribe('finishCreate', (data: AppData) => this.core.setState(data));
     this.app.subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
-    this.app.subscribe('settingsEvent', (state: State) => this.core.setState(state));
+    // this.app.subscribe('settingsEvent', (state: State) => this.core.setState(state));
     this.app.subscribe('moveEvent', (appData: AppData) => this.core.setState(appData));
     this.app.subscribe('scaleEvent', (appData: AppData) => this.core.setState(appData));
     // this.app.getComponent('slider').subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
@@ -30,6 +32,10 @@ class Controller {
     this.core.subscribe('getRenderData', () => {
       this.anchor.dispatchEvent(new CustomEvent('getState', { detail: this.core.getState() }));
     });
+  }
+
+  bindComponentEvents(): void {
+    this.app.getComponent('settings').subscribe('settingsEvent', (state: State) => this.core.setState(state));
   }
 }
 

@@ -62,8 +62,10 @@ class Tooltip implements Component {
     }
 
     const finishTransform = (e) => {
-      e.target.style.transition = '';
-      e.target.style.transform = 'rotate(0deg)';
+      setTimeout(() => {
+        e.target.style.transition = '';
+        e.target.style.transform = 'rotate(0deg)';
+      }, 300);
     };
 
     const OFFSET_FACTOR = 4;

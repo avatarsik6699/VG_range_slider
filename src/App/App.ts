@@ -119,41 +119,6 @@ class App extends Observer {
     });
   }
 
-  private _settingsEvent(e) {
-    const { target } = e;
-    const settings = this.getNode('settings') as HTMLFormElement;
-    if (!settings) throw new Error('Settings not found');
-
-    const settingsData: any = {};
-    const getSettingsData = (e: Event) => {
-      Array.from(settings.elements).forEach((el) => {
-        const { value } = <HTMLInputElement | HTMLSelectElement>el;
-        const { name } = <HTMLInputElement | HTMLSelectElement>el;
-        settingsData[name] = isNaN(<number>value) ? value : Number(value);
-      });
-
-      const values = settingsData.type === 'single' ? ['from'] : ['from', 'to'];
-
-      settingsData.value = values.map((field) => {
-        const valueNum = settingsData[field];
-        delete settingsData[field];
-        return valueNum;
-      });
-
-      this.flag = true;
-      target.removeEventListener('blur', getSettingsData);
-      this.notify('settingsEvent', { ...settingsData, action: RECRATE_APP });
-    };
-
-    if (target.nodeName === 'INPUT' || target.nodeName === 'SELECT') {
-      if (this.flag) {
-        this.flag = false;
-        target.addEventListener('blur', getSettingsData, { once: true });
-      } else {
-      }
-    }
-  }
-
   private _sliderEvent(e: MouseEvent | TouchEvent) {
     const target = e.target as HTMLElement;
     const appData = this._getAppData(e);
@@ -257,7 +222,7 @@ class App extends Observer {
   private _getEventName(target: HTMLElement): string {
     if (!target) this._throwException('Не передан target');
 
-    const eventName = ['slider', 'settings'].find((name) => {
+    const eventName = ['slider'].find((name) => {
       if (target.closest(`[data-component="${name}"]`)) {
         return name;
       }
@@ -276,6 +241,11 @@ class App extends Observer {
 
   private _throwException(message: string): never {
     throw new Error(message);
+  }
+
+  getComponent(name: string): Component {
+    if (this.instances[name] === undefined) throw new Error("Component wasn't found");
+    return this.instances[name][0];
   }
 }
 
