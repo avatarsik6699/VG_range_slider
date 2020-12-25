@@ -31,7 +31,7 @@ $ git clone https://github.com/avatarsik6699/VG_slider.git
 Вставить _CSS_ в **head** вашего **html** файла
 
 ```html
-<link href="./range_slider/dist/app/VG_range_slider.css"></script>
+<link href="./range_slider/dist/app/VG_range_slider.css" />
 ```
 
 **Вариант с установкой через npm**
@@ -42,7 +42,7 @@ $ git clone https://github.com/avatarsik6699/VG_slider.git
 **Подключение слайдера с настройками**  
 `$('.js-root').slider(settings)` - отрисуется по заданным настройкам.
 
-**settings** --- _представляет собой объект {}, который может принимать следующие параметры:_
+**settings** - _представляет собой объект {}, который может принимать следующие параметры:_
 | key | type | default | value |
 | :---: | :---: | :---: | :---: |
 | max | number | 1000 | any number |
@@ -59,9 +59,9 @@ $ git clone https://github.com/avatarsik6699/VG_slider.git
 ### Методы слайдера
 
 В том случае, если 1 параметром в слайдер передана строка `$('.js-root').slider('method') `, то слайдер попытается найти данный метод и вызвать его. Если же данного метода нет, то выбросится ошибка о том, что данный метод не существует.  
-`$('.js-root').slider('hide')` --- скрывает слайдер.  
-`$('.js-root').slider('destroy')` --- уничтожает слайдер (удаляет все теги внутри .js-root).  
-`$('.js-root').slider('show')` --- показывает слайдер.
+`$('.js-root').slider('hide')` - скрывает слайдер.  
+`$('.js-root').slider('destroy')` - уничтожает слайдер (удаляет все теги внутри .js-root).  
+`$('.js-root').slider('show')` - показывает слайдер.
 
 ```js
 $('.js-root').slider('getState', callback);
@@ -71,8 +71,6 @@ $('.js-root').slider('getState', callback);
 ```
 
 ### Разработка
-
-_Команды будут работать только в том случае, если на вашем компьютере установлены [Node](https://nodejs.org) и [npm](https://www.npmjs.com/)._
 
 `$ npm test` - запуск тестов Mocha + Chai  
 `$ npm build` - production режим  

@@ -1,11 +1,14 @@
-import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
+import { EVENT_TRIGGERED, HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
 import { Component, RenderData, State } from '../../../Helpers/Interfaces';
+import Observer from '../../../Helpers/Observer';
 
-class Handle implements Component {
+class Handle extends Observer implements Component {
   private template = '';
 
-  constructor(private anchor: HTMLElement, state: State, private id: number = 0) {
+  constructor(private anchor: HTMLElement, state: State, private id: number = 0, private parentMethods: any) {
+    super();
     this.create(state);
+    this.bindEvents();
   }
 
   create(state: { position: string; value: number[] }): void {
@@ -50,6 +53,38 @@ class Handle implements Component {
 
     handle.dataset.value = String(renderData.coords[this.id]?.valuePxValue.value) ?? handle.dataset.value;
     handle.style[side] = `${renderData.coords[this.id]?.valuePxValue.px}px`;
+  }
+
+  private bindEvents() {
+    const eventHandler = (customEv) => {
+      const { handles } = customEv.detail;
+      const { parentEv } = customEv.detail;
+      const appData = this.parentMethods.getAppData(parentEv);
+      const handleMove = (moveEvent): void => {
+        const handlesPxValue = this.parentMethods.getHandlesPxValues(moveEvent, appData.id);
+        this.notify('moveEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValue, ...appData });
+      };
+
+      const finishMove = (): void => {
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', finishMove);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', finishMove);
+      };
+
+      if (parentEv instanceof TouchEvent) {
+        parentEv.preventDefault();
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('touchend', finishMove);
+      } else {
+        parentEv.preventDefault();
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', finishMove);
+      }
+
+      handles.forEach((handle) => (handle.ondragstart = () => false));
+    };
+    this.getNode().addEventListener('handleEvent', eventHandler);
   }
 
   private setTemplate(state: { position: string; value: number[] }): void {

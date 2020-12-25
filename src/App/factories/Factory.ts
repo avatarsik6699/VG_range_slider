@@ -15,13 +15,13 @@ class Factory implements IFactory {
 
   private components: IConstructorComponent[] = [Slider, Handle, Tooltip, Scale, Bar, Settings];
 
-  createComponents(anchor: HTMLElement, state: State): ComponentInstances {
+  createComponents(anchor: HTMLElement, state: State, parentMethods: any): ComponentInstances {
     const DEFAULT_ID = 0;
 
     const result = this.getCorrectComponents(this.components, state).reduce((instances, Сomponent) => {
       const name = this.getComponentName(Сomponent);
-      return this.multipleComponents.includes(name) && (state.type === 'range' || state.type === 'multiple')
-        ? { ...instances, [name]: state.value.map((_, id) => new Сomponent(anchor, state, id)) }
+      return this.multipleComponents.includes(name) && state.type !== 'single'
+        ? { ...instances, [name]: state.value.map((_, id) => new Сomponent(anchor, state, id, parentMethods)) }
         : { ...instances, [name]: [new Сomponent(anchor, state, DEFAULT_ID)] };
     }, {});
     return result;

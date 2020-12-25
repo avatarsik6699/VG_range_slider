@@ -1,13 +1,16 @@
-import { HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
+import { EVENT_TRIGGERED, HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
 import { Component, RenderData, State } from '../../../Helpers/Interfaces';
+import Observer from '../../../Helpers/Observer';
 
-class Scale implements Component {
+class Scale extends Observer implements Component {
   private isInit = false;
 
   private template = '<div class="slider_scale"></div>';
 
   constructor(private anchor: HTMLElement, state: State) {
+    super();
     this.create(state);
+    this.bindEvents();
   }
 
   create(state: { position: string }): void {
@@ -62,6 +65,21 @@ class Scale implements Component {
       scale.insertAdjacentHTML('afterbegin', content);
       this.isInit = true;
     }
+  }
+
+  private bindEvents() {
+    const eventHandler = (ev) => {
+      console.log(ev);
+      const scaleValue = Number(ev.detail.target.textContent);
+      const { handlesValue } = ev.detail;
+      const { appData } = ev.detail;
+
+      // меняем value по id у того handle, который должен переместиться
+      handlesValue.splice(appData.id, 1, scaleValue);
+
+      this.notify('scaleEvent', { action: EVENT_TRIGGERED, eventType: 'touch', value: handlesValue, ...appData });
+    };
+    this.getNode().addEventListener('scaleEvent', eventHandler);
   }
 
   private setTemplate(state: { position: string }): void {

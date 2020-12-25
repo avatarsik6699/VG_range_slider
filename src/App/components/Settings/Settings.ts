@@ -102,7 +102,7 @@ class Settings extends Observer implements Component {
         ev.target.addEventListener('change', getSettingsData, { once: true });
       }
     };
-    this.getNode().addEventListener('click', handlersAdding);
+    this.getNode().addEventListener('mousedown', handlersAdding);
   }
 
   private isTargetFieldAndEventAdded(target: string, fields: Array<string>) {
