@@ -1,7 +1,7 @@
 import { RECRATE_APP } from '../../../Helpers/Constants';
 import { Component, State } from '../../../Helpers/Interfaces';
 import Observer from '../../../Helpers/Observer';
-import { getSettingsContent } from '../../templates/settings.template';
+import getSettingsContent from '../../templates/settings.template';
 
 class Settings extends Observer implements Component {
   private template = '';

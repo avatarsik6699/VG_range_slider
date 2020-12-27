@@ -19,15 +19,10 @@ class Controller {
 
   bindBasicEvents(): void {
     this.app.subscribe('finishCreate', () => this.bindComponentEvents());
+    this.app.subscribe('finishCreate', () => this.app.bindEvents());
     this.app.subscribe('finishCreate', (data: AppData) => this.core.setState(data));
-    // this.app.subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
-    // this.app.subscribe('settingsEvent', (state: State) => this.core.setState(state));
-    // this.app.subscribe('moveEvent', (appData: AppData) => this.core.setState(appData));
-    // this.app.subscribe('scaleEvent', (appData: AppData) => this.core.setState(appData));
-    // this.app.getComponent('slider').subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
-    // this.app.getComponent('slider').subscribe('moveEvent', (appData: AppData) => this.core.setState(appData));
 
-    this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderUI(renderData));
+    this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderApp(renderData));
     this.core.subscribe('updateState', (state: State) => this.app.reCreate(state));
     this.core.subscribe('getRenderData', () => {
       this.anchor.dispatchEvent(new CustomEvent('getState', { detail: this.core.getState() }));
@@ -35,10 +30,10 @@ class Controller {
   }
 
   bindComponentEvents(): void {
-    this.app.getComponent('settings').subscribe('settingsEvent', (state: State) => this.core.setState(state));
-    this.app.getComponent('scale').subscribe('scaleEvent', (appData: AppData) => this.core.setState(appData));
-    this.app.getComponent('handle').subscribe('moveEvent', (appData: AppData) => this.core.setState(appData));
-    this.app.getComponent('slider').subscribe('touchEvent', (appData: AppData) => this.core.setState(appData));
+    this.app.getComponent('settings').subscribe?.('settingsEvent', (state: State) => this.core.setState(state));
+    this.app.getComponent('scale').subscribe?.('scaleEvent', (appData: AppData) => this.core.setState(appData));
+    this.app.getComponent('handle').subscribe?.('moveEvent', (appData: AppData) => this.core.setState(appData));
+    this.app.getComponent('slider').subscribe?.('touchEvent', (appData: AppData) => this.core.setState(appData));
   }
 }
 

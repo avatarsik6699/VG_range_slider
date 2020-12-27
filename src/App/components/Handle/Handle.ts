@@ -59,9 +59,10 @@ class Handle extends Observer implements Component {
     const eventHandler = (customEv) => {
       const { handles } = customEv.detail;
       const { parentEv } = customEv.detail;
-      const appData = this.parentMethods.getAppData(parentEv);
+
+      const appData = this.parentMethods.parentGetAppData(parentEv);
       const handleMove = (moveEvent): void => {
-        const handlesPxValue = this.parentMethods.getHandlesPxValues(moveEvent, appData.id);
+        const handlesPxValue = this.parentMethods.parentGetHandlesPxValues(moveEvent, appData.id);
         this.notify('moveEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValue, ...appData });
       };
 

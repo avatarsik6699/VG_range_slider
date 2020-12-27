@@ -1,5 +1,3 @@
-import Observer from './Observer';
-
 interface State {
   min: number;
   max: number;
@@ -45,6 +43,10 @@ interface RenderData {
   };
 }
 
+type IConstructorComponent = {
+  new (anchor: HTMLElement, state: State, id?: number, parentMethods?): Component;
+};
+
 interface Component {
   create(state: State, id?: number);
   getName(): string;
@@ -66,11 +68,13 @@ interface AppData {
 }
 
 type ScaleValues = ValuePxValue[];
-type IConstructorComponent = {
-  new (anchor: HTMLElement, state: State, id?: number): Component;
-};
+
+interface IFactory {
+  createComponents(anchor: HTMLElement, state: State, parentMethods): ComponentInstances;
+}
 
 export {
+  IFactory,
   ComponentInstances,
   State,
   Component,

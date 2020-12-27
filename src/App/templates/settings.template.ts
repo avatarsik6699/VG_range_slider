@@ -67,4 +67,4 @@ const getSettingsContent = (state) => {
   </label>
   `;
 };
-export { getSettingsContent };
+export default getSettingsContent;

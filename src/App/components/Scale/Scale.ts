@@ -68,11 +68,10 @@ class Scale extends Observer implements Component {
   }
 
   private bindEvents() {
-    const eventHandler = (ev) => {
-      console.log(ev);
-      const scaleValue = Number(ev.detail.target.textContent);
-      const { handlesValue } = ev.detail;
-      const { appData } = ev.detail;
+    const eventHandler = (customEv) => {
+      const scaleValue = Number(customEv.detail.target.textContent);
+      const { handlesValue } = customEv.detail;
+      const { appData } = customEv.detail;
 
       // меняем value по id у того handle, который должен переместиться
       handlesValue.splice(appData.id, 1, scaleValue);

@@ -1,7 +1,7 @@
 import { AppData, MinMax, RenderData, ScaleValues, State } from '../Helpers/Interfaces';
 import Observer from '../Helpers/Observer';
 import defaultState from './defaultState';
-//MapOfHandles
+
 class Core extends Observer {
   private state: State = defaultState;
 
@@ -18,7 +18,6 @@ class Core extends Observer {
     const value = !settings.action
       ? this._calcCorrectValue(prepareState.value, max, min)
       : this._getUnifyValue(<AppData>settings, prepareState);
-    console.log(prepareState);
     switch ((prepareState as AppData).action) {
       case 'SLIDER_IS_CREATED':
         this.state = { ...this.state, value };

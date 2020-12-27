@@ -33,9 +33,9 @@ class Slider extends Observer implements Component {
   }
 
   private bindEvents() {
-    const eventHandler = (ev) => {
-      const { appData } = ev.detail;
-      const { handlesPxValue } = ev.detail;
+    const eventHandler = (customEv) => {
+      const { appData } = customEv.detail;
+      const { handlesPxValue } = customEv.detail;
       this.notify('touchEvent', {
         action: EVENT_TRIGGERED,
         eventType: 'touch',
@@ -44,48 +44,6 @@ class Slider extends Observer implements Component {
       });
     };
     this.getNode().addEventListener('sliderEvent', eventHandler);
-    // sliderEvent(e: MouseEvent | TouchEvent) {
-    //   const target = e.target as HTMLElement;
-    //   const appData = this._getAppData(e);
-    //   if (target.closest(`[data-component="scale"]`)) {
-    //     this._scaleEvent(e);
-    //   } else if (target.dataset.component !== 'handle') {
-    //     const appData = this._getAppData(e);
-    //     const handlesPxValues = this._getHandlesPxValues(e, appData.id);
-    //     this.notify('touchEvent', {
-    //       action: EVENT_TRIGGERED,
-    //       eventType: 'touch',
-    //       pxValue: handlesPxValues,
-    //       ...appData,
-    //     });
-    //   } else {
-    //     const handleMove = (e: MouseEvent | TouchEvent): void => {
-    //       const handlesPxValues = this._getHandlesPxValues(e, appData.id);
-    //       this.notify('moveEvent', { action: EVENT_TRIGGERED, pxValue: handlesPxValues, ...appData });
-    //     };
-
-    //     const finishMove = (): void => {
-    //       document.removeEventListener('mousemove', handleMove);
-    //       document.removeEventListener('mouseup', finishMove);
-    //       document.removeEventListener('touchmove', handleMove);
-    //       document.removeEventListener('touchend', finishMove);
-    //     };
-
-    //     if (e instanceof TouchEvent) {
-    //       e.preventDefault();
-    //       document.addEventListener('touchmove', handleMove);
-    //       document.addEventListener('touchend', finishMove);
-    //     } else {
-    //       e.preventDefault();
-    //       document.addEventListener('mousemove', handleMove);
-    //       document.addEventListener('mouseup', finishMove);
-    //     }
-
-    //     this.getNodes('handle').forEach((handle) => {
-    //       handle.ondragstart = () => false;
-    //     });
-    //   }
-    // }
   }
 
   private _setTemplate(state: { position: string }) {

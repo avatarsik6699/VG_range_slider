@@ -1,4 +1,4 @@
-import { ComponentInstances, IConstructorComponent, State } from '../../Helpers/Interfaces';
+import { ComponentInstances, IConstructorComponent, IFactory, State } from '../../Helpers/Interfaces';
 import Bar from '../components/Bar/Bar';
 import Handle from '../components/Handle/Handle';
 import Scale from '../components/Scale/Scale';
@@ -6,23 +6,19 @@ import Settings from '../components/Settings/Settings';
 import Slider from '../components/Slider/Slider';
 import Tooltip from '../components/Tooltip/Tooltip';
 
-export interface IFactory {
-  createComponents(anchor: HTMLElement, state: State): ComponentInstances;
-}
-
 class Factory implements IFactory {
   private multipleComponents = ['tooltip', 'handle'];
 
   private components: IConstructorComponent[] = [Slider, Handle, Tooltip, Scale, Bar, Settings];
 
-  createComponents(anchor: HTMLElement, state: State, parentMethods: any): ComponentInstances {
+  createComponents(anchor: HTMLElement, state: State, parentMethods): ComponentInstances {
     const DEFAULT_ID = 0;
 
     const result = this.getCorrectComponents(this.components, state).reduce((instances, Сomponent) => {
       const name = this.getComponentName(Сomponent);
       return this.multipleComponents.includes(name) && state.type !== 'single'
         ? { ...instances, [name]: state.value.map((_, id) => new Сomponent(anchor, state, id, parentMethods)) }
-        : { ...instances, [name]: [new Сomponent(anchor, state, DEFAULT_ID)] };
+        : { ...instances, [name]: [new Сomponent(anchor, state, DEFAULT_ID, parentMethods)] };
     }, {});
     return result;
   }
