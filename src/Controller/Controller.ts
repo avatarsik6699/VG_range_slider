@@ -30,10 +30,20 @@ class Controller {
   }
 
   bindComponentEvents(): void {
-    this.app.getComponent('settings').subscribe?.('settingsEvent', (state: State) => this.core.setState(state));
-    this.app.getComponent('scale').subscribe?.('scaleEvent', (appData: AppData) => this.core.setState(appData));
-    this.app.getComponent('handle').subscribe?.('moveEvent', (appData: AppData) => this.core.setState(appData));
-    this.app.getComponent('slider').subscribe?.('touchEvent', (appData: AppData) => this.core.setState(appData));
+    const componentEventList = {
+      settings: 'settingsEvent',
+      scale: 'scaleEvent',
+      handle: 'moveEvent',
+      slider: 'touchEvent',
+    };
+
+    Object.keys(this.app.instances).forEach((name) => {
+      if (componentEventList[name]) {
+        this.app
+          .getComponent(name)
+          .subscribe?.(componentEventList[name], (data: State | AppData) => this.core.setState(data));
+      }
+    });
   }
 }
 
