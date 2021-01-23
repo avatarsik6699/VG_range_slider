@@ -7,7 +7,7 @@ const settings = {
   value: [355, 555, 666, 400, 300],
   step: 1,
   position: 'horizontal',
-  type: 'multiple',
+  type: 'single',
   scale: true,
   tooltip: true,
   bar: true,

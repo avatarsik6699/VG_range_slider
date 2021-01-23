@@ -5,7 +5,12 @@ import Observer from '../../../Helpers/Observer';
 class Handle extends Observer implements Component {
   private template = '';
 
-  constructor(private anchor: HTMLElement, state: State, private id: number = 0, private parentMethods: any) {
+  constructor(
+    private anchor: HTMLElement,
+    state: State,
+    private id: number = 0,
+    private parentMethods: { [key: string]: Function },
+  ) {
     super();
     this.create(state);
     this.bindEvents();

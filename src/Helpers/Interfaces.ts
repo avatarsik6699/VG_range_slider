@@ -8,8 +8,8 @@ interface State {
   scale: boolean;
   tooltip: boolean;
   bar: boolean;
-  from?: number;
-  to?: number;
+  settings: boolean;
+  action?: string;
 }
 
 type ComponentInstances = {
@@ -70,7 +70,7 @@ interface AppData {
 type ScaleValues = ValuePxValue[];
 
 interface IFactory {
-  createComponents(anchor: HTMLElement, state: State, parentMethods): ComponentInstances;
+  createComponents<T>(anchor: HTMLElement, state: State, parentMethods: { [key: string]: T }): ComponentInstances;
 }
 
 export {

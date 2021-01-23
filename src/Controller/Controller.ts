@@ -5,7 +5,6 @@ import { AppData, RenderData, State } from '../Helpers/Interfaces';
 
 class Controller {
   core: Core;
-
   app: App;
 
   constructor(private anchor: HTMLElement, settings: State) {
@@ -13,17 +12,15 @@ class Controller {
     this.app = new App(anchor, FactorySelector);
     this.bindBasicEvents();
     this.app.create(this.core.getState());
-    this.app.bindEvents();
-    this.bindComponentEvents();
   }
 
   bindBasicEvents(): void {
     this.app.subscribe('finishCreate', () => this.bindComponentEvents());
     this.app.subscribe('finishCreate', () => this.app.bindEvents());
-    this.app.subscribe('finishCreate', (data: AppData) => this.core.setState(data));
+    this.app.subscribe('finishCreate', (data: AppData) => this.core.appDataHandler(data));
 
     this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderApp(renderData));
-    this.core.subscribe('updateState', (state: State) => this.app.reCreate(state));
+    this.core.subscribe('recrateApp', (state: State) => this.app.reCreate(state));
     this.core.subscribe('getRenderData', () => {
       this.anchor.dispatchEvent(new CustomEvent('getState', { detail: this.core.getState() }));
     });
@@ -38,10 +35,17 @@ class Controller {
     };
 
     Object.keys(this.app.instances).forEach((name) => {
-      if (componentEventList[name]) {
+      if (componentEventList[name] && name !== 'settings') {
         this.app
           .getComponent(name)
-          .subscribe?.(componentEventList[name], (data: State | AppData) => this.core.setState(data));
+          .subscribe?.(componentEventList[name], (appData: AppData) => this.core.appDataHandler(appData));
+      }
+      if (name === 'settings') {
+        this.app
+          .getComponent(name)
+          .subscribe?.(componentEventList[name], (data: State) =>
+            this.core.setState(data, { value: data.value, action: data.action }),
+          );
       }
     });
   }

@@ -10,6 +10,7 @@ const defaultState: State = {
   scale: true,
   tooltip: true,
   bar: true,
+  settings: true,
 };
 
 export default defaultState;

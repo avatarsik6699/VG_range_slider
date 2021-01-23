@@ -3,8 +3,8 @@ import { Component, RenderData, State } from '../../../Helpers/Interfaces';
 
 class Tooltip implements Component {
   private template = '';
+
   private position = 0;
-  private direction = '';
 
   constructor(private anchor: HTMLElement, state: State, private id: number = 0) {
     this.create(state);
@@ -52,7 +52,6 @@ class Tooltip implements Component {
           ? this.position
           : renderData.coords[this.id]?.valuePxValue.value;
     }
-
     if (direction === 'right') {
       rotateValue = -15;
     } else if (direction === 'left') {
@@ -84,11 +83,10 @@ class Tooltip implements Component {
   }
 
   private _setTemplate(state: State): void {
-    this.direction = 'left';
     if (!state.position) throw new Error("position in params wasn't found");
-    const { value } = state;
+    const value = state.value[0];
     if (state.type === 'single') {
-      this.position = value[0];
+      this.position = value;
     }
     const modifer = `slider__tooltip slider__tooltip_position-${state.position}`;
     this.template = `<div class="slider__tooltip ${modifer}" data-component="tooltip" data-id=${this.id}>0</div>`;

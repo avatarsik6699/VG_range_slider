@@ -17,7 +17,7 @@ class Bar implements Component {
     if (renderData.type === undefined || renderData.handleSize === undefined) {
       throw new Error("type or handleSize wasn't found in renderData");
     }
-    // eslint-disable-next-line default-case
+
     switch (renderData.position) {
       case HORIZONTAL_SLIDER:
         this.update('left', 'width', renderData);
@@ -60,7 +60,6 @@ class Bar implements Component {
       const [left, right] = [Math.min(...pxValues), Math.max(...pxValues)];
       return [left, right];
     }
-    // default - single
     return renderData.coords[targetId].valuePxValue.px;
   }
 
@@ -70,6 +69,7 @@ class Bar implements Component {
     const { handleSize } = renderData;
     const px = this.getPxValue(renderData);
     const bar = this.getNode();
+
     if (renderData.eventType === 'touch') {
       const removeTransition = () => {
         bar.style.transition = '';
@@ -77,6 +77,7 @@ class Bar implements Component {
       bar.style.transition = `${side} 0.2s ease, ${size} 0.2s ease`;
       bar.addEventListener('transitionend', removeTransition, { once: true });
     }
+
     if (type === 'single') {
       bar.style[side] = START_PX;
       bar.style[size] = `${(px as number) + handleSize}px`;

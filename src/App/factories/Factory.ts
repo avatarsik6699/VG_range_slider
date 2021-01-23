@@ -11,7 +11,7 @@ class Factory implements IFactory {
 
   private components: IConstructorComponent[] = [Slider, Handle, Tooltip, Scale, Bar, Settings];
 
-  createComponents(anchor: HTMLElement, state: State, parentMethods): ComponentInstances {
+  createComponents<T>(anchor: HTMLElement, state: State, parentMethods: { [key: string]: T }): ComponentInstances {
     const DEFAULT_ID = 0;
 
     const result = this.getCorrectComponents(this.components, state).reduce((instances, Сomponent) => {

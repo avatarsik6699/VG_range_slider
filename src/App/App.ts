@@ -6,7 +6,7 @@ import { IFactorySelector } from './FactorySelector';
 type Coords = { [key: string]: number };
 
 class App extends Observer {
-  instances: { [key: string]: Component[] } = {};
+  public instances: { [key: string]: Component[] } = {};
 
   private position = 'horizontal';
 
@@ -17,7 +17,7 @@ class App extends Observer {
   create(state: State): void {
     this.instances = this.createComponents(state);
     this.position = state.position;
-    // после начальной отрисовки данные об сладйере отправляются в Core
+    // после начальной отрисовки данные о сладйере отправляются в Core
     this.notify('finishCreate', { ...this.getAppData(), action: SLIDER_IS_CREATED });
   }
 
@@ -29,9 +29,9 @@ class App extends Observer {
   }
 
   renderApp(renderData: RenderData): void {
-    Object.values(this.instances).forEach((instance) => {
-      instance.forEach((subInstance) => (subInstance.render ? subInstance.render(renderData) : ''));
-    });
+    Object.values(this.instances).forEach((instance) =>
+      instance.forEach((component) => (component.render ? component.render(renderData) : '')),
+    );
   }
 
   bindEvents(): void {
@@ -89,14 +89,35 @@ class App extends Observer {
     return this.instances[name].map((instance) => instance.getNode());
   }
 
-  private getCoord(element: HTMLElement | string, coord: string): number {
-    const defaultElement = typeof element === 'string' ? this.getNode(element) : element;
-    return defaultElement.getBoundingClientRect()[coord as string];
+  getComponent(name: string): Component {
+    if (this.instances[name]) {
+      return this.instances[name][0];
+    }
+    throw new Error('error');
   }
 
-  private getCoords(element: HTMLElement | string, coord: string[]): Coords {
+  show(): void {
+    this.anchor.style.display = '';
+  }
+
+  hide(): void {
+    this.anchor.style.display = 'none';
+  }
+
+  destroy(): void {
+    Array.from(this.anchor.children).forEach((node) => {
+      node.remove();
+    });
+  }
+
+  private getCoord(element: HTMLElement | string, coord: string): number {
     const defaultElement = typeof element === 'string' ? this.getNode(element) : element;
-    return coord.reduce(
+    return defaultElement.getBoundingClientRect()[coord];
+  }
+
+  private getCoords(element: HTMLElement | string, coords: string[]): Coords {
+    const defaultElement = typeof element === 'string' ? this.getNode(element) : element;
+    return coords.reduce(
       (result: Coords, name: string) => ({
         ...result,
         [name]: defaultElement.getBoundingClientRect()[name],
@@ -132,20 +153,6 @@ class App extends Observer {
     if (defaultSpeicalCoords[coord]) return defaultSpeicalCoords[coord]();
 
     throw new Error(`${coord} was not found in defaultCoords or incorrect function`);
-  }
-
-  show(): void {
-    this.anchor.style.display = '';
-  }
-
-  hide(): void {
-    this.anchor.style.display = 'none';
-  }
-
-  destroy(): void {
-    Array.from(this.anchor.children).forEach((node) => {
-      node.remove();
-    });
   }
 
   private getAppData(ev?: MouseEvent | TouchEvent) {
@@ -202,13 +209,6 @@ class App extends Observer {
 
   private isEmpty<T extends HTMLElement>(elem: T) {
     return elem.children.length === 0;
-  }
-
-  getComponent(name: string): Component {
-    if (this.instances[name]) {
-      return this.instances[name][0];
-    }
-    throw new Error('error');
   }
 }
 
