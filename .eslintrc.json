@@ -33,7 +33,7 @@
         "endOfLine": "auto"
       }
     ],
-
+    "endOfLine": "lf",
     "arrow-body-style": "off",
     "prefer-arrow-callback": "off",
     "func-names": "off",

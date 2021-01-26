@@ -1,5 +1,7 @@
 import './style.scss';
 import './plugin';
+import Selector from './App/components/Settings/Selector';
+import Input from './App/components/Settings/Input/Input';
 
 const settings = {
   max: 1000,
@@ -13,6 +15,19 @@ const settings = {
   bar: true,
   settings: true,
 };
-
-$('.js-anchor').slider(settings);
-$('.js-root').slider(settings);
+const selector = new Selector(
+  document.querySelector(
+    'select[name="custom-select"]',
+  ) as HTMLSelectElement,
+);
+// console.log(selector);
+// $('.js-anchor').slider(settings);
+// $('.js-root').slider(settings);
+const customInput = new Input(
+  document.querySelector('.js-root'),
+  {
+    a: 1,
+  },
+  1,
+);
+console.log(customInput);

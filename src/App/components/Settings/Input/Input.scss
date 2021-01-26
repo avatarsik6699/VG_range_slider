@@ -1,0 +1,96 @@
+.custom-input {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  max-width: 200px;
+  align-items: center;
+
+  &__label {
+    position: relative;
+    margin-right: 40px;
+    border: 2px solid #c6edff;
+    border-radius: 10em;
+    padding: 5px 10px;
+    color: #515151;
+    font: 500 normal 13px/1.2 Verdana;
+    &::after {
+      content: '';
+      display: inline-block;
+      width: 38px;
+      position: absolute;
+      border-top: 3px dashed rgba(153, 223, 255, 0.56);
+      top: 12px;
+      left: 51px;
+    }
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    border-radius: 10em;
+    padding: 10px;
+    border-radius: 10em;
+    padding: 10px;
+    border: 3px solid #8bd3f3a6;
+
+    & > button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: lightslategray;
+      outline: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    &:hover {
+      background: #2bbbfc33;
+    }
+  }
+
+  &__sub {
+    font: normal 500 20px/1.2 Verdana;
+  }
+
+  &__add {
+    font: normal 500 18px/1.2 Verdana;
+  }
+
+  &__field {
+    width: 100%;
+    text-overflow: ellipsis;
+    background: none;
+    border: none;
+    text-align: center;
+    outline: none;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    &,
+    &:hover,
+    &:focus {
+      appearance: none;
+      -moz-appearance: textfield;
+    }
+    // delete arrow---------------------------------------------------
+
+    // &:focus {
+    //   border: 1px solid gray;
+    // }
+
+    // &:hover {
+    //   background: #bfeafe;
+    // }
+  }
+
+  &-wrapper {
+    display: inline-flex;
+  }
+  &__buttons-container {
+    display: inline-flex;
+    flex-flow: column nowrap;
+    background: red;
+  }
+}

@@ -73,7 +73,12 @@ interface IFactory {
   createComponents<T>(anchor: HTMLElement, state: State, parentMethods: { [key: string]: T }): ComponentInstances;
 }
 
+interface SettingsState extends State {
+  action: string;
+}
+
 export {
+  SettingsState,
   IFactory,
   ComponentInstances,
   State,

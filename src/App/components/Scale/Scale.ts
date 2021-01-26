@@ -1,4 +1,4 @@
-import { EVENT_TRIGGERED, HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
+import { EVENT_TRIGGERED, EVENT_TRIGGERED_SCALE, HORIZONTAL_SLIDER, VERTICAL_SLIDER } from '../../../Helpers/Constants';
 import { Component, RenderData, State } from '../../../Helpers/Interfaces';
 import Observer from '../../../Helpers/Observer';
 
@@ -76,7 +76,7 @@ class Scale extends Observer implements Component {
       // меняем value по id у того handle, который должен переместиться
       handlesValue.splice(appData.id, 1, scaleValue);
 
-      this.notify('scaleEvent', { action: EVENT_TRIGGERED, eventType: 'touch', value: handlesValue, ...appData });
+      this.notify('scaleEvent', { action: EVENT_TRIGGERED_SCALE, eventType: 'touch', value: handlesValue, ...appData });
     };
     this.getNode().addEventListener('scaleEvent', eventHandler);
   }

@@ -15,9 +15,11 @@ class Controller {
   }
 
   bindBasicEvents(): void {
+    // навешиваем события-----------------------------------------------
     this.app.subscribe('finishCreate', () => this.bindComponentEvents());
     this.app.subscribe('finishCreate', () => this.app.bindEvents());
-    this.app.subscribe('finishCreate', (data: AppData) => this.core.appDataHandler(data));
+
+    this.app.subscribe('finishCreate', (data: AppData) => this.core.actionHandler(data));
 
     this.core.subscribe('getRenderData', (renderData: RenderData) => this.app.renderApp(renderData));
     this.core.subscribe('recrateApp', (state: State) => this.app.reCreate(state));
@@ -38,14 +40,12 @@ class Controller {
       if (componentEventList[name] && name !== 'settings') {
         this.app
           .getComponent(name)
-          .subscribe?.(componentEventList[name], (appData: AppData) => this.core.appDataHandler(appData));
+          .subscribe?.(componentEventList[name], (appData: AppData) => this.core.actionHandler(appData));
       }
       if (name === 'settings') {
         this.app
           .getComponent(name)
-          .subscribe?.(componentEventList[name], (data: State) =>
-            this.core.setState(data, { value: data.value, action: data.action }),
-          );
+          .subscribe?.(componentEventList[name], (data: State) => this.core.actionHandler(data));
       }
     });
   }

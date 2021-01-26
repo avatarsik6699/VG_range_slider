@@ -2,30 +2,30 @@ import { HALF_HANDLE_SIZE, SLIDER_IS_CREATED } from '../Helpers/Constants';
 import { Component, RenderData, State } from '../Helpers/Interfaces';
 import Observer from '../Helpers/Observer';
 import { IFactorySelector } from './FactorySelector';
-
+const SLIDER_RECREATED = 'SLIDER_RECREATED';
+const SLIDER_CREATED = 'SLIDER_CREATED';
 type Coords = { [key: string]: number };
 
 class App extends Observer {
   public instances: { [key: string]: Component[] } = {};
-
   private position = 'horizontal';
 
   constructor(private anchor: HTMLElement, private FactorySelector: IFactorySelector) {
     super();
   }
 
-  create(state: State): void {
+  create(state: State, eventType = { action: SLIDER_CREATED }): void {
     this.instances = this.createComponents(state);
     this.position = state.position;
     // после начальной отрисовки данные о сладйере отправляются в Core
-    this.notify('finishCreate', { ...this.getAppData(), action: SLIDER_IS_CREATED });
+    this.notify('finishCreate', { ...this.getAppData(), ...eventType });
   }
 
   reCreate(state: State): void {
     if (!this.isEmpty(this.anchor)) {
       this.destroy();
     }
-    this.create(state);
+    this.create(state, { action: SLIDER_RECREATED });
   }
 
   renderApp(renderData: RenderData): void {
@@ -211,5 +211,5 @@ class App extends Observer {
     return elem.children.length === 0;
   }
 }
-
+export { SLIDER_RECREATED, SLIDER_CREATED };
 export default App;
